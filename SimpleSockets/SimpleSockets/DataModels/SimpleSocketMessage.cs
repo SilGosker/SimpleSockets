@@ -2,26 +2,17 @@
 
 namespace SimpleSockets.DataModels;
 
-public class SimpleSocketMessage
+internal class SimpleSocketMessage
 {
-    internal SimpleSocketMessage(BroadCastLevel level)
+    internal SimpleSocketMessage(BroadCastLevel level, string? @event, string message)
     {
         BroadCastLevel = level;
+        Event = @event;
+        Message = message;
     }
 
-    internal  SimpleSocketMessage(string @event, string message) : this(BroadCastLevel.Members)
-    {
-        Event = @event;
-        Message = message;
-    }
-    
-    internal  SimpleSocketMessage(string @event, string message, BroadCastLevel broadCastLevel) : this(broadCastLevel)
-    {
-        Event = @event;
-        Message = message;
-    }
-    public string Message { get; set; }
-    public string Event { get; set; }
+    public string? Message { get; set; }
+    public string? Event { get; set; }
     public BroadCastLevel BroadCastLevel { get; set; }
-    public string Sender { get; set; }
+    public string? Sender { get; set; }
 }

@@ -3,8 +3,13 @@
 
     internal class SimpleSocketRoom
     {
-        internal string Id { get; set; } = null!;
-        internal List<SimpleSocket> Sockets { get; set; } = new List<SimpleSocket>();
+        internal SimpleSocketRoom(string id, SimpleSocket socket)
+        {
+            Id = id;
+            Sockets = new List<SimpleSocket> { socket };
+        }
+        internal string Id { get; set; }
+        internal List<SimpleSocket> Sockets { get; set; }
 
     }
 }
