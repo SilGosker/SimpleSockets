@@ -15,11 +15,14 @@ internal class SimpleSocketTypeCaching
         ConstructorDependencies = simpleSocketType.GetConstructors()[0].GetParameters();
         AuthenticatorType = authenticatorType;
     }
-    internal static SimpleSocketTypeCaching Create<TSimpleSocket>() where TSimpleSocket : ISimpleSocket
+    internal static SimpleSocketTypeCaching Create<TSimpleSocket>()
+        where TSimpleSocket : ISimpleSocket
     {
         return new SimpleSocketTypeCaching(typeof(TSimpleSocket), null);
     }
-    internal static SimpleSocketTypeCaching Create<TSimpleSocket, TAuthenticator>() where TSimpleSocket : ISimpleSocket where TAuthenticator : ISimpleSocketAuthenticator
+    internal static SimpleSocketTypeCaching Create<TSimpleSocket, TAuthenticator>()
+        where TSimpleSocket : ISimpleSocket
+        where TAuthenticator : ISimpleSocketAsyncAuthenticator
     {
         return new SimpleSocketTypeCaching(typeof(TSimpleSocket), typeof(TAuthenticator));
     }

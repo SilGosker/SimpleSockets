@@ -25,7 +25,7 @@ namespace SimpleSockets.Middleware
 
         internal static void SetBehavior<TSimpleSocket, TSimpleSocketAuthenticator>(string url)
             where TSimpleSocket : ISimpleSocket
-            where TSimpleSocketAuthenticator : ISimpleSocketAuthenticator
+            where TSimpleSocketAuthenticator : ISimpleSocketAsyncAuthenticator
         {
             TypeDictionary[url] = SimpleSocketTypeCaching.Create<TSimpleSocket, TSimpleSocketAuthenticator>();
         }
@@ -57,11 +57,14 @@ namespace SimpleSockets.Middleware
             if (simpleSocketType.AuthenticatorType != null)
             {
                 using var scope = _scopeFactory.CreateScope();
+                var authenticator = ActivatorUtilities.CreateInstance(scope.ServiceProvider, simpleSocketType.AuthenticatorType);
                 
-                if (ActivatorUtilities.CreateInstance(scope.ServiceProvider, simpleSocketType.AuthenticatorType) is ISimpleSocketAuthenticator authenticator)
+                authenticationResult = authenticator switch
                 {
-                    authenticationResult = await authenticator.Authenticate();
-                }
+                    ISimpleSocketAsyncAuthenticator asyncAuthenticator => await asyncAuthenticator.AuthenticateAsyncs(),
+                    ISimpleSocketAuthenticator syncAuthenticator => syncAuthenticator.Authenticate(),
+                    _ => authenticationResult
+                };
             }
 
             if (authenticationResult.IsAuthenticated != true)
