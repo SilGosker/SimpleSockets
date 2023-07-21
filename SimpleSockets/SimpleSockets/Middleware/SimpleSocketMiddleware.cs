@@ -1,20 +1,33 @@
-﻿using System.Reflection;
+﻿using System.Net.NetworkInformation;
+using System.Reflection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using SimpleSockets.DataModels;
+using SimpleSockets.Interfaces;
 using SimpleSockets.Services;
 
 namespace SimpleSockets.Middleware
 {
     internal class SocketMiddleware
     {
-        private static readonly Dictionary<string, Type> TypeDictionary = new Dictionary<string, Type>();
+        private static readonly Dictionary<string, SimpleSocketTypeCaching> TypeDictionary = new();
         private readonly RequestDelegate _next;
         private readonly SimpleSocketService _simpleSocketService;
         private readonly IServiceScopeFactory _scopeFactory;
 
-        internal static void SetBehavior<T>(string url) where T : SimpleSocket
+        private static readonly SimpleSocketAuthenticationResult DefaultAuthenticationResult =
+            new SimpleSocketAuthenticationResult(true, null, null);
+        internal static void SetBehavior<TSimpleSocket>(string url)
+            where TSimpleSocket : ISimpleSocket
         {
-            TypeDictionary[url] = typeof(T);
+            TypeDictionary[url] = SimpleSocketTypeCaching.Create<TSimpleSocket>();
+        }
+
+        internal static void SetBehavior<TSimpleSocket, TSimpleSocketAuthenticator>(string url)
+            where TSimpleSocket : ISimpleSocket
+            where TSimpleSocketAuthenticator : ISimpleSocketAuthenticator
+        {
+            TypeDictionary[url] = SimpleSocketTypeCaching.Create<TSimpleSocket, TSimpleSocketAuthenticator>();
         }
 
         public SocketMiddleware(RequestDelegate next, SimpleSocketService simpleSocketService,
@@ -33,49 +46,40 @@ namespace SimpleSockets.Middleware
                 return;
             }
 
-
-            Type? type = TypeDictionary.GetValueOrDefault(context.Request.Path.ToString());
-            if (type == null)
+            var simpleSocketType = TypeDictionary.GetValueOrDefault(context.Request.Path.ToString());
+            if (simpleSocketType == null)
             {
                 await _next.Invoke(context);
                 return;
             }
-
-
-            var methodInfo = type.GetMethod("OnAuthentication", BindingFlags.Static);
-            if (methodInfo == null)
+            
+            SimpleSocketAuthenticationResult authenticationResult = DefaultAuthenticationResult;
+            if (simpleSocketType.AuthenticatorType != null)
             {
-                await _next.Invoke(context);
+                using var scope = _scopeFactory.CreateScope();
+                
+                if (ActivatorUtilities.CreateInstance(scope.ServiceProvider, simpleSocketType.AuthenticatorType) is ISimpleSocketAuthenticator authenticator)
+                {
+                    authenticationResult = await authenticator.Authenticate();
+                }
+            }
+
+            if (authenticationResult.IsAuthenticated != true)
+            {
+                context.Response.StatusCode = 401;
                 return;
             }
 
-            if (!await (Task<bool>)(methodInfo.Invoke(null, new object?[] {context}) ?? Task.FromResult(true)))
-            {
-                return;
-            }
-
-            string genericProtocol = context.WebSockets.WebSocketRequestedProtocols[0];
-            SimpleSocket simpleSocket;
+            var genericProtocol = context.WebSockets.WebSocketRequestedProtocols[0];
+            ISimpleSocket simpleSocket;
             using (var scope = _scopeFactory.CreateScope())
             {
-                simpleSocket = scope.ServiceProvider.GetRequiredService<SimpleSocket>(await context.WebSockets.AcceptWebSocketAsync(genericProtocol));
+                simpleSocket = (ISimpleSocket)ActivatorUtilities.CreateInstance(scope.ServiceProvider,
+                    simpleSocketType.SimpleSocketType, await context.WebSockets.AcceptWebSocketAsync(genericProtocol));
             }
 
-            if (simpleSocket == null)
-            {
-                await _next.Invoke(context);
-                return;
-            }
-
-            if (string.IsNullOrEmpty(simpleSocket.UserId))
-            {
-                simpleSocket.UserId = Guid.NewGuid().ToString();
-            }
-
-            if (string.IsNullOrEmpty(simpleSocket.RoomId))
-            {
-                simpleSocket.RoomId = genericProtocol;
-            }
+            simpleSocket.UserId = authenticationResult.UserId ?? Guid.NewGuid().ToString();
+            simpleSocket.RoomId = authenticationResult.RoomId ?? "__0";
 
             await _simpleSocketService.AddSocket(simpleSocket);
         }

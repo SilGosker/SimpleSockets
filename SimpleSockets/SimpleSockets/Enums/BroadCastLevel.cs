@@ -2,10 +2,16 @@
 [Flags]
 public enum BroadCastLevel
 {
-    Receiver = 1,
     /// <summary>
-    /// All the other members that match your <see cref=""/>
+    /// Broadcasts to no one
     /// </summary>
-    Members = 4,
-    EveryOne = 5
+    None = 0,
+    /// <summary>
+    /// Broadcasts to only the users in the same room as the sender matching the <see cref="SimpleSocket.RoomId"/> except for the sender itself
+    /// </summary>
+    Members = 5,
+    /// <summary>
+    /// Broadcasts to only the users in the same room as the sender matching the <see cref="SimpleSocket.RoomId"/>
+    /// </summary>
+    EveryOne = 10
 }

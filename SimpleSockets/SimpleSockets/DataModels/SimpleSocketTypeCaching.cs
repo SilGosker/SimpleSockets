@@ -1,21 +1,26 @@
 ﻿using System.Reflection;
 using Microsoft.AspNetCore.Http;
+using SimpleSockets.Interfaces;
 
 namespace SimpleSockets.DataModels;
 
 internal class SimpleSocketTypeCaching
 {
     internal ParameterInfo[] ConstructorDependencies { get; set; }
-    internal MethodInfo OnAuthentication { get; set; }
-    internal Type Type { get; set; }
-    private SimpleSocketTypeCaching(Type type)
+    internal Type SimpleSocketType { get; set; }
+    public Type? AuthenticatorType { get; set; }
+    private SimpleSocketTypeCaching(Type simpleSocketType, Type? authenticatorType)
     {
-        Type = type;
-        ConstructorDependencies = type.GetConstructors()[0].GetParameters();
-        OnAuthentication = type.GetMethod(nameof(SimpleSocket.Authenticate), BindingFlags.Static)!;
+        SimpleSocketType = simpleSocketType;
+        ConstructorDependencies = simpleSocketType.GetConstructors()[0].GetParameters();
+        AuthenticatorType = authenticatorType;
     }
-    internal static SimpleSocketTypeCaching Create<T>() where T : SimpleSocket
+    internal static SimpleSocketTypeCaching Create<TSimpleSocket>() where TSimpleSocket : ISimpleSocket
     {
-        return new SimpleSocketTypeCaching(typeof(T));
+        return new SimpleSocketTypeCaching(typeof(TSimpleSocket), null);
+    }
+    internal static SimpleSocketTypeCaching Create<TSimpleSocket, TAuthenticator>() where TSimpleSocket : ISimpleSocket where TAuthenticator : ISimpleSocketAuthenticator
+    {
+        return new SimpleSocketTypeCaching(typeof(TSimpleSocket), typeof(TAuthenticator));
     }
 }
