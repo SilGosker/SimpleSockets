@@ -13,6 +13,6 @@ public interface ISimpleSocket
     internal Task Leave();
     internal Task SendMessage(string message);
     internal Task SendMessage(string @event, string message);
-    internal Func<ISimpleSocket, BroadCastLevel, string, Task>? BroadCast { get; set; }
+    internal Func<ISimpleSocket, BroadCastLevel, string, Task>? Emit { get; set; }
     internal Action<ISimpleSocket>? DisposeAtSocketHandler { get; set; }
 }

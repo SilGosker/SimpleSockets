@@ -3,7 +3,7 @@
 public interface ISimpleSocketService
 {
     /// <summary>
-    /// Checks if a user is found connected
+    /// Checks if a user is connected and available
     /// </summary>
     /// <param name="roomId">The room id of the socket</param>
     /// <param name="userId">The user id of the socket</param>
@@ -44,7 +44,7 @@ public interface ISimpleSocketService
     /// <returns>The task representing the parallel sending of the messages</returns>
     public Task SendToRoom(string roomId, string message);
     /// <summary>
-    /// Sends a message to all the users in a room with an event id or name
+    /// Sends a message to a user in a room with an event id or name
     /// </summary>
     /// <param name="roomId">The room id in which the user need to receive the message</param>
     /// <param name="userId">The user id which needs to receive the message</param>
@@ -53,12 +53,12 @@ public interface ISimpleSocketService
     /// <returns>The task representing the sending of the message</returns>
     public Task SendToUser(string roomId, string userId, string @event, string message);
     /// <summary>
-    /// Sends a message to all the users in a room
+    /// Sends a message to a user in a room
     /// </summary>
     /// <param name="roomId">The room id in which the user needs to receive the message</param>
-    /// <param name="userId">The user id which needs to receive the message </param>
+    /// <param name="userId">The user id which needs to receive the message</param>
     /// <param name="message">The message</param>
-    /// <returns>THe task representing the sending of the message</returns>
+    /// <returns>The task representing the sending of the message</returns>
     public Task SendToUser(string roomId, string userId, string message);
 
 }

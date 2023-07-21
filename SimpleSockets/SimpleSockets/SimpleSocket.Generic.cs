@@ -10,7 +10,7 @@ public abstract class SimpleSocket<TEvent> : IDisposable, ISimpleSocket
     private readonly CancellationTokenSource _cts;
     private bool _isDisposed;
     private readonly WebSocket _webSocket;
-    public Func<ISimpleSocket, BroadCastLevel, string, Task>? BroadCast { get; set; } = null!;
+    public Func<ISimpleSocket, BroadCastLevel, string, Task>? Emit { get; set; } = null!;
     public Action<ISimpleSocket>? DisposeAtSocketHandler { get; set; } = null!;
 
     public string RoomId { get; set; } = null!;
@@ -21,14 +21,35 @@ public abstract class SimpleSocket<TEvent> : IDisposable, ISimpleSocket
         _webSocket = webSocket ?? throw new ArgumentNullException(nameof(webSocket));
         _cts = new CancellationTokenSource();
     }
+    /// <summary>
+    /// Sends a message to all members of the sockets room
+    /// </summary>
+    /// <param name="message">The message to be sent</param>
+    /// <returns>The task representing the parallel asynchronous sending</returns>
+    public Task BroadCast(string message) => Emit?.Invoke(this, BroadCastLevel.RoomMembers, message) ?? Task.CompletedTask;
+    /// <summary>
+    /// Sends a message with an event id/name to all members of the sockets room
+    /// </summary>
+    /// <param name="event">The name/id of the event</param>
+    /// <param name="message">The message to be sent</param>
+    /// <returns>The task representing the parallel asynchronous sending</returns>
+    public Task BroadCast(string @event, string message) => Emit?.Invoke(this, BroadCastLevel.RoomMembers, CreateEvent(@event, message)) ?? Task.CompletedTask;
 
-    public Task Emit(string message) => BroadCast?.Invoke(this, BroadCastLevel.Members, message) ?? Task.CompletedTask;
-
-    public Task Emit(string @event, string message) => BroadCast?.Invoke(this, BroadCastLevel.Members, CreateEvent(@event, message)) ?? Task.CompletedTask;
-
-    public Task Emit(BroadCastLevel level, string message) => BroadCast?.Invoke(this, level, message) ?? Task.CompletedTask;
-
-    public Task Emit(BroadCastLevel level, string @event, string message) => BroadCast?.Invoke(this, level, CreateEvent(@event, message)) ?? Task.CompletedTask;
+    /// <summary>
+    /// Sends a message to the members matching the <see cref="RoomId"/> specified by the <paramref name="level"/>
+    /// </summary>
+    /// <param name="level">The broadcast level the message will reach</param>
+    /// <param name="message">The message to be sent</param>
+    /// <returns>The task representing the parallel asynchronous sending</returns>
+    public Task BroadCast(BroadCastLevel level, string message) => Emit?.Invoke(this, level, message) ?? Task.CompletedTask;
+    /// <summary>
+    /// Sends a message with an event id/name to all members specified by the <paramref name="level"/>
+    /// </summary>
+    /// <param name="level">The broadcast level the message will reach</param>
+    /// <param name="event">The name/id of the event</param>
+    /// <param name="message">The message to be sent</param>
+    /// <returns>The task representing the parallel asynchronous sending</returns>
+    public Task BroadCast(BroadCastLevel level, string @event, string message) => Emit?.Invoke(this, level, CreateEvent(@event, message)) ?? Task.CompletedTask;
 
     public abstract string CreateEvent(string @event, string message);
     public abstract TEvent RegisterEvent(string message);

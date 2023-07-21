@@ -1,5 +1,5 @@
 ﻿namespace SimpleSockets.Enums;
-[Flags]
+
 public enum BroadCastLevel
 {
     /// <summary>
@@ -7,11 +7,27 @@ public enum BroadCastLevel
     /// </summary>
     None = 0,
     /// <summary>
-    /// Broadcasts to only the users in the same room as the sender matching the <see cref="SimpleSocket.RoomId"/> except for the sender itself
+    /// Broadcasts to the users matching the <see cref="SimpleSocket.RoomId"/> of the sender except for the sender
+    /// </summary>
+    RoomMembers = 1,
+    /// <summary>
+    /// Broadcasts to the users matching the senders type
+    /// </summary>
+    Room = 2,
+    /// <summary>
+    /// Broadcasts to the users matching the senders type except for the sender
+    /// </summary>
+    TypeMembers = 3,
+    /// <summary>
+    /// Broadcasts to the users connected to the server except for the sender itself
+    /// </summary>
+    AllTypes = 4,
+    /// <summary>
+    /// Broadcasts to the users matching the <see cref="SimpleSocket.RoomId"/> of the sender
     /// </summary>
     Members = 5,
     /// <summary>
-    /// Broadcasts to only the users in the same room as the sender matching the <see cref="SimpleSocket.RoomId"/>
+    /// Broadcasts to the users connected to the server
     /// </summary>
-    EveryOne = 10
+    EveryOne = 6
 }
