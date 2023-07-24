@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Builder;
 using SimpleSockets.Interfaces;
 using SimpleSockets.Middleware;
 
@@ -10,14 +10,14 @@ public static class AppBuilderExtensions
     /// Adds the SimpleSockets middleware to the pipeline.
     /// </summary>
     /// <param name="app">The application that the pipeline should be added to</param>
-    public static void UseSimpleSockets(this IApplicationBuilder app)
+    public static IApplicationBuilder UseSimpleSockets(this IApplicationBuilder app)
     {
         app.UseWebSockets(new WebSocketOptions()
         {
             KeepAliveInterval = TimeSpan.FromSeconds(10)
         });
         app.UseMiddleware<SocketMiddleware>();
-        
+        return app;
     }
     
     /// <summary>

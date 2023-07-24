@@ -11,7 +11,7 @@ public enum BroadCastLevel
     /// </summary>
     RoomMembers = 1,
     /// <summary>
-    /// Broadcasts to the users matching the senders type
+    /// Broadcasts to the users matching the <see cref="SimpleSocket.RoomId"/>
     /// </summary>
     Room = 2,
     /// <summary>

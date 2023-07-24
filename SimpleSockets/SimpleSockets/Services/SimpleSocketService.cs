@@ -1,9 +1,10 @@
 ﻿using SimpleSockets.DataModels;
 using SimpleSockets.Enums;
+using SimpleSockets.Interfaces;
 
 namespace SimpleSockets.Services
 {
-    internal class SimpleSocketService : ISimpleSocketService
+    internal sealed class SimpleSocketService : ISimpleSocketService
     {
         private readonly List<SimpleSocketRoom> _rooms;
 

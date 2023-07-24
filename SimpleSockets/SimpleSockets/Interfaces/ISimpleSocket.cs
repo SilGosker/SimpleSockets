@@ -7,8 +7,8 @@ public interface ISimpleSocket
 {
     internal Task ReceiveMessages();
     internal bool IsConnected();
-    internal string RoomId { get; set; }
-    internal string UserId { get; set; }
+    public string RoomId { get; internal set; }
+    public string UserId { get; internal set; }
     internal Task OnConnect();
     internal Task Leave();
     internal Task SendMessage(string message);

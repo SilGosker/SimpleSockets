@@ -4,5 +4,5 @@ namespace SimpleSockets.Interfaces;
 
 public interface ISimpleSocketAsyncAuthenticator
 {
-    public Task<SimpleSocketAuthenticationResult> AuthenticateAsyncs();
+    public Task<SimpleSocketAuthenticationResult> AuthenticateAsync();
 }

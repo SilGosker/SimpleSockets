@@ -1,7 +1,9 @@
-﻿namespace SimpleSockets.DataModels
+﻿using SimpleSockets.Interfaces;
+
+namespace SimpleSockets.DataModels
 {
 
-    internal class SimpleSocketRoom
+    internal sealed class SimpleSocketRoom
     {
         internal SimpleSocketRoom(string id, ISimpleSocket socket)
         {

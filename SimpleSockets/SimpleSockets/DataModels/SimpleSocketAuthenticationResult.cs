@@ -1,6 +1,6 @@
 ﻿namespace SimpleSockets.DataModels;
 
-public class SimpleSocketAuthenticationResult
+public sealed class SimpleSocketAuthenticationResult
 {
     public SimpleSocketAuthenticationResult(bool isAuthenticated, string? userId, string? roomId)
     {
