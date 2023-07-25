@@ -47,10 +47,7 @@ internal sealed class SocketMiddleware
             return;
         }
 
-        SimpleSocketAuthenticationResult authenticationResult = new(
-            (simpleSocketType.Options.IsDefaultAuthenticated != null
-             && (bool)simpleSocketType.Options.IsDefaultAuthenticated)
-            || _options.IsDefaultAuthenticated, null, null);
+        SimpleSocketAuthenticationResult authenticationResult = new(simpleSocketType.Options.IsDefaultAuthenticated ?? _options.IsDefaultAuthenticated);
 
         if (simpleSocketType.AuthenticatorType != null)
         {
