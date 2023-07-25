@@ -10,6 +10,10 @@ public sealed class SimpleSocketAuthenticationResult
         UserId = userId;
         RoomId = roomId;
     }
+    public SimpleSocketAuthenticationResult(bool isAuthenticated)
+    {
+        IsAuthenticated = isAuthenticated;
+    }
     /// <summary>
     /// Whether the user is authenticated and allowed to connect to the server.
     ///
