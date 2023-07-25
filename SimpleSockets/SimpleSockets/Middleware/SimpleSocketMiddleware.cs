@@ -82,7 +82,7 @@ internal sealed class SocketMiddleware
             if (ws == null) return;
             simpleSocket =
                 (ISimpleSocket)ActivatorUtilities.CreateInstance(scope.ServiceProvider,
-                    simpleSocketType.SimpleSocketType, ws);
+                    simpleSocketType.SimpleSocketType, ws, simpleSocketType.Options);
         }
 
         try
@@ -97,5 +97,6 @@ internal sealed class SocketMiddleware
         }
 
         await _simpleSocketService.AddSocket(simpleSocket);
+        _simpleSocketService.RemoveSocket(simpleSocket);
     }
 }

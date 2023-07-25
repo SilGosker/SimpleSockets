@@ -32,10 +32,16 @@ public class SimpleSocketOptions
     public bool? IsDefaultAuthenticated { get; set; } = null;
 
     internal Type? AuthenticatorType;
+    
     public void UseAuthenticator<TAuthenticator>()
     where TAuthenticator : ISimpleSocketAuthenticator
     {
         AuthenticatorType = typeof(TAuthenticator);
     }
     
+    public void UseAsyncAuthenticator<TAuthenticator>()
+        where TAuthenticator : ISimpleSocketAsyncAuthenticator
+    {
+        AuthenticatorType = typeof(TAuthenticator);
+    }
 }

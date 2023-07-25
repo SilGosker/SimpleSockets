@@ -155,7 +155,7 @@ public abstract class SimpleSocket<TEvent> : IDisposable, ISimpleSocket
             {
                 try
                 {
-                    await _webSocket.ReceiveAsync(new ArraySegment<byte>(chunks), _cts.Token);
+                    result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(chunks), _cts.Token);
                 }
                 catch (WebSocketException)
                 {
