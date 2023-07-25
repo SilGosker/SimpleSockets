@@ -7,27 +7,27 @@ public enum BroadCastLevel
     /// </summary>
     None = 0,
     /// <summary>
-    /// Broadcasts to the users matching the <see cref="SimpleSocket.RoomId"/> of the sender except for the sender
+    /// Broadcasts to the users matching the <see cref="SimpleSocket.RoomId"/> of the sender, excluding the sender
     /// </summary>
     RoomMembers = 1,
     /// <summary>
-    /// Broadcasts to the users matching the <see cref="SimpleSocket.RoomId"/>
+    /// Broadcasts to the users matching the <see cref="SimpleSocket.RoomId"/> of the sender, including the sender
     /// </summary>
     Room = 2,
     /// <summary>
-    /// Broadcasts to the users matching the senders type except for the sender
+    /// Broadcasts to the users matching the senders type, excluding the sender
     /// </summary>
     TypeMembers = 3,
     /// <summary>
-    /// Broadcasts to the users connected to the server except for the sender itself
+    /// Broadcasts to the users matching the senders type, including the sender
     /// </summary>
-    AllTypes = 4,
+    Type = 4,
     /// <summary>
-    /// Broadcasts to the users matching the <see cref="SimpleSocket.RoomId"/> of the sender
+    /// Broadcasts to all users connected to the server, excluding the sender
     /// </summary>
     Members = 5,
     /// <summary>
-    /// Broadcasts to the users connected to the server
+    /// Broadcasts to the users connected to the server, including the sender
     /// </summary>
     EveryOne = 6
 }

@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.AspNetCore.Http;
 using SimpleSockets.Interfaces;
+using SimpleSockets.Options;
 
 namespace SimpleSockets.DataModels;
 
@@ -8,24 +9,21 @@ internal sealed class SimpleSocketTypeCaching
 {
     internal ParameterInfo[] ConstructorDependencies { get; set; }
     internal Type SimpleSocketType { get; set; }
-    public Type? AuthenticatorType { get; set; }
-    private SimpleSocketTypeCaching(Type simpleSocketType, Type? authenticatorType)
+    internal Type? AuthenticatorType { get; set; }
+    internal SimpleSocketOptions Options;
+    
+    private SimpleSocketTypeCaching(Type simpleSocketType, SimpleSocketOptions? options)
     {
         SimpleSocketType = simpleSocketType;
         var constructorParameters = simpleSocketType.GetTypeInfo().DeclaredConstructors.FirstOrDefault();
         if (constructorParameters == null) throw new InvalidOperationException($"No constructors for type {simpleSocketType.FullName} found. Check if the class and constructor is public.");
         ConstructorDependencies = constructorParameters.GetParameters();
-        AuthenticatorType = authenticatorType;
+        Options = options ?? new SimpleSocketOptions();
+        AuthenticatorType = Options.AuthenticatorType;
     }
-    internal static SimpleSocketTypeCaching Create<TSimpleSocket>()
-        where TSimpleSocket : ISimpleSocket
+
+    internal static SimpleSocketTypeCaching Create(Type simpleSocketType, SimpleSocketOptions? options)
     {
-        return new SimpleSocketTypeCaching(typeof(TSimpleSocket), null);
-    }
-    internal static SimpleSocketTypeCaching Create<TSimpleSocket, TAuthenticator>()
-        where TSimpleSocket : ISimpleSocket
-        where TAuthenticator : ISimpleSocketAsyncAuthenticator
-    {
-        return new SimpleSocketTypeCaching(typeof(TSimpleSocket), typeof(TAuthenticator));
+        return new (simpleSocketType, options);
     }
 }

@@ -3,6 +3,7 @@ using SimpleSockets.Enums;
 using SimpleSockets.Interfaces;
 using System.Net.WebSockets;
 using System.Text;
+using SimpleSockets.Options;
 
 namespace SimpleSockets;
 
@@ -34,11 +35,14 @@ public abstract class SimpleSocket<TEvent> : IDisposable, ISimpleSocket
         }
     }
 
-    protected internal SimpleSocket(WebSocket webSocket)
+    private readonly SimpleSocketOptions _options;
+    protected internal SimpleSocket(WebSocket webSocket, SimpleSocketOptions options)
     {
         _webSocket = webSocket ?? throw new ArgumentNullException(nameof(webSocket));
         _cts = new CancellationTokenSource();
+        _options = options ?? throw new ArgumentNullException(nameof(options));
     }
+    
     /// <summary>
     /// Sends a message to all members of the sockets room matching the <see cref="RoomId"/> 
     /// </summary>
@@ -114,27 +118,70 @@ public abstract class SimpleSocket<TEvent> : IDisposable, ISimpleSocket
 
     public async Task ReceiveMessages()
     {
-        byte[] bytes = new byte[1024 * 4];
-        while (IsConnected() && !_cts.IsCancellationRequested && !_isDisposed)
+        if (!_options.EnableChunkedMessages)
         {
-            try
+            byte[] bytes = new byte[_options.MaxMessageSize];
+            while (IsConnected() && !_cts.IsCancellationRequested && !_isDisposed)
             {
-                await _webSocket.ReceiveAsync(new ArraySegment<byte>(bytes), _cts.Token);
-            }
-            catch (WebSocketException)
-            {
-                break;
-            }
+                try
+                {
+                    await _webSocket.ReceiveAsync(new ArraySegment<byte>(bytes), _cts.Token);
+                }
+                catch (WebSocketException)
+                {
+                    break;
+                }
 
-            string message = Encoding.Default.GetString(bytes).Replace("\0", "");
-            await OnMessage(message);
+                string message = Encoding.Default.GetString(bytes).Replace("\0", "");
+                await OnMessage(message);
 
-            for (int i = 0; i < bytes.Length; i++)
-            {
-                bytes[i] = default;
+                for (int i = 0; i < bytes.Length; i++)
+                {
+                    bytes[i] = default;
+                }
             }
+            await Leave();
+            return;
         }
 
+        StringBuilder sb = new();
+        byte[] chunks = new byte[_options.ChunkSize];
+        
+        while (IsConnected() && !_cts.IsCancellationRequested && !_isDisposed)
+        {
+            WebSocketReceiveResult result = new WebSocketReceiveResult(0, WebSocketMessageType.Text, false);
+            
+            while (!result.EndOfMessage)
+            {
+                try
+                {
+                    await _webSocket.ReceiveAsync(new ArraySegment<byte>(chunks), _cts.Token);
+                }
+                catch (WebSocketException)
+                {
+                    break;
+                }
+
+                sb.Append(Encoding.Default.GetString(chunks).TrimEnd('\0'));
+                if (sb.Length > _options.MaxMessageSize)
+                {
+                    break;
+                }
+            }
+
+            if (result.EndOfMessage && IsConnected())
+            {
+                await OnMessage(sb.ToString());
+            }
+            
+            sb.Clear();
+            
+            for (int i = 0; i < chunks.Length; i++)
+            {
+                chunks[i] = default;
+            }
+        }
+        
         await Leave();
     }
 

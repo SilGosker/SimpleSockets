@@ -107,7 +107,7 @@ namespace SimpleSockets.Services
             {
                 switch (broadCastLevel)
                 {
-                    case BroadCastLevel.AllTypes:
+                    case BroadCastLevel.Type:
                         var senderType = sender.GetType();
                         return Task.WhenAll(_rooms.SelectMany(e => e.Sockets)
                             .Where(e => e.GetType() == senderType)

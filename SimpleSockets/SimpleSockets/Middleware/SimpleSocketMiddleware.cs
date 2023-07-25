@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using SimpleSockets.DataModels;
 using SimpleSockets.Interfaces;
+using SimpleSockets.Options;
 using SimpleSockets.Services;
 
 namespace SimpleSockets.Middleware;
@@ -14,27 +15,21 @@ internal sealed class SocketMiddleware
     private readonly RequestDelegate _next;
     private readonly SimpleSocketService _simpleSocketService;
     private readonly IServiceScopeFactory _scopeFactory;
-
+    private readonly SimpleSocketMiddlewareOptions _options;
     private static readonly SimpleSocketAuthenticationResult DefaultAuthenticationResult = new(true, null, null);
-    internal static void SetBehavior<TSimpleSocket>(string url)
-        where TSimpleSocket : ISimpleSocket
-    {
-        TypeDictionary[url] = SimpleSocketTypeCaching.Create<TSimpleSocket>();
-    }
 
-    internal static void SetBehavior<TSimpleSocket, TSimpleSocketAuthenticator>(string url)
-        where TSimpleSocket : ISimpleSocket
-        where TSimpleSocketAuthenticator : ISimpleSocketAsyncAuthenticator
+    internal static void SetBehavior(string url, Type simpleSocketType, SimpleSocketOptions? options = null)
     {
-        TypeDictionary[url] = SimpleSocketTypeCaching.Create<TSimpleSocket, TSimpleSocketAuthenticator>();
+        TypeDictionary[url] = SimpleSocketTypeCaching.Create(simpleSocketType, options);
     }
 
     public SocketMiddleware(RequestDelegate next, SimpleSocketService simpleSocketService,
-        IServiceScopeFactory scopeFactory)
+        IServiceScopeFactory scopeFactory, SimpleSocketMiddlewareOptions options)
     {
         _next = next;
         _simpleSocketService = simpleSocketService;
         _scopeFactory = scopeFactory;
+        _options = options;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -51,13 +46,18 @@ internal sealed class SocketMiddleware
             await _next.Invoke(context);
             return;
         }
-            
-        SimpleSocketAuthenticationResult authenticationResult = DefaultAuthenticationResult;
+
+        SimpleSocketAuthenticationResult authenticationResult = new(
+            (simpleSocketType.Options.IsDefaultAuthenticated != null
+             && (bool)simpleSocketType.Options.IsDefaultAuthenticated)
+            || _options.IsDefaultAuthenticated, null, null);
+
         if (simpleSocketType.AuthenticatorType != null)
         {
             using var scope = _scopeFactory.CreateScope();
-            var authenticator = ActivatorUtilities.CreateInstance(scope.ServiceProvider, simpleSocketType.AuthenticatorType);
-                
+            var authenticator =
+                ActivatorUtilities.CreateInstance(scope.ServiceProvider, simpleSocketType.AuthenticatorType);
+
             authenticationResult = authenticator switch
             {
                 ISimpleSocketAsyncAuthenticator asyncAuthenticator => await asyncAuthenticator.AuthenticateAsync(),
@@ -66,7 +66,7 @@ internal sealed class SocketMiddleware
             };
         }
 
-        if (authenticationResult.IsAuthenticated != true)
+        if (!authenticationResult.IsAuthenticated)
         {
             context.Response.StatusCode = 401;
             return;
@@ -75,22 +75,27 @@ internal sealed class SocketMiddleware
         ISimpleSocket simpleSocket;
         using (var scope = _scopeFactory.CreateScope())
         {
-            var ws = context.WebSockets.WebSocketRequestedProtocols.Count > 0 
-                ? await context.WebSockets.AcceptWebSocketAsync(context.WebSockets.WebSocketRequestedProtocols[0]) 
+            var ws = context.WebSockets.WebSocketRequestedProtocols.Count > 0
+                ? await context.WebSockets.AcceptWebSocketAsync(context.WebSockets.WebSocketRequestedProtocols[0])
                 : await context.WebSockets.AcceptWebSocketAsync();
-            simpleSocket = (ISimpleSocket)ActivatorUtilities.CreateInstance(scope.ServiceProvider, simpleSocketType.SimpleSocketType, ws);
+            
+            if (ws == null) return;
+            simpleSocket =
+                (ISimpleSocket)ActivatorUtilities.CreateInstance(scope.ServiceProvider,
+                    simpleSocketType.SimpleSocketType, ws);
         }
 
         try
         {
-            simpleSocket.UserId = authenticationResult.UserId ?? Guid.NewGuid().ToString();
-            simpleSocket.RoomId = authenticationResult.RoomId ?? "__0";
+            simpleSocket.UserId = authenticationResult.UserId ?? _options.GetDefaultUserId(context);
+            simpleSocket.RoomId = authenticationResult.RoomId ?? _options.GetDefaultRoomId(context);
         }
         catch (Exception)
         {
-            throw new InvalidOperationException("The UserId or RoomId should not be set in the constructor of any SimpleSocket");
+            throw new InvalidOperationException(
+                "The UserId or RoomId should not be set in the constructor of any SimpleSocket");
         }
-        
+
         await _simpleSocketService.AddSocket(simpleSocket);
     }
 }

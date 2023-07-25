@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using Microsoft.Extensions.Options;
+using SimpleSockets.Options;
+using System.Diagnostics;
 using System.Net.WebSockets;
 
 namespace SimpleSockets;
@@ -6,7 +8,7 @@ namespace SimpleSockets;
 [DebuggerDisplay("{RoomId}.{UserId} = {_webSocket.State}")]
 public abstract class SimpleSocket : SimpleSocket<string>
 {
-    protected internal SimpleSocket(WebSocket webSocket) : base(webSocket)
+    protected internal SimpleSocket(WebSocket webSocket, SimpleSocketOptions options) : base(webSocket, options)
     {
     }
     

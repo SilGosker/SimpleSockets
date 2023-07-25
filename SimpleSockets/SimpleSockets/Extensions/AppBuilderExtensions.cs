@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Builder;
-using SimpleSockets.Interfaces;
 using SimpleSockets.Middleware;
+using SimpleSockets.Options;
 
 namespace SimpleSockets.Extensions;
 
@@ -10,44 +10,19 @@ public static class AppBuilderExtensions
     /// Adds the SimpleSockets middleware to the pipeline.
     /// </summary>
     /// <param name="app">The application that the pipeline should be added to</param>
-    public static IApplicationBuilder UseSimpleSockets(this IApplicationBuilder app)
-    {
-        app.UseWebSockets(new WebSocketOptions()
-        {
-            KeepAliveInterval = TimeSpan.FromSeconds(10)
-        });
-        app.UseMiddleware<SocketMiddleware>();
-        return app;
-    }
-    
-    /// <summary>
-    /// Adds a SimpleSocket type without authentication to the available websocket endpoints.
-    /// If you do want to use authentication, use <see cref="AddSimpleSocket{TSimpleSocket, TSimpleSocketAuthenticator}"/>
-    /// </summary>
-    /// <typeparam name="TSimpleSocket">The type of simple socket you want to use</typeparam>
-    /// <param name="app">The app that the websockets endpoint should be added to</param>
-    /// <param name="url">The url that the websockets url should match</param>
-    /// <returns>The <see cref="IApplicationBuilder"/> that was parsed in through the <see cref="app"/> argument </returns>
-    public static IApplicationBuilder AddSimpleSocket<TSimpleSocket>(this IApplicationBuilder app, string url)
-        where TSimpleSocket : ISimpleSocket
-    {
-        SocketMiddleware.SetBehavior<TSimpleSocket>(url);
-        return app;
-    }
+    public static SimpleSocketBuilder UseSimpleSockets(this IApplicationBuilder app) => UseSimpleSockets(app, null);
 
     /// <summary>
-    /// Adds a SimpleSocket type with authentication to the available websocket endpoints.
+    /// Adds the SimpleSockets middleware to the pipeline.
     /// </summary>
-    /// <typeparam name="TSimpleSocket">The type of simple socket you want to use</typeparam>
-    /// <typeparam name="TSimpleSocketAuthenticator">The type of authenticator you want to use</typeparam>
-    /// <param name="app">The app that the websockets endpoint should be added to</param>
-    /// <param name="url">The url that the websockets url should match</param>
-    /// <returns>The <see cref="IApplicationBuilder"/> that was parsed in through the <see cref="app"/> argument </returns>
-    public static IApplicationBuilder AddSimpleSocket<TSimpleSocket, TSimpleSocketAuthenticator>(this IApplicationBuilder app, string url)
-        where TSimpleSocket : ISimpleSocket
-        where TSimpleSocketAuthenticator : ISimpleSocketAsyncAuthenticator
+    /// <param name="app">The application that the pipeline should be added to</param>
+    /// <param name="configure">An <see cref="Action{SimpleSocketMiddlewareOptions}"/> to configure the provided <see cref="SimpleSocketMiddlewareOptions"/>.</param>
+    public static SimpleSocketBuilder UseSimpleSockets(this IApplicationBuilder app, Action<SimpleSocketMiddlewareOptions>? configure)
     {
-        SocketMiddleware.SetBehavior<TSimpleSocket, TSimpleSocketAuthenticator>(url);
-        return app;
+        var options = new SimpleSocketMiddlewareOptions();
+        configure?.Invoke(options);
+        app.UseWebSockets(options.WebSocketOptions);
+        app.UseMiddleware<SocketMiddleware>(options);
+        return new SimpleSocketBuilder(app);
     }
 }
