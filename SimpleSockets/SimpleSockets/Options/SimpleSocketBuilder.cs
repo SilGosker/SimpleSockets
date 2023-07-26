@@ -23,7 +23,7 @@ public class SimpleSocketBuilder
     /// <returns>The <see cref="IApplicationBuilder"/> that was parsed in through the <see cref="app"/> argument </returns>
     public SimpleSocketBuilder AddSimpleSocket<TSimpleSocket>(string url)
         where TSimpleSocket : ISimpleSocket
-        => AddSimpleSocket(url, typeof(TSimpleSocket), null, null);
+        => AddSimpleSocket(url, typeof(TSimpleSocket), null);
 
     /// <summary>
     /// Adds a SimpleSocket type without authentication to the available websocket endpoints.
@@ -36,9 +36,9 @@ public class SimpleSocketBuilder
     /// <returns>The <see cref="IApplicationBuilder"/> that was parsed in through the <see cref="app"/> argument </returns>
     public SimpleSocketBuilder AddSimpleSocket<TSimpleSocket>(string url, Action<SimpleSocketOptions> configure)
         where TSimpleSocket : ISimpleSocket
-        => AddSimpleSocket(url, typeof(TSimpleSocket), null, configure);
+        => AddSimpleSocket(url, typeof(TSimpleSocket), configure);
 
-    private SimpleSocketBuilder AddSimpleSocket(string url, Type simpleSocketType, Type? authenticatorType, Action<SimpleSocketOptions>? configure)
+    private SimpleSocketBuilder AddSimpleSocket(string url, Type simpleSocketType, Action<SimpleSocketOptions>? configure)
     {
         var options = new SimpleSocketOptions();
         configure?.Invoke(options);

@@ -11,6 +11,6 @@ public static class ServiceCollectionExtensions
     /// <param name="serviceCollection">The collection the <see cref="ISimpleSocketService"/> should be added to </param>
     public static void AddSimpleSocketService(this IServiceCollection serviceCollection)
     {
-        serviceCollection.AddSingleton<SimpleSocketService>();
+        serviceCollection.AddSingleton<ISimpleSocketService, SimpleSocketService>();
     }
 }

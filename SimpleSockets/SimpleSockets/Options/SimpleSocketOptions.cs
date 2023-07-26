@@ -1,4 +1,5 @@
-﻿using SimpleSockets.Interfaces;
+﻿using System.Text;
+using SimpleSockets.Interfaces;
 
 namespace SimpleSockets.Options;
 
@@ -27,12 +28,17 @@ public class SimpleSocketOptions
     /// If not null, overrides the <see cref="SimpleSocketMiddlewareOptions.IsDefaultAuthenticated"/> property.
     /// Does not override the use of an authenticator.
     ///
-    /// Default is null
+    /// The Default is null
     /// </summary>
     public bool? IsDefaultAuthenticated { get; set; } = null;
 
     internal Type? AuthenticatorType;
-    
+    /// <summary>
+    /// The encoding that will be used to encode en decode messages from and to bytes.
+    ///
+    /// The default is <see cref="System.Text.Encoding.UTF8"/>
+    /// </summary>
+    public Encoding Encoding { get; set; } = Encoding.UTF8;
     public void UseAuthenticator<TAuthenticator>()
     where TAuthenticator : ISimpleSocketAuthenticator
     {

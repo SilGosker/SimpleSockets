@@ -9,7 +9,7 @@ public class SimpleSocketMiddlewareOptions
     /// <summary>
     /// The default way of getting a RoomId that will be used if no authenticator is provided.
     ///
-    /// The default is '__0'
+    /// The default is always '__0'
     /// </summary>
     public Func<HttpContext, string> GetDefaultRoomId { get; set; } = _ => "__0";
     /// <summary>

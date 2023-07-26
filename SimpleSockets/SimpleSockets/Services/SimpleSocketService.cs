@@ -58,16 +58,6 @@ namespace SimpleSockets.Services
                                 ?? Enumerable.Empty<Task>());
         }
 
-        public void Remove(string roomId)
-        {
-            _rooms.RemoveAll(e => e.Id == roomId);
-        }
-
-        public void Remove(string roomId, string userId)
-        {
-            _rooms.SingleOrDefault(e => e.Id == roomId)?.Sockets.RemoveAll(e => e.UserId == userId);
-        }
-
         public Task SendToRoom(string roomId, string @event, string message)
         {
             return Task.WhenAll(_rooms.SingleOrDefault(e => e.Id == roomId)?.Sockets

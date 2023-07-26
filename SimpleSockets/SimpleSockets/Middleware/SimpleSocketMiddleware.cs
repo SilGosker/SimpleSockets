@@ -16,7 +16,6 @@ internal sealed class SocketMiddleware
     private readonly SimpleSocketService _simpleSocketService;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly SimpleSocketMiddlewareOptions _options;
-    private static readonly SimpleSocketAuthenticationResult DefaultAuthenticationResult = new(true, null, null);
 
     internal static void SetBehavior(string url, Type simpleSocketType, SimpleSocketOptions? options = null)
     {
@@ -47,7 +46,8 @@ internal sealed class SocketMiddleware
             return;
         }
 
-        SimpleSocketAuthenticationResult authenticationResult = new(simpleSocketType.Options.IsDefaultAuthenticated ?? _options.IsDefaultAuthenticated);
+        SimpleSocketAuthenticationResult authenticationResult =
+            new(simpleSocketType.Options.IsDefaultAuthenticated ?? _options.IsDefaultAuthenticated);
 
         if (simpleSocketType.AuthenticatorType != null)
         {
@@ -75,7 +75,7 @@ internal sealed class SocketMiddleware
             var ws = context.WebSockets.WebSocketRequestedProtocols.Count > 0
                 ? await context.WebSockets.AcceptWebSocketAsync(context.WebSockets.WebSocketRequestedProtocols[0])
                 : await context.WebSockets.AcceptWebSocketAsync();
-            
+
             if (ws == null) return;
             simpleSocket =
                 (ISimpleSocket)ActivatorUtilities.CreateInstance(scope.ServiceProvider,
