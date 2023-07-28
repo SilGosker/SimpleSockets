@@ -10,13 +10,15 @@ public static class AppBuilderExtensions
     /// Adds the SimpleSockets middleware to the pipeline.
     /// </summary>
     /// <param name="app">The application that the pipeline should be added to</param>
+    /// <returns>A <see cref="SimpleSocketBuilder"/> To further configure the SimpleSockets</returns>
     public static SimpleSocketBuilder UseSimpleSockets(this IApplicationBuilder app) => UseSimpleSockets(app, null);
 
     /// <summary>
     /// Adds the SimpleSockets middleware to the pipeline.
     /// </summary>
     /// <param name="app">The application that the pipeline should be added to</param>
-    /// <param name="configure">An <see cref="Action{SimpleSocketMiddlewareOptions}"/> to configure the provided <see cref="SimpleSocketMiddlewareOptions"/>.</param>
+    /// <param name="configure">A function to configure the provided <see cref="SimpleSocketMiddlewareOptions"/>.</param>
+    /// <returns>A <see cref="SimpleSocketBuilder"/> To further configure the SimpleSockets</returns>
     public static SimpleSocketBuilder UseSimpleSockets(this IApplicationBuilder app, Action<SimpleSocketMiddlewareOptions>? configure)
     {
         var options = new SimpleSocketMiddlewareOptions();
