@@ -23,6 +23,6 @@ public static class AppBuilderExtensions
         configure?.Invoke(options);
         app.UseWebSockets(options.WebSocketOptions);
         app.UseMiddleware<SocketMiddleware>(options);
-        return new SimpleSocketBuilder(app);
+        return new SimpleSocketBuilder();
     }
 }
