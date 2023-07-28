@@ -9,12 +9,27 @@ public interface ISimpleSocketService
     /// <param name="userId">The user id of the socket</param>
     /// <returns>Whether the user is found and connected</returns>
     public bool Any(string roomId, string userId);
+    
     /// <summary>
     /// Checks if a room is found and available
     /// </summary>
     /// <param name="roomId">The room id of the socket</param>
     /// <returns>Whether the room is found and at least 1 socket is connected</returns>
     public bool Any(string roomId);
+    
+    /// <summary>
+    /// Counts the amount of users connected to a room
+    /// </summary>
+    /// <param name="roomId">The room id</param>
+    /// <returns>The count on how many users are in the room</returns>
+    public int Count(string roomId);
+    
+    /// <summary>
+    /// Counts the amount of users connected to the server
+    /// </summary>
+    /// <returns>The count of how many users are connected to the server</returns>
+    public int Count();
+
     /// <summary>
     /// Forces a room to be removed and instantiates the leave event for all users in the room
     /// </summary>

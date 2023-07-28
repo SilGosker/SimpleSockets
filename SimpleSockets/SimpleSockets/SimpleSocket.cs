@@ -22,5 +22,10 @@ public abstract class SimpleSocket : SimpleSocket<string>
         return $"{@event}:{message}";
     }
 
+    /// <summary>
+    /// This method is called when a message is received from the websocket.
+    /// </summary>
+    /// <param name="message">The received message</param>
+    /// <returns>A task representing the operation</returns>
     public abstract override Task OnMessage(string message);
 }

@@ -7,13 +7,13 @@ namespace SimpleSockets.Options;
 public class SimpleSocketMiddlewareOptions
 {
     /// <summary>
-    /// The default way of getting a RoomId that will be used if no authenticator is provided.
+    /// The default way of getting a RoomId that will be used if no authenticator is provided. If returns null, switches back to default
     ///
     /// The default is always '__0'
     /// </summary>
     public Func<HttpContext, string> GetDefaultRoomId { get; set; } = _ => "__0";
     /// <summary>
-    /// The default way of getting a new userId that will be used if no authenticator is provided.
+    /// The default way of getting a new userId that will be used if no authenticator is provided. If returns null, switches back to default
     ///
     /// The default is a random Guid.
     /// </summary>

@@ -1,8 +1,7 @@
-﻿using SimpleSockets.DataModels;
-using SimpleSockets.Enums;
-using SimpleSockets.Interfaces;
+﻿using SimpleSockets.Enums;
 using System.Net.WebSockets;
 using System.Text;
+using SimpleSockets.Interfaces;
 using SimpleSockets.Options;
 
 namespace SimpleSockets;
@@ -105,7 +104,7 @@ public abstract class SimpleSocket<TEvent> : IDisposable, ISimpleSocket
             return;
         }
 
-        byte[] bytes = Encoding.UTF8.GetBytes(CreateEvent(@event, message));
+        byte[] bytes = _options.Encoding.GetBytes(CreateEvent(@event, message));
         try
         {
             await _webSocket.SendAsync(new ArraySegment<byte>(bytes), WebSocketMessageType.Text, true, _cts.Token);
@@ -132,7 +131,7 @@ public abstract class SimpleSocket<TEvent> : IDisposable, ISimpleSocket
                     break;
                 }
 
-                string message = Encoding.Default.GetString(bytes).Replace("\0", "");
+                string message = _options.Encoding.GetString(bytes).Replace("\0", "");
                 await OnMessage(message);
 
                 for (int i = 0; i < bytes.Length; i++)

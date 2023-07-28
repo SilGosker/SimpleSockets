@@ -1,7 +1,6 @@
-﻿using SimpleSockets.DataModels;
-using SimpleSockets.Enums;
+﻿using SimpleSockets.Enums;
 
-namespace SimpleSockets;
+namespace SimpleSockets.Interfaces;
 
 public interface ISimpleSocket
 {
