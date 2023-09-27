@@ -3,8 +3,8 @@ using System.Reflection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using SimpleSockets.Authentication;
+using SimpleSockets.Builder;
 using SimpleSockets.DataModels;
-using SimpleSockets.Options;
 using SimpleSockets.Services;
 
 namespace SimpleSockets.Middleware;
@@ -32,7 +32,7 @@ internal sealed class SocketMiddleware
             return;
         }
 
-        var simpleSocket = await SimpleSocketInstanceFactory.GetInstanceAndAuthenticate(context,
+        var simpleSocket = await SimpleSocketInstanceFactory.GetAuthenticatedInstance(context,
             _options.IsDefaultAuthenticated,
             // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract : always expect the worst from your users
             _options.GetDefaultRoomId(context) ?? "__0",

@@ -63,14 +63,14 @@ internal sealed class SimpleSocketService : ISimpleSocketService
     public Task ForceLeave(string roomId)
     {
         return Task.WhenAll(_rooms.SingleOrDefault(e => e.Id == roomId)?.Sockets
-            .Select(e => e.Leave()) ?? Enumerable.Empty<Task>());
+            .Select(e => e.DisposeAsync().AsTask()) ?? Enumerable.Empty<Task>());
     }
 
     public Task ForceLeave(string roomId, string userId)
     {
         return Task.WhenAll(_rooms.SingleOrDefault(e => e.Id == roomId)?.Sockets
                                 .Where(e => e.IsConnected() && e.UserId == userId)
-                                .Select(e => e.Leave())
+                                .Select(e => e.DisposeAsync().AsTask())
                             ?? Enumerable.Empty<Task>());
     }
 
@@ -78,94 +78,61 @@ internal sealed class SimpleSocketService : ISimpleSocketService
     {
         return Task.WhenAll(_rooms.SingleOrDefault(e => e.Id == roomId)?.Sockets
                                 .Where(e => e.IsConnected())
-                                .Select(e => e.SendMessage(@event, message))
+                                .Select(e => e is IEventSocket o ? o.SendToClient(message, @event) : Task.CompletedTask)
                             ?? Enumerable.Empty<Task>());
     }
 
     public async Task SendToRoom(string roomId, string message)
     {
-        List<Task> tasks =
+        var tasks =
             (_rooms.Where(e => e.Id == roomId)
-                .SelectMany(room => room.Sockets, (_, behavior) => behavior.SendMessage(message))).ToList();
+                .SelectMany(room => room.Sockets, (_, behavior) => behavior.SendToClient(message)));
         await Task.WhenAll(tasks);
     }
 
-    public Task SendToUser(string roomId, string userId, string @event, string message)
+    public Task SendToClient(string roomId, string userId, string @event, string message)
     {
         return Task.WhenAll(_rooms.SingleOrDefault(e => e.Id == roomId)?.Sockets
                                 .Where(e => e.IsConnected() && e.UserId == userId)
-                                .Select(e => e.SendMessage(@event, message))
+                                .Select(e => e is IEventSocket o ? o.SendToClient(message, @event) : Task.CompletedTask)
                             ?? Enumerable.Empty<Task>());
     }
-
-    public async Task SendToUser(string roomId, string userId, string message)
+    public async Task SendToClient(string roomId, string userId, string message)
     {
         await _rooms.FirstOrDefault(e => e.Id == roomId)?.Sockets.FirstOrDefault(e => e.UserId == userId)
-            ?.SendMessage(message)!;
+            ?.SendToClient(message)!;
     }
 
-    private Task BroadCast(ISimpleSocket? sender, BroadCastLevel broadCastLevel, string? message)
+    private Task BroadCast(ISimpleSocket? sender, BroadCastFilter broadCastFilter, string? message)
     {
-        if (string.IsNullOrEmpty(message) || sender == null || broadCastLevel == BroadCastLevel.None)
+        if (string.IsNullOrEmpty(message) || sender == null || broadCastFilter == BroadCastFilter.Everyone)
             return Task.CompletedTask;
-            
-        if (broadCastLevel > BroadCastLevel.Room)
-        {
-            switch (broadCastLevel)
-            {
-                case BroadCastLevel.Type:
-                    var senderType = sender.GetType();
-                    return Task.WhenAll(_rooms.SelectMany(e => e.Sockets)
-                        .Where(e => e.GetType() == senderType)
-                        .Select(e => e.SendMessage(message)));
-                case BroadCastLevel.Members:
-                    return Task.WhenAll(_rooms.SelectMany(e => e.Sockets)
-                        .Where(e => e.IsConnected() && (e.RoomId != sender.RoomId || e.UserId != sender.UserId))
-                        .Select(e => e.SendMessage(message)));
-                case BroadCastLevel.EveryOne:
-                    return Task.WhenAll(_rooms.SelectMany(e => e.Sockets)
-                        .Where(e => e.IsConnected())
-                        .Select(e => e.SendMessage(message)));
-                case BroadCastLevel.TypeMembers:
-                    return Task.WhenAll(_rooms.SelectMany(e => e.Sockets)
-                        .Where(e => e.IsConnected()
-                                    && (e.RoomId != sender.RoomId 
-                                        || e.UserId != sender.UserId) 
-                                    && e.GetType() == sender.GetType())
-                        .Select(e => e.SendMessage(message)));
-            }
 
-            return Task.CompletedTask;
+        IEnumerable<ISimpleSocket> simpleSockets = _rooms.SelectMany(e => e.Sockets);
+        if (broadCastFilter.HasFlag(BroadCastFilter.EqualRoomId))
+        {
+            simpleSockets = _rooms.SingleOrDefault(room => room.Id == sender.RoomId)?.Sockets ??
+                            Enumerable.Empty<ISimpleSocket>();
         }
 
-        SimpleSocketRoom? room = _rooms.FirstOrDefault(e => e.Id == sender.RoomId);
-        if (room == null)
-            return Task.CompletedTask;
-            
-        switch (broadCastLevel)
+        if (broadCastFilter.HasFlag(BroadCastFilter.EqualType))
         {
-            case BroadCastLevel.Room:
-            {
-                IEnumerable<Task> tasks = room.Sockets.Where(e => e.IsConnected())
-                    .Select(e => e.SendMessage(message));
-                return Task.WhenAll(tasks);
-            }
-            case BroadCastLevel.RoomMembers:
-            {
-                IEnumerable<Task> tasks = room.Sockets.Where(e => e.IsConnected() && e.UserId != sender.UserId)
-                    .Select(e => e.SendMessage(message));
-                return Task.WhenAll(tasks);
-            }
+            simpleSockets = simpleSockets.Where(e => e.GetType() == sender.GetType());
         }
 
-        return Task.CompletedTask;
+        if (broadCastFilter.HasFlag(BroadCastFilter.Members))
+        {
+            simpleSockets = simpleSockets.Where(e => e.UserId != sender.UserId);
+        }
+
+        return Task.WhenAll(simpleSockets.Select(e => e.SendToClient(message)));
     }
 
     internal void RemoveSocket(ISimpleSocket? caster)
     {
         if (caster == null) return;
 
-        SimpleSocketRoom? room = _rooms.SingleOrDefault(e => e.Id == caster.RoomId);
+        var room = _rooms.SingleOrDefault(e => e.Id == caster.RoomId);
         if (room == null) return;
 
         room.Sockets.RemoveAll(e => e.UserId == caster.UserId && !e.IsConnected());

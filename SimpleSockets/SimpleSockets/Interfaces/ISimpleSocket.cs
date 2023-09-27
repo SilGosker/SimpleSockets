@@ -2,16 +2,63 @@
 
 namespace SimpleSockets.Interfaces;
 
-public interface ISimpleSocket
+/// <summary>
+///     The interface for a basic SimpleSocket class.
+/// </summary>
+public interface ISimpleSocket : IAsyncDisposable
 {
-    internal Task ReceiveMessages();
-    internal bool IsConnected();
-    public string RoomId { get; internal set; }
-    public string UserId { get; internal set; }
-    internal Task OnConnect();
-    internal Task Leave();
-    internal Task SendMessage(string message);
-    internal Task SendMessage(string @event, string message);
-    internal Func<ISimpleSocket, BroadCastLevel, string, Task>? Emit { get; set; }
-    internal Action<ISimpleSocket>? DisposeAtSocketHandler { get; set; }
+    /// <summary>
+    ///     The room that the SimpleSocket is connected to.
+    /// </summary>
+    public string RoomId { get; set; }
+
+    /// <summary>
+    ///     The unique identifier of the SimpleSocket.
+    /// </summary>
+    public string UserId { get; set; }
+
+    /// <summary>
+    ///     The function that handles the outgoing messages.
+    /// </summary>
+    public Func<ISimpleSocket, BroadCastFilter, string, Task>? Emit { get; set; }
+
+    /// <summary>
+    ///     Removes all references from the ISimpleSocket so garbage collection can remove it.
+    /// </summary>
+    public Action<ISimpleSocket>? DisposeAtSocketHandler { get; set; }
+
+    /// <summary>
+    ///     The event that is fired when the SimpleSocket should start receiving messages.
+    /// </summary>
+    /// <returns>
+    ///     A task that should keep the SimpleSocket middleware alive during the lifetime of the clients connection
+    /// </returns>
+    public Task ReceiveMessages();
+
+    /// <summary>
+    ///     Checks the connection status of the SimpleSocket.
+    /// </summary>
+    /// <returns>
+    ///     <c>true</c> if the SimpleSocket is connected; otherwise, <c>false</c>.
+    /// </returns>
+    public bool IsConnected();
+
+    /// <summary>
+    ///     The event that will be emitted just before the socket receives its messages
+    /// </summary>
+    /// <returns>A task that represent the asynchronous event</returns>
+    public Task OnConnect();
+
+    /// <summary>
+    ///     The event that will be emitted just before the backing websocket is disposed and removed from the server
+    /// </summary>
+    /// <returns>A task that represent the asynchronous event</returns>
+    public Task OnDisconnect();
+
+    /// <summary>
+    ///     Sends a message to the client connected to the server
+    /// </summary>
+    /// <param name="message">The content of the message</param>
+    /// <returns>A task that represents the asynchronous operation</returns>
+    public Task SendToClient(string message);
 }

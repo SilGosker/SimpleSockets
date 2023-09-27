@@ -1,11 +1,10 @@
 ﻿using Microsoft.AspNetCore.Builder;
-using SimpleSockets.Extensions;
-using SimpleSockets.Options;
+using SimpleSockets.Builder;
 
 namespace SimpleSockets.Authentication;
 
 /// <summary>
-///     The combined result of authentication and authorization for a <see cref="SimpleSocket" /> client connection
+///     The combined result of authentication and authorization for a <see cref="SimpleSocket" /> connection
 /// </summary>
 public sealed class SimpleSocketAuthenticationResult
 {
@@ -22,7 +21,7 @@ public sealed class SimpleSocketAuthenticationResult
     }
 
     /// <summary>
-    ///     Creates a new <see cref="SimpleSocketAuthenticationResult" /> with the given parameters
+    ///     Creates a new <see cref="SimpleSocketAuthenticationResult" /> instance with the given parameters
     /// </summary>
     /// <param name="isAuthenticated">
     ///     <para>
@@ -30,15 +29,7 @@ public sealed class SimpleSocketAuthenticationResult
     ///     </para>
     ///     <para>
     ///         Failure (<c>false</c>) will result in a 401 status code. <br />
-    ///         Success (<c>true</c>) will result in the user to connect to the server.
-    ///     </para>
-    ///     <para>
-    ///         The default is <c>true</c>.<br />
-    ///         This behavior can be changed in the settings when calling the
-    ///         <see cref="AppBuilderExtensions.UseSimpleSockets(IApplicationBuilder, Action{SimpleSocketMiddlewareOptions})" />
-    ///         <br />
-    ///         and can be overridden for a individual connections when calling the
-    ///         <see cref="SimpleSocketBuilder.AddSimpleSocket{TSimpleSocket}(string, Action{SimpleSocketOptions})" />
+    ///         Success (<c>true</c>) will result in the websocket being accepted.
     ///     </para>
     /// </param>
     /// <param name="roomId">The id of the room the user will connect to</param>
@@ -56,11 +47,11 @@ public sealed class SimpleSocketAuthenticationResult
     ///     </para>
     ///     <para>
     ///         Failure (<c>false</c>) will result in a 401 status code. <br />
-    ///         Success (<c>true</c>) will result in the user to connect to the server.
+    ///         Success (<c>true</c>) will result in the websocket being accepted.
     ///     </para>
     ///     <para>
-    ///         The default is <c>true</c>.<br />
-    ///         This behavior can be changed in the settings when calling the
+    ///         The default value is <c>false</c>. <br />
+    ///         The default behavior can be changed in the settings when calling the
     ///         <see cref="AppBuilderExtensions.UseSimpleSockets(IApplicationBuilder, Action{SimpleSocketMiddlewareOptions})" />
     ///         <br />
     ///         and can be overridden for a individual connections when calling the

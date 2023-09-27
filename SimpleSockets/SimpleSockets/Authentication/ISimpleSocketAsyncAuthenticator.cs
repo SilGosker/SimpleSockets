@@ -1,5 +1,4 @@
-﻿using SimpleSockets.Extensions;
-using SimpleSockets.Options;
+﻿using SimpleSockets.Builder;
 
 namespace SimpleSockets.Authentication;
 
@@ -14,7 +13,7 @@ public interface ISimpleSocketAsyncAuthenticator
     /// <param name="previousAuthenticationResult">
     ///     <para>
     ///         The authentication result returned by the previous authenticator if available. Otherwise, the default
-    ///         authentication result.
+    ///         authentication result. For more information about the authentication and authorization, see <see href="https://github.com/SilGosker/SimpleSockets#Authentication">Authentication</see>
     ///     </para>
     ///     <para>
     ///         The default authentication result can configured through the
@@ -23,7 +22,10 @@ public interface ISimpleSocketAsyncAuthenticator
     ///         and the <see cref="SimpleSocketBuilder.AddSimpleSocket(string,Type, Action{SimpleSocketOptions})" />.
     ///     </para>
     /// </param>
-    /// <returns>A task representing the asynchronous authentication.</returns>
+    /// <returns>
+    ///     A task that represents the authentication result
+    ///     that will be passed into the next authenticator or used as the definitive result
+    /// </returns>
     public Task<SimpleSocketAuthenticationResult> AuthenticateAsync(
         SimpleSocketAuthenticationResult previousAuthenticationResult);
 }
