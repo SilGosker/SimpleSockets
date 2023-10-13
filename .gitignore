@@ -351,3 +351,5 @@ MigrationBackup/
 .idea/
 
 SimpleSockets/SimpleTest/
+
+Documentation/.vscode/
