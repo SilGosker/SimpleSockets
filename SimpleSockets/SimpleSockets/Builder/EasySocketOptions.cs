@@ -1,9 +1,9 @@
 ﻿using System.Text;
-using SimpleSockets.Authentication;
+using EasySockets.Authentication;
 
-namespace SimpleSockets.Builder;
+namespace EasySockets.Builder;
 
-public class SimpleSocketOptions
+public class EasySocketOptions
 {
     private int _chunkSize = 100;
 
@@ -30,12 +30,12 @@ public class SimpleSocketOptions
 
     /// <summary>
     ///     Whether or not this socket is authenticated by default. <br /><br />
-    ///     overrides the <see cref="SimpleSocketMiddlewareOptions" />.
-    ///     <see cref="SimpleSocketMiddlewareOptions.IsDefaultAuthenticated" /> property if not null.
+    ///     overrides the <see cref="EasySocketMiddlewareOptions" />.
+    ///     <see cref="EasySocketMiddlewareOptions.IsDefaultAuthenticated" /> property if not null.
     ///     <br />
     ///     Does not override the use of an authenticator.<br /><br />
-    ///     If not null, the value of the first <see cref="SimpleSocketAuthenticationResult" />.
-    ///     <see cref="SimpleSocketAuthenticationResult.IsAuthenticated" /> will be
+    ///     If not null, the value of the first <see cref="EasySocketAuthenticationResult" />.
+    ///     <see cref="EasySocketAuthenticationResult.IsAuthenticated" /> will be
     ///     the value this property.<br /><br />
     ///     The default is null.
     /// </summary>
@@ -66,7 +66,7 @@ public class SimpleSocketOptions
     /// </summary>
     /// <typeparam name="TAuthenticator">The type of the authenticator</typeparam>
     public void AddAuthenticator<TAuthenticator>()
-        where TAuthenticator : ISimpleSocketAuthenticator
+        where TAuthenticator : IEasySocketAuthenticator
     {
         Authenticators.Add(typeof(TAuthenticator));
     }
@@ -76,7 +76,7 @@ public class SimpleSocketOptions
     /// </summary>
     /// <typeparam name="TAuthenticator">The type of the authenticator</typeparam>
     public void AddAsyncAuthenticator<TAuthenticator>()
-        where TAuthenticator : ISimpleSocketAsyncAuthenticator
+        where TAuthenticator : IEasySocketAsyncAuthenticator
     {
         Authenticators.Add(typeof(TAuthenticator));
     }

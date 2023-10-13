@@ -1,45 +1,45 @@
-﻿using SimpleSockets.Enums;
+﻿using EasySockets.Enums;
 
-namespace SimpleSockets.Interfaces;
+namespace EasySockets.Interfaces;
 
 /// <summary>
-///     The interface for a basic SimpleSocket class.
+///     The interface for a basic EasySocket class.
 /// </summary>
-public interface ISimpleSocket : IAsyncDisposable
+public interface IEasySocket : IAsyncDisposable
 {
     /// <summary>
-    ///     The room that the SimpleSocket is connected to.
+    ///     The room that the EasySocket is connected to.
     /// </summary>
     public string RoomId { get; set; }
 
     /// <summary>
-    ///     The unique identifier of the SimpleSocket.
+    ///     The unique identifier of the EasySocket.
     /// </summary>
     public string UserId { get; set; }
 
     /// <summary>
     ///     The function that handles the outgoing messages.
     /// </summary>
-    public Func<ISimpleSocket, BroadCastFilter, string, Task>? Emit { get; set; }
+    public Func<IEasySocket, BroadCastFilter, string, Task>? Emit { get; set; }
 
     /// <summary>
-    ///     Removes all references from the ISimpleSocket so garbage collection can remove it.
+    ///     Removes all references from the IEasySocket so garbage collection can remove it.
     /// </summary>
-    public Action<ISimpleSocket>? DisposeAtSocketHandler { get; set; }
+    public Action<IEasySocket>? DisposeAtSocketHandler { get; set; }
 
     /// <summary>
-    ///     The event that is fired when the SimpleSocket should start receiving messages.
+    ///     The event that is fired when the EasySocket should start receiving messages.
     /// </summary>
     /// <returns>
-    ///     A task that should keep the SimpleSocket middleware alive during the lifetime of the clients connection
+    ///     A task that should keep the EasySocket middleware alive during the lifetime of the clients connection
     /// </returns>
     public Task ReceiveMessages();
 
     /// <summary>
-    ///     Checks the connection status of the SimpleSocket.
+    ///     Checks the connection status of the EasySocket.
     /// </summary>
     /// <returns>
-    ///     <c>true</c> if the SimpleSocket is connected; otherwise, <c>false</c>.
+    ///     <c>true</c> if the EasySocket is connected; otherwise, <c>false</c>.
     /// </returns>
     public bool IsConnected();
 

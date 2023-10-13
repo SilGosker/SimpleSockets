@@ -1,6 +1,6 @@
-﻿namespace SimpleSockets.Services;
+﻿namespace EasySockets.Services;
 
-public interface ISimpleSocketService
+public interface IEasySocketService
 {
     /// <summary>
     ///     Checks if a client is connected and available

@@ -1,19 +1,19 @@
 ﻿using System.Net.WebSockets;
-using SimpleSockets.Builder;
-using SimpleSockets.DataModels;
-using SimpleSockets.Enums;
-using SimpleSockets.Interfaces;
+using EasySockets.Builder;
+using EasySockets.DataModels;
+using EasySockets.Enums;
+using EasySockets.Interfaces;
 
-namespace SimpleSockets;
+namespace EasySockets;
 
-internal static class SimpleSocketEventHolder
+internal static class EasySocketEventHolder
 {
-    internal static readonly Dictionary<SimpleSocketEventComparer, Func<string, Task>> Events = new();
+    internal static readonly Dictionary<EasySocketEventComparer, Func<string, Task>> Events = new();
 }
 
-public abstract class EventSocket<TEvent> : SimpleSocket, IEventSocket where TEvent : ISimpleSocketEvent
+public abstract class EventSocket<TEvent> : EasySocket, IEventSocket where TEvent : IEasySocketEvent
 {
-    protected EventSocket(WebSocket webSocket, SimpleSocketOptions options) : base(webSocket, options)
+    protected EventSocket(WebSocket webSocket, EasySocketOptions options) : base(webSocket, options)
     {
     }
 
@@ -50,10 +50,10 @@ public abstract class EventSocket<TEvent> : SimpleSocket, IEventSocket where TEv
 
         if (action is null) throw new ArgumentNullException(nameof(action));
         var eventName = @event.GetEvent();
-        if (SimpleSocketEventHolder.Events.ContainsKey(new SimpleSocketEventComparer(GetType(), eventName)))
+        if (EasySocketEventHolder.Events.ContainsKey(new EasySocketEventComparer(GetType(), eventName)))
             return;
 
-        SimpleSocketEventHolder.Events.Add(new SimpleSocketEventComparer(GetType(), eventName), action);
+        EasySocketEventHolder.Events.Add(new EasySocketEventComparer(GetType(), eventName), action);
     }
 
     /// <summary>
@@ -70,7 +70,7 @@ public abstract class EventSocket<TEvent> : SimpleSocket, IEventSocket where TEv
     }
 
     /// <summary>
-    ///     Sends a message to the members matching the <see cref="SimpleSocket.RoomId" />.
+    ///     Sends a message to the members matching the <see cref="EasySocket.RoomId" />.
     /// </summary>
     /// <inheritdoc cref="BroadCast(BroadCastFilter,string,string)" />
     public Task BroadCast(string @event, string message)
@@ -88,9 +88,9 @@ public abstract class EventSocket<TEvent> : SimpleSocket, IEventSocket where TEv
             return;
         }
 
-        var eventComparer = new SimpleSocketEventComparer(GetType(), @event.GetEvent());
-        KeyValuePair<SimpleSocketEventComparer, Func<string, Task>>? action =
-            SimpleSocketEventHolder.Events.FirstOrDefault(e => e.Key == eventComparer);
+        var eventComparer = new EasySocketEventComparer(GetType(), @event.GetEvent());
+        KeyValuePair<EasySocketEventComparer, Func<string, Task>>? action =
+            EasySocketEventHolder.Events.FirstOrDefault(e => e.Key == eventComparer);
 
         if (action is null)
         {

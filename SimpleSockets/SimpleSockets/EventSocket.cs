@@ -1,29 +1,29 @@
 ﻿using System.Net.WebSockets;
 using System.Text.Json;
-using SimpleSockets.Builder;
-using SimpleSockets.DataModels;
+using EasySockets.Builder;
+using EasySockets.DataModels;
 
-namespace SimpleSockets;
+namespace EasySockets;
 
-public abstract class EventSocket : EventSocket<SimpleSocketEvent>
+public abstract class EventSocket : EventSocket<EasySocketEvent>
 {
-    protected EventSocket(WebSocket webSocket, SimpleSocketOptions options) : base(webSocket, options)
+    protected EventSocket(WebSocket webSocket, EasySocketOptions options) : base(webSocket, options)
     {
     }
 
-    public sealed override Task<SimpleSocketEvent?> ExtractEvent(string message)
+    public sealed override Task<EasySocketEvent?> ExtractEvent(string message)
     {
         try
         {
-            return Task.FromResult(JsonSerializer.Deserialize<SimpleSocketEvent>(message));
+            return Task.FromResult(JsonSerializer.Deserialize<EasySocketEvent>(message));
         }
         catch
         {
-            return Task.FromResult((SimpleSocketEvent?)null);
+            return Task.FromResult((EasySocketEvent?)null);
         }
     }
 
-    public sealed override Task<string?> ExtractMessage(SimpleSocketEvent @event, string message)
+    public sealed override Task<string?> ExtractMessage(EasySocketEvent @event, string message)
     {
         return Task.FromResult((string?)@event.Message);
     }
@@ -32,7 +32,7 @@ public abstract class EventSocket : EventSocket<SimpleSocketEvent>
     {
         try
         {
-            return Task.FromResult((string?)JsonSerializer.Serialize(new SimpleSocketEvent { Event = @event, Message = message }));
+            return Task.FromResult((string?)JsonSerializer.Serialize(new EasySocketEvent { Event = @event, Message = message }));
         }
         catch
         {

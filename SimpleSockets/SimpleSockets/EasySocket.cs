@@ -1,31 +1,31 @@
 ﻿using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Text;
-using SimpleSockets.Builder;
-using SimpleSockets.Enums;
-using SimpleSockets.Interfaces;
+using EasySockets.Builder;
+using EasySockets.Enums;
+using EasySockets.Interfaces;
 
-namespace SimpleSockets;
+namespace EasySockets;
 
 [DebuggerDisplay("{RoomId}.{UserId} = {_webSocket.State}")]
-public abstract class SimpleSocket : ISimpleSocket
+public abstract class EasySocket : IEasySocket
 {
     private readonly CancellationTokenSource _cts;
-    private readonly SimpleSocketOptions _options;
+    private readonly EasySocketOptions _options;
     private readonly WebSocket _webSocket;
     private bool _isDisposed;
     private string _roomId = null!;
     private string _userId = null!;
     private bool _isReceiving;
-    protected internal SimpleSocket(WebSocket webSocket, SimpleSocketOptions options)
+    protected internal EasySocket(WebSocket webSocket, EasySocketOptions options)
     {
         _webSocket = webSocket ?? throw new ArgumentNullException(nameof(webSocket));
         _cts = new CancellationTokenSource();
         _options = options ?? throw new ArgumentNullException(nameof(options));
     }
 
-    public Func<ISimpleSocket, BroadCastFilter, string, Task>? Emit { get; set; } = null!;
-    public Action<ISimpleSocket>? DisposeAtSocketHandler { get; set; } = null!;
+    public Func<IEasySocket, BroadCastFilter, string, Task>? Emit { get; set; } = null!;
+    public Action<IEasySocket>? DisposeAtSocketHandler { get; set; } = null!;
 
     public string RoomId
     {

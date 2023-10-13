@@ -1,25 +1,25 @@
 using Microsoft.AspNetCore.Builder;
-using SimpleSockets.Middleware;
+using EasySockets.Middleware;
 
-namespace SimpleSockets.Builder;
+namespace EasySockets.Builder;
 
 /// <summary>
-///     The exposed SimpleSockets extensions for the <see cref="IApplicationBuilder" />.
+///     The exposed EasySockets extensions for the <see cref="IApplicationBuilder" />.
 /// </summary>
 public static class AppBuilderExtensions
 {
     /// <summary>
-    ///     Adds the SimpleSockets middleware to the pipeline.
+    ///     Adds the EasySockets middleware to the pipeline.
     /// </summary>
-    /// <param name="app">The application that the SimpleSockets middleware should be added to.</param>
-    /// <param name="configure">A function to configure the provided <see cref="SimpleSocketMiddlewareOptions" />.</param>
-    /// <returns>A <see cref="SimpleSocketBuilder" /> To further configure the SimpleSockets.</returns>
+    /// <param name="app">The application that the EasySockets middleware should be added to.</param>
+    /// <param name="configure">A function to configure the provided <see cref="EasySocketMiddlewareOptions" />.</param>
+    /// <returns>A <see cref="EasySocketBuilder" /> To further configure the EasySockets.</returns>
     /// <exception cref="ArgumentNullException"></exception>
     /// <exception cref="ArgumentException"></exception>
-    public static SimpleSocketBuilder UseSimpleSockets(this IApplicationBuilder app,
-        Action<SimpleSocketMiddlewareOptions>? configure = null)
+    public static EasySocketBuilder UseEasySockets(this IApplicationBuilder app,
+        Action<EasySocketMiddlewareOptions>? configure = null)
     {
-        var options = new SimpleSocketMiddlewareOptions();
+        var options = new EasySocketMiddlewareOptions();
         configure?.Invoke(options);
         if (options == null)
             throw new ArgumentException($"The {nameof(configure)} method cannot make the options null",
@@ -27,6 +27,6 @@ public static class AppBuilderExtensions
 
         app.UseWebSockets(options.WebSocketOptions);
         app.UseMiddleware<SocketMiddleware>(options);
-        return new SimpleSocketBuilder();
+        return new EasySocketBuilder();
     }
 }

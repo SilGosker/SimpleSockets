@@ -1,25 +1,25 @@
-﻿using SimpleSockets.DataModels;
-using SimpleSockets.Enums;
-using SimpleSockets.Interfaces;
+﻿using EasySockets.DataModels;
+using EasySockets.Enums;
+using EasySockets.Interfaces;
 
-namespace SimpleSockets.Services;
+namespace EasySockets.Services;
 
-internal sealed class SimpleSocketService : ISimpleSocketService
+internal sealed class EasySocketService : IEasySocketService
 {
-    private readonly List<SimpleSocketRoom> _rooms;
-    private static SimpleSocketService? _instance;
+    private readonly List<EasySocketRoom> _rooms;
+    private static EasySocketService? _instance;
 
-    internal static SimpleSocketService Create()
+    internal static EasySocketService Create()
     {
-        return _instance ??= new SimpleSocketService();
+        return _instance ??= new EasySocketService();
     }
 
-    private SimpleSocketService()
+    private EasySocketService()
     {
-        _rooms = new List<SimpleSocketRoom>();
+        _rooms = new List<EasySocketRoom>();
     }
 
-    internal async Task AddSocket(ISimpleSocket socket)
+    internal async Task AddSocket(IEasySocket socket)
     {
         if (!socket.IsConnected()) return;
 
@@ -29,7 +29,7 @@ internal sealed class SimpleSocketService : ISimpleSocketService
         var room = _rooms.SingleOrDefault(e => e.Id == socket.RoomId);
         if (room == null)
         {
-            _rooms.Add(new SimpleSocketRoom(socket.RoomId, socket));
+            _rooms.Add(new EasySocketRoom(socket.RoomId, socket));
         }
         else
         {
@@ -103,16 +103,16 @@ internal sealed class SimpleSocketService : ISimpleSocketService
             ?.SendToClient(message)!;
     }
 
-    private Task BroadCast(ISimpleSocket? sender, BroadCastFilter broadCastFilter, string? message)
+    private Task BroadCast(IEasySocket? sender, BroadCastFilter broadCastFilter, string? message)
     {
         if (string.IsNullOrEmpty(message) || sender == null || broadCastFilter == BroadCastFilter.Everyone)
             return Task.CompletedTask;
 
-        IEnumerable<ISimpleSocket> simpleSockets = _rooms.SelectMany(e => e.Sockets);
+        IEnumerable<IEasySocket> simpleSockets = _rooms.SelectMany(e => e.Sockets);
         if (broadCastFilter.HasFlag(BroadCastFilter.EqualRoomId))
         {
             simpleSockets = _rooms.SingleOrDefault(room => room.Id == sender.RoomId)?.Sockets ??
-                            Enumerable.Empty<ISimpleSocket>();
+                            Enumerable.Empty<IEasySocket>();
         }
 
         if (broadCastFilter.HasFlag(BroadCastFilter.EqualType))
@@ -128,7 +128,7 @@ internal sealed class SimpleSocketService : ISimpleSocketService
         return Task.WhenAll(simpleSockets.Select(e => e.SendToClient(message)));
     }
 
-    internal void RemoveSocket(ISimpleSocket? caster)
+    internal void RemoveSocket(IEasySocket? caster)
     {
         if (caster == null) return;
 

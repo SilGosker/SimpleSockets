@@ -1,9 +1,9 @@
-﻿namespace SimpleSockets.Interfaces;
+﻿namespace EasySockets.Interfaces;
 
 /// <summary>
-///     The interface for a SimpleSocket class with custom event implementation.
+///     The interface for a EasySocket class with custom event implementation.
 /// </summary>
-public interface IEventSocket : ISimpleSocket
+public interface IEventSocket : IEasySocket
 {
     /// <summary>
     ///     Sends a message with an event id/name to the client.

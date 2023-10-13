@@ -1,15 +1,15 @@
-﻿namespace SimpleSockets.DataModels;
+﻿namespace EasySockets.DataModels;
 
-internal readonly struct SimpleSocketEventComparer
+internal readonly struct EasySocketEventComparer
 {
-    public bool Equals(SimpleSocketEventComparer other)
+    public bool Equals(EasySocketEventComparer other)
     {
         return _type == other._type && _event == other._event;
     }
 
     public override bool Equals(object? obj)
     {
-        return obj is SimpleSocketEventComparer other && Equals(other);
+        return obj is EasySocketEventComparer other && Equals(other);
     }
 
     public override int GetHashCode()
@@ -19,20 +19,20 @@ internal readonly struct SimpleSocketEventComparer
 
     private readonly Type _type;
     private readonly string _event;
-    public SimpleSocketEventComparer(Type type, string @event)
+    public EasySocketEventComparer(Type type, string @event)
     {
         _type = type;
         _event = @event;
     }
 
-    public static bool operator ==(SimpleSocketEventComparer? left, SimpleSocketEventComparer? right)
+    public static bool operator ==(EasySocketEventComparer? left, EasySocketEventComparer? right)
     {
         if (left is null && right is null) return true;
         if (left is null || right is null) return false;
         return left.Value._type == right.Value._type && left.Value._event == right.Value._event;
     }
 
-    public static bool operator !=(SimpleSocketEventComparer? left, SimpleSocketEventComparer? right)
+    public static bool operator !=(EasySocketEventComparer? left, EasySocketEventComparer? right)
     {
         return !(left == right);
     }

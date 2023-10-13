@@ -1,20 +1,20 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using SimpleSockets.Services;
+using EasySockets.Services;
 
-namespace SimpleSockets.Builder;
+namespace EasySockets.Builder;
 
 /// <summary>
-///     The exposed SimpleSockets extensions for the <see cref="IServiceCollection" />.
+///     The exposed EasySockets extensions for the <see cref="IServiceCollection" />.
 /// </summary>
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    ///     Adds the <see cref="ISimpleSocketService" /> to the dependency injection container.
+    ///     Adds the <see cref="IEasySocketService" /> to the dependency injection container.
     /// </summary>
-    /// <param name="serviceCollection">The collection the <see cref="ISimpleSocketService" /> should be added to.</param>
-    public static void AddSimpleSocketService(this IServiceCollection serviceCollection)
+    /// <param name="serviceCollection">The collection the <see cref="IEasySocketService" /> should be added to.</param>
+    public static void AddEasySocketService(this IServiceCollection serviceCollection)
     {
-        serviceCollection.AddSingleton<SimpleSocketService>(_ => SimpleSocketService.Create());
-        serviceCollection.AddSingleton<ISimpleSocketService>(e => e.GetRequiredService<SimpleSocketService>());
+        serviceCollection.AddSingleton<EasySocketService>(_ => EasySocketService.Create());
+        serviceCollection.AddSingleton<IEasySocketService>(e => e.GetRequiredService<EasySocketService>());
     }
 }

@@ -1,27 +1,27 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using SimpleSockets.Authentication;
-using SimpleSockets.DataModels;
-using SimpleSockets.Interfaces;
+using EasySockets.Authentication;
+using EasySockets.DataModels;
+using EasySockets.Interfaces;
 
-namespace SimpleSockets.Middleware;
+namespace EasySockets.Middleware;
 
-internal class SimpleSocketInstanceFactory
+internal class EasySocketInstanceFactory
 {
-    private static readonly Dictionary<string, SimpleSocketTypeContainer> SimpleSocketTypes = new();
+    private static readonly Dictionary<string, EasySocketTypeContainer> EasySocketTypes = new();
         
-    internal static void AddType(string url, SimpleSocketTypeContainer simpleSocketType)
+    internal static void AddType(string url, EasySocketTypeContainer simpleSocketType)
     {
-        SimpleSocketTypes.Add(url, simpleSocketType);
+        EasySocketTypes.Add(url, simpleSocketType);
     }
         
-    internal static async Task<ISimpleSocket?> GetAuthenticatedInstance(HttpContext context, bool isAuthenticatedByDefault, string defaultRoomId, string defaultUserId)
+    internal static async Task<IEasySocket?> GetAuthenticatedInstance(HttpContext context, bool isAuthenticatedByDefault, string defaultRoomId, string defaultUserId)
     {
-        var simpleSocketTypeCache = SimpleSocketTypes.GetValueOrDefault(context.Request.Path.ToString());
+        var simpleSocketTypeCache = EasySocketTypes.GetValueOrDefault(context.Request.Path.ToString());
         if (simpleSocketTypeCache is null) return null;
 
         using var scope = context.RequestServices.CreateScope();
-        SimpleSocketAuthenticationResult authenticationResult = new(simpleSocketTypeCache.Options.IsDefaultAuthenticated ?? isAuthenticatedByDefault);
+        EasySocketAuthenticationResult authenticationResult = new(simpleSocketTypeCache.Options.IsDefaultAuthenticated ?? isAuthenticatedByDefault);
 
         foreach (var authenticatorType in simpleSocketTypeCache.Options.Authenticators)
         {
@@ -29,9 +29,9 @@ internal class SimpleSocketInstanceFactory
 
             authenticationResult = authenticator switch
             {
-                ISimpleSocketAsyncAuthenticator asyncAuthenticator => await asyncAuthenticator.AuthenticateAsync(
+                IEasySocketAsyncAuthenticator asyncAuthenticator => await asyncAuthenticator.AuthenticateAsync(
                     authenticationResult),
-                ISimpleSocketAuthenticator syncAuthenticator =>
+                IEasySocketAuthenticator syncAuthenticator =>
                     syncAuthenticator.Authenticate(authenticationResult),
                 _ => authenticationResult
             };
@@ -46,7 +46,7 @@ internal class SimpleSocketInstanceFactory
             : await context.WebSockets.AcceptWebSocketAsync();
 
         if (ws == null) return null;
-        if (ActivatorUtilities.CreateInstance(scope.ServiceProvider, simpleSocketTypeCache.SimpleSocketType, ws, simpleSocketTypeCache.Options) is not ISimpleSocket simpleSocket)
+        if (ActivatorUtilities.CreateInstance(scope.ServiceProvider, simpleSocketTypeCache.EasySocketType, ws, simpleSocketTypeCache.Options) is not IEasySocket simpleSocket)
             return null;
             
         try
@@ -57,7 +57,7 @@ internal class SimpleSocketInstanceFactory
         catch (Exception)
         {
             throw new InvalidOperationException(
-                "The UserId or RoomId should not be set in the constructor of any SimpleSocket");
+                "The UserId or RoomId should not be set in the constructor of any EasySocket");
         }
             
         return simpleSocket;

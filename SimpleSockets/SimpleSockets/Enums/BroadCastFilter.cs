@@ -1,4 +1,4 @@
-﻿namespace SimpleSockets.Enums;
+﻿namespace EasySockets.Enums;
 
 /// <summary>
 /// Specifies which clients should and should not receive the message.
@@ -19,11 +19,11 @@ public enum BroadCastFilter
     /// </summary>
     EqualType = 2,
     /// <summary>
-    /// Adds the filter that all clients should match the sender's <see cref="SimpleSocket.RoomId"/>.
+    /// Adds the filter that all clients should match the sender's <see cref="EasySocket.RoomId"/>.
     /// </summary>
     EqualRoomId = 4,
     /// <summary>
-    /// Adds the filter that all clients should match the sender's <see cref="SimpleSocket.RoomId"/> excluding the sender.
+    /// Adds the filter that all clients should match the sender's <see cref="EasySocket.RoomId"/> excluding the sender.
     /// </summary>
     RoomMembers = Members | EqualRoomId,
     /// <summary>

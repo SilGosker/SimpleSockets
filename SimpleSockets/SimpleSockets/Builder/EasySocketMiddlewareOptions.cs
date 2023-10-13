@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using SimpleSockets.Authentication;
+using EasySockets.Authentication;
 
-namespace SimpleSockets.Builder;
+namespace EasySockets.Builder;
 
-public class SimpleSocketMiddlewareOptions
+public class EasySocketMiddlewareOptions
 {
     private Func<HttpContext, string> _getDefaultRoomId = _ => "__0";
     private Func<HttpContext, string> _getDefaultUserId = _ => Guid.NewGuid().ToString();
@@ -13,7 +13,7 @@ public class SimpleSocketMiddlewareOptions
     /// <summary>
     ///     <para>
     ///         The default way of getting a RoomId that will be used if no authenticator is provided or if the definitive
-    ///         <see cref="SimpleSocketAuthenticationResult.RoomId" /> is null.
+    ///         <see cref="EasySocketAuthenticationResult.RoomId" /> is null.
     ///         <para>
     ///             If this method returns null, the middleware switches back to <c>"__0"</c>.
     ///         </para>
@@ -31,7 +31,7 @@ public class SimpleSocketMiddlewareOptions
     /// <summary>
     ///     <para>
     ///         The default way of getting a new userId that will be used if no authenticator is provided or if the definitive
-    ///         <see cref="SimpleSocketAuthenticationResult.UserId" /> is null.
+    ///         <see cref="EasySocketAuthenticationResult.UserId" /> is null.
     ///         <para>
     ///             If returns null, the middleware switches back to <c>Guid.NewGuid()</c>.
     ///         </para>
@@ -49,8 +49,8 @@ public class SimpleSocketMiddlewareOptions
     /// <summary>
     ///     <para>
     ///         Whether the client is authenticated by default if no authenticator is used and if
-    ///         <see cref="SimpleSocketOptions"/>.<see cref="SimpleSocketOptions.IsDefaultAuthenticated" /> is <c>null</c>. <br />
-    ///         The <see cref="SimpleSocketOptions"/>.<see cref="SimpleSocketOptions.IsDefaultAuthenticated" /> can be configured through the <see cref="AppBuilderExtensions.UseSimpleSockets" />
+    ///         <see cref="EasySocketOptions"/>.<see cref="EasySocketOptions.IsDefaultAuthenticated" /> is <c>null</c>. <br />
+    ///         The <see cref="EasySocketOptions"/>.<see cref="EasySocketOptions.IsDefaultAuthenticated" /> can be configured through the <see cref="AppBuilderExtensions.UseEasySockets" />
     ///     </para>
     ///     <para>
     ///         The default is <c>false</c>.

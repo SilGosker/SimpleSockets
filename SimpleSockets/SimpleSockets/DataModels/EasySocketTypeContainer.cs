@@ -1,26 +1,26 @@
 ﻿using System.Reflection;
-using SimpleSockets.Builder;
+using EasySockets.Builder;
 
-namespace SimpleSockets.DataModels;
+namespace EasySockets.DataModels;
 
-internal sealed class SimpleSocketTypeContainer
+internal sealed class EasySocketTypeContainer
 {
     internal ParameterInfo[] ConstructorDependencies { get; set; }
-    internal Type SimpleSocketType { get; set; }
+    internal Type EasySocketType { get; set; }
     internal IReadOnlyList<Type> AuthenticatorTypes { get; set; }
-    internal SimpleSocketOptions Options;
+    internal EasySocketOptions Options;
     
-    private SimpleSocketTypeContainer(Type simpleSocketType, SimpleSocketOptions? options)
+    private EasySocketTypeContainer(Type simpleSocketType, EasySocketOptions? options)
     {
-        SimpleSocketType = simpleSocketType;
+        EasySocketType = simpleSocketType;
         var constructorParameters = simpleSocketType.GetTypeInfo().DeclaredConstructors.FirstOrDefault();
         if (constructorParameters == null) throw new InvalidOperationException($"No constructors for type {simpleSocketType.FullName} found. Check if the class and constructor is public.");
         ConstructorDependencies = constructorParameters.GetParameters();
-        Options = options ?? new SimpleSocketOptions();
+        Options = options ?? new EasySocketOptions();
         AuthenticatorTypes = Options.Authenticators;
     }
 
-    internal static SimpleSocketTypeContainer Create(Type simpleSocketType, SimpleSocketOptions? options)
+    internal static EasySocketTypeContainer Create(Type simpleSocketType, EasySocketOptions? options)
     {
         return new (simpleSocketType, options);
     }
