@@ -11,32 +11,32 @@ public abstract class EventSocket : EventSocket<EasySocketEvent>
     {
     }
 
-    public sealed override Task<EasySocketEvent?> ExtractEvent(string message)
+    public sealed override EasySocketEvent? ExtractEvent(string message)
     {
         try
         {
-            return Task.FromResult(JsonSerializer.Deserialize<EasySocketEvent>(message));
+            return JsonSerializer.Deserialize<EasySocketEvent>(message);
         }
         catch
         {
-            return Task.FromResult((EasySocketEvent?)null);
+            return null;
         }
     }
 
-    public sealed override Task<string?> ExtractMessage(EasySocketEvent @event, string message)
+    public sealed override string? ExtractMessage(EasySocketEvent @event, string message)
     {
-        return Task.FromResult((string?)@event.Message);
+        return @event.Message;
     }
 
-    public sealed override Task<string?> BindEvent(string @event, string message)
+    public sealed override string? BindEvent(string @event, string message)
     {
         try
         {
-            return Task.FromResult((string?)JsonSerializer.Serialize(new EasySocketEvent { Event = @event, Message = message }));
+            return JsonSerializer.Serialize(new EasySocketEvent { Event = @event, Message = message });
         }
         catch
         {
-            return Task.FromResult((string?)null);
+            return null;
         }
     }
 }
