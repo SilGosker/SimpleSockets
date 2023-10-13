@@ -21,6 +21,6 @@ jobs:
       with:
         dotnet-version: 6.0.x
     - name: Restore dependencies
-      run: dotnet restore -- SimpleSockets/SimpleSockets/SimpleSockets.csproj
+      run: dotnet restore -- EasySockets/EasySockets/EasySockets.csproj
     - name: Build
-      run: dotnet build --no-restore SimpleSockets/SimpleSockets/SimpleSockets.csproj
+      run: dotnet build --no-restore EasySockets/EasySockets/EasySockets.csproj
