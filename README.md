@@ -60,20 +60,18 @@ public class ChatSocket : EasySocket
     }
 }
 ```
+This is the bare minimum behavior. The long constructor is required to make the code compile and work. The `OnMessage` method is invoked whenever the server receives a message from the client.
 
-This is the bare minimum behavior. When it receives a message, it just returns a completed task.
 But in our chat application, we want other clients that are connected to the server to receive the client's message!
 
 This can be achieved fairly simply:
 ```C#
 public class ChatSocket : EasySocket
 {
-    //This is just some boilerplate code to make the code compile
     public ChatSocket(WebSocket webSocket, EasySocketOptions options) : base(webSocket, options)
     {
     }
 
-    //This method is invoked when the socket received a message from the connected client
     public override Task OnMessage(string message)
     {
         // the BroadCast method sends a message back to all other clients
@@ -81,21 +79,20 @@ public class ChatSocket : EasySocket
     }
 }
 ```
-The BroadCast method is part of the EasySocket class. It has a few overloads, which we will discuss later on.
-What the BroadCast method does (basically) is sending a string to all other connected clients that specify a requirement.
-The default requirement is matching the RoomId. More clarifications about how these requirements work can be found later on.
+The `BroadCast` method is part of the EasySocket class. It has a few overloads, which we will discuss later on.
 
+When `BroadCast` is called, the passed string will be sent to all connected clients specified by a requirement. How these requirements work will be discussed later on.
+
+The default requirement is matching the RoomId. More clarifications about how these requirements work can be found later on.
 
 Of course we can send an extra message when the client is connected or leaves the server:
 ```C#
 public class ChatSocket : EasySocket
 {
-    //some boilerplate to make the code compile
     public ChatSocket(WebSocket webSocket, EasySocketOptions options) : base(webSocket, options)
     {
     }
 
-    //this method is invoked when the socket received a message
     public override Task OnMessage(string message)
     {
         return BroadCast(message);
@@ -112,29 +109,21 @@ public class ChatSocket : EasySocket
     }
 }
 ```
-The `OnConnect` method is invoked when the client is connected to the server,
+The `OnConnect` method is invoked when the client is succesfully connected to the server,
 while the `OnDisconnect` method is invoked when the client loses connection with the server.
 
-For the sake of simplicity in this tutorial, we won't use these in the current application.
-Just know these are there.
+For the sake of simplicity in this tutorial, we won't use these in the current application. Just know these are there.
 
 Now that we have created our behavior, lets add that to the pipeline:
 ```C#
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddEasySocketService(); //this will expose the IEasySocketService to the DI container
-//other dependencies that you might want to add to your DI container
-var app = builder.Build();
-
-//other tools you might want to add/configure to your pipeline.
+// ... other build stuff
 
 app.UseEasySockets()
-    .AddEasySocket<ChatSocket>("/chat"); //this will add the ChatSocket to the pipeline, listening to the '/chat' url.
+    .AddEasySocket<ChatSocket>("/chat");
 ```
+The following piece of code will add the `ChatSocket` type to the `/chat` url. Whenever a websocket request is made to `/chat`, a `ChatSocket` instance will be created and the `OnConnect` method will be invoked. Then whenever the client sends a message to the server, the `OnMessage` method will be invoked. Then when the client disconnects from the server, the `OnDisconnect` method will be invoked.
 
-Now if you run the application and make a websocket (ws or wss, depending on your SSL certificate) request to `/chat`,
-you should connect to the server. If you make a second request and send a message,
-all other clients will receive that message!
+Now if you run the application and make a websocket (ws or wss, depending on your SSL certificate) request to `/chat`, you should connect to the server. If you make a second request and send a message, all other clients will receive that message!
 
 ### Authentication and Authorization
 Cool, you have built your very simple backend chat-application!
