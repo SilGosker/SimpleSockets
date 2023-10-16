@@ -22,7 +22,7 @@ When using the Nuget Exporer, search for `EasySockets` and you'll be on your way
 This section will go through the process of adding EasySockets to your application.
 As an example, we will be making a small chat application and expand this the more we dive deep into the rich features EasySockets has to offer.
 
-*do note that this is will only guide you through the backend process, not the frontend. When referring to 'make a request', you should find your own implementation of doing so. This can be through the browser and connecting using the JavaScript `Websocket` class, or using an application like Postman*
+*do note that this is will only guide you through the backend process, not the frontend. When referring to 'make a request', you should find your own implementation of doing so. This can be through the browser and connecting using the JavaScript `Websocket` class, or using an application like Postman. Also note that the websocket request type is `ws` or `wss` depending on your SSL certificate*
 
 ### Basic Usage
 Lets start by adding EasySockets to your application. apply the following code:
@@ -30,7 +30,7 @@ Lets start by adding EasySockets to your application. apply the following code:
 ```C#
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddEasySocketService(); //this will expose the IEasySocketService to the DI container
+builder.Services.AddEasySocketService();
 
 //other dependencies that you might want to add to your DI container
 
@@ -38,8 +38,12 @@ var app = builder.Build();
 
 //other tools you might want to add/configure to your pipeline.
 
-app.UseEasySockets(); //this will add the EasySocket middleware to the pipeline
+app.UseEasySockets();
 ```
+
+The `builder.Services.AddEasySocketService();` adds the `IEasySocketService` available for DI. This manages all the websocket connections, and you can manipulate those connections outside of the websocket instances. For example, you can send messages to the client in a controller, http endpoint or your own custom services.
+
+The `app.UseEasySockets();` adds the middleware that handles authentication and accepts (or declines) the websocket connection. If you want authentication based on the `HttpContext.User` property, make sure that you call this method **after** calling the `app.UseAuthentication()` and `app.UseAuthorization()`.
 
 This on its own doesn't do a whole lot. Why? Because we haven't configured anything.
 There is no behavior added to the pipeline thus every websocket request will result in an `403` error.
@@ -48,12 +52,10 @@ So lets create a behavior that allows us to connect to the server:
 ```C#
 public class ChatSocket : EasySocket
 {
-    //This is just some boilerplate code to make the code compile
     public ChatSocket(WebSocket webSocket, EasySocketOptions options) : base(webSocket, options)
     {
     }
 
-    //This method is invoked when the socket received a message from the connected client
     public override Task OnMessage(string message)
     {
         return Task.CompletedTask;
@@ -74,7 +76,6 @@ public class ChatSocket : EasySocket
 
     public override Task OnMessage(string message)
     {
-        // the BroadCast method sends a message back to all other clients
         return BroadCast(message);
     }
 }
@@ -116,23 +117,33 @@ For the sake of simplicity in this tutorial, we won't use these in the current a
 
 Now that we have created our behavior, lets add that to the pipeline:
 ```C#
-// ... other build stuff
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddEasySocketService();
+
+//other dependencies that you might want to add to your DI container
+
+var app = builder.Build();
+
+//other tools you might want to add/configure to your pipeline.
 
 app.UseEasySockets()
     .AddEasySocket<ChatSocket>("/chat");
 ```
-The following piece of code will add the `ChatSocket` type to the `/chat` url. Whenever a websocket request is made to `/chat`, a `ChatSocket` instance will be created and the `OnConnect` method will be invoked. Then whenever the client sends a message to the server, the `OnMessage` method will be invoked. Then when the client disconnects from the server, the `OnDisconnect` method will be invoked.
+The following piece of code will add the `ChatSocket` type to the `/chat` url. Whenever a websocket request is made to `/chat`, a `ChatSocket` instance will be created and the `OnConnect` method will be invoked. Whenever the client sends a message to the server, the `OnMessage` method will be invoked. When the client disconnects from the server, the `OnDisconnect` method will be invoked.
 
-Now if you run the application and make a websocket (ws or wss, depending on your SSL certificate) request to `/chat`, you should connect to the server. If you make a second request and send a message, all other clients will receive that message!
+Now if you run the application and make a websocket request to `/chat`, you should connect to the server. If you make a second request and send a message, all other clients will receive that message!
 
 ### Authentication and Authorization
 Cool, you have built your very simple backend chat-application!
 Next up is authentication and authorization. The following topics are discussed:
-* Setting up the RoomId
-* Setting up the UserId
-* Basic usage of the `IEasySocketService`
+* Authenticating a client.
+* Authorization.
+* How Rooms work.
+* Dividing clients in rooms.
+* Basic usage of the `IEasySocketService`.
 
-*This part uses the code from the previous chapter*
+*This part uses the code from the previous chapter.*
 
 We currently have a problem with our chat application: Each and every user is connected to the same room.
 This causes each user to receive the messages of each other user. Not very practical for our 'privacy-focussed' chat application.
@@ -198,7 +209,6 @@ public class ChatAuthenticator : IEasySocketAuthenticator
 
     public ChatAuthenticator(IEasySocketService easySocketService)
     {
-        // inject the IEasySocketService into the authenticator
         _easySocketService = easySocketService;
     }
 
