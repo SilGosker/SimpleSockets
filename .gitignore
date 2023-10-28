@@ -353,3 +353,5 @@ MigrationBackup/
 SimpleSockets/SimpleTest/
 
 Documentation/.vscode/
+
+.obsidian/
