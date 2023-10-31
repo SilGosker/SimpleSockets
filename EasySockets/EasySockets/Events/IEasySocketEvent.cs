@@ -1,4 +1,4 @@
-﻿namespace EasySockets.Interfaces;
+﻿namespace EasySockets.Events;
 
 public interface IEasySocketEvent
 {

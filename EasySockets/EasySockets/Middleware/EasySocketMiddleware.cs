@@ -1,10 +1,7 @@
-﻿using System.Net.NetworkInformation;
-using System.Reflection;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using EasySockets.Authentication;
 using EasySockets.Builder;
-using EasySockets.DataModels;
 using EasySockets.Services;
 
 namespace EasySockets.Middleware;
@@ -34,10 +31,8 @@ internal sealed class SocketMiddleware
 
         var simpleSocket = await EasySocketInstanceFactory.GetAuthenticatedInstance(context,
             _options.IsDefaultAuthenticated,
-            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract : always expect the worst from your users
-            _options.GetDefaultRoomId(context) ?? "__0",
-            // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract : always expect the worst from your users
-            _options.GetDefaultUserId(context) ?? Guid.NewGuid().ToString());
+            _options.GetDefaultRoomId,
+            _options.GetDefaultUserId);
 
         if (simpleSocket == null)
         {

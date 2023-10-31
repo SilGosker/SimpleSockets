@@ -2,9 +2,8 @@
 using EasySockets.Builder;
 using EasySockets.DataModels;
 using EasySockets.Enums;
-using EasySockets.Interfaces;
 
-namespace EasySockets;
+namespace EasySockets.Events;
 
 internal static class EasySocketEventHolder
 {
@@ -64,19 +63,19 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket where TEven
     /// <param name="event">The event id/name</param>
     /// <param name="message">The message to be sent</param>
     /// <returns>The task representing the parallel asynchronous sending</returns>
-    public Task BroadCast(BroadCastFilter filter, string @event, string message)
+    public Task Broadcast(BroadCastFilter filter, string @event, string message)
     {
-        return (Emit?.Invoke(this, filter, BindEvent(@event, message) ?? "") ?? Task.CompletedTask);
+        return Emit?.Invoke(this, filter, BindEvent(@event, message) ?? "") ?? Task.CompletedTask;
     }
 
-    /// <summary>
-    ///     Sends a message to the members matching the <see cref="EasySocket.RoomId" />.
-    /// </summary>
-    /// <inheritdoc cref="BroadCast(BroadCastFilter,string,string)" />
-    public Task BroadCast(string @event, string message)
+	/// <summary>
+	///     Sends a message to the members matching the <see cref="EasySocket.RoomId" />.
+	/// </summary>
+	/// <inheritdoc cref="Broadcast(BroadCastFilter, string, string)" />
+	public Task Broadcast(string @event, string message)
     {
-        return (Emit?.Invoke(this, BroadCastFilter.EqualRoomId, BindEvent(@event, message) ?? "") ??
-               Task.CompletedTask);
+        return Emit?.Invoke(this, BroadCastFilter.EqualRoomId, BindEvent(@event, message) ?? "") ??
+               Task.CompletedTask;
     }
 
     public sealed override async Task OnMessage(string message)
@@ -152,7 +151,7 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket where TEven
     /// </summary>
     /// <param name="event">The event id/name</param>
     /// <param name="message">The message to be sent</param>
-    /// <returns>The full message to be sent over the connection, or null if the operation failed.s</returns>
+    /// <returns>The full message to be sent over the connection, or null if the operation failed</returns>
     public abstract string? BindEvent(string @event, string message);
 
     /// <summary>

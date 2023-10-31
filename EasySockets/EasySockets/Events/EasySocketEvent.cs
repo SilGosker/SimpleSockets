@@ -1,6 +1,4 @@
-﻿using EasySockets.Interfaces;
-
-namespace EasySockets;
+﻿namespace EasySockets.Events;
 
 public class EasySocketEvent : IEasySocketEvent
 {

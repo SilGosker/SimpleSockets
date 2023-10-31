@@ -1,6 +1,6 @@
 ﻿using EasySockets.Enums;
 
-namespace EasySockets.Interfaces;
+namespace EasySockets;
 
 /// <summary>
 ///     The interface for a basic EasySocket class.

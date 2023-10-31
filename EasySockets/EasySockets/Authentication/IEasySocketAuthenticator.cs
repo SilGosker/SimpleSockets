@@ -1,4 +1,6 @@
-﻿namespace EasySockets.Authentication;
+﻿using Microsoft.AspNetCore.Http;
+
+namespace EasySockets.Authentication;
 
 /// <summary>
 ///     The interface for authenticating a client.
@@ -12,5 +14,5 @@ public interface IEasySocketAuthenticator
     ///     The authentication result that will be passed into the next authenticator or used as the definitive result
     /// </returns>
     /// <inheritdoc cref="IEasySocketAsyncAuthenticator.AuthenticateAsync" />
-    public EasySocketAuthenticationResult Authenticate(EasySocketAuthenticationResult previousAuthenticationResult);
+    public EasySocketAuthenticationResult Authenticate(EasySocketAuthenticationResult currentAuthenticationResult, HttpContext context);
 }

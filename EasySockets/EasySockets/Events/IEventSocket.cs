@@ -1,4 +1,4 @@
-﻿namespace EasySockets.Interfaces;
+﻿namespace EasySockets.Events;
 
 /// <summary>
 ///     The interface for a EasySocket class with custom event implementation.
