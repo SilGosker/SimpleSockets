@@ -20,8 +20,8 @@ public abstract class EasySocket : IEasySocket
 		_webSocket = webSocket ?? throw new ArgumentNullException(nameof(webSocket));
 		_cts = new CancellationTokenSource();
 		_options = options ?? throw new ArgumentNullException(nameof(options));
-		RoomId = roomId;
-		UserId = userId;
+		RoomId = roomId ?? throw new ArgumentNullException(nameof(roomId));
+		UserId = userId ?? throw new ArgumentNullException(nameof(userId));
 	}
 
 

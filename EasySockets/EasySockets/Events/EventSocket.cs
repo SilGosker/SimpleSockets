@@ -6,11 +6,11 @@ namespace EasySockets.Events;
 
 public abstract class EventSocket : EventSocket<EasySocketEvent>
 {
-    protected EventSocket(WebSocket webSocket, EasySocketOptions options) : base(webSocket, options)
-    {
-    }
+	protected EventSocket(WebSocket webSocket, EasySocketOptions options, string roomId, string userId) : base(webSocket, options, roomId, userId)
+	{
+	}
 
-    public sealed override EasySocketEvent? ExtractEvent(string message)
+	public sealed override EasySocketEvent? ExtractEvent(string message)
     {
         try
         {
@@ -38,4 +38,6 @@ public abstract class EventSocket : EventSocket<EasySocketEvent>
             return null;
         }
     }
+
+
 }
