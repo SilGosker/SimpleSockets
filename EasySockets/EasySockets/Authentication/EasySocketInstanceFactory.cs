@@ -7,9 +7,9 @@ namespace EasySockets.Authentication;
 
 internal class EasySocketInstanceFactory
 {
-    private static readonly Dictionary<string, EasySocketTypeContainer> EasySocketTypes = new();
+    private static readonly Dictionary<string, EasySocketTypeCache> EasySocketTypes = new();
 
-    internal static void AddType(string url, EasySocketTypeContainer simpleSocketType)
+    internal static void AddType(string url, EasySocketTypeCache simpleSocketType)
     {
         if (EasySocketTypes.ContainsKey(url)) throw new InvalidOperationException($"Url '{url}' Cannot be added twice");
         EasySocketTypes.Add(url, simpleSocketType);
