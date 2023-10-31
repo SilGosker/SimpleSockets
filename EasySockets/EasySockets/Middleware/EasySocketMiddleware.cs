@@ -31,8 +31,8 @@ internal sealed class SocketMiddleware
 
         var simpleSocket = await EasySocketInstanceFactory.GetAuthenticatedInstance(context,
             _options.IsDefaultAuthenticated,
-            _options.GetDefaultRoomId,
-            _options.GetDefaultUserId);
+            _options.GetDefaultRoomId(context),
+            _options.GetDefaultUserId(context));
 
         if (simpleSocket == null)
         {
