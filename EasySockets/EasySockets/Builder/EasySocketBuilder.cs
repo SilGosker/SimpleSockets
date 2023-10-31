@@ -1,6 +1,6 @@
-﻿using EasySockets.Authentication;
+using EasySockets.Authentication;
 using EasySockets.DataModels;
-using EasySockets.Interfaces;
+using EasySockets.Events;
 
 namespace EasySockets.Builder;
 

@@ -3,7 +3,6 @@ using System.Net.WebSockets;
 using System.Text;
 using EasySockets.Builder;
 using EasySockets.Enums;
-using EasySockets.Interfaces;
 
 namespace EasySockets;
 

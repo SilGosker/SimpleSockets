@@ -1,9 +1,8 @@
 ﻿using System.Net.WebSockets;
 using System.Text.Json;
 using EasySockets.Builder;
-using EasySockets.DataModels;
 
-namespace EasySockets;
+namespace EasySockets.Events;
 
 public abstract class EventSocket : EventSocket<EasySocketEvent>
 {

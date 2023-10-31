@@ -2,9 +2,8 @@
 using EasySockets.Builder;
 using EasySockets.DataModels;
 using EasySockets.Enums;
-using EasySockets.Interfaces;
 
-namespace EasySockets;
+namespace EasySockets.Events;
 
 internal static class EasySocketEventHolder
 {
@@ -66,7 +65,7 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket where TEven
     /// <returns>The task representing the parallel asynchronous sending</returns>
     public Task Broadcast(BroadCastFilter filter, string @event, string message)
     {
-        return (Emit?.Invoke(this, filter, BindEvent(@event, message) ?? "") ?? Task.CompletedTask);
+        return Emit?.Invoke(this, filter, BindEvent(@event, message) ?? "") ?? Task.CompletedTask;
     }
 
 	/// <summary>
@@ -75,8 +74,8 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket where TEven
 	/// <inheritdoc cref="Broadcast(BroadCastFilter, string, string)" />
 	public Task Broadcast(string @event, string message)
     {
-        return (Emit?.Invoke(this, BroadCastFilter.EqualRoomId, BindEvent(@event, message) ?? "") ??
-               Task.CompletedTask);
+        return Emit?.Invoke(this, BroadCastFilter.EqualRoomId, BindEvent(@event, message) ?? "") ??
+               Task.CompletedTask;
     }
 
     public sealed override async Task OnMessage(string message)

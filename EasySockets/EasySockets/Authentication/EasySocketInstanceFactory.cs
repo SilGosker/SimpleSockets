@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using EasySockets.DataModels;
-using EasySockets.Interfaces;
 
 namespace EasySockets.Authentication;
 

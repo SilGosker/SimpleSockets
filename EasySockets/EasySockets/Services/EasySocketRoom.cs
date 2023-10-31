@@ -1,6 +1,4 @@
-﻿using EasySockets.Interfaces;
-
-namespace EasySockets.DataModels;
+﻿namespace EasySockets.Services;
 
 internal sealed class EasySocketRoom
 {
