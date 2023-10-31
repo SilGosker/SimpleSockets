@@ -6,7 +6,7 @@ namespace EasySockets.Authentication;
 /// <summary>
 ///     The combined result of authentication and authorization for a <see cref="EasySocket" /> connection
 /// </summary>
-public sealed class EasySocketAuthenticationResult
+public struct EasySocketAuthenticationResult
 {
     /// <inheritdoc cref="EasySocketAuthenticationResult(bool, string, string)" />
     public EasySocketAuthenticationResult(bool isAuthenticated)
@@ -28,7 +28,7 @@ public sealed class EasySocketAuthenticationResult
     ///         Whether the authentication result indicated success or failure.
     ///     </para>
     ///     <para>
-    ///         Failure (<c>false</c>) will result in a 401 status code. <br />
+    ///         Failure (<c>false</c>) will result in a 403 status code. <br />
     ///         Success (<c>true</c>) will result in the websocket being accepted.
     ///     </para>
     /// </param>

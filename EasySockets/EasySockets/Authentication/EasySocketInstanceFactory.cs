@@ -32,8 +32,7 @@ internal class EasySocketInstanceFactory
                 _ => authenticationResult
             };
 
-            // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract : never trust your users input
-            if (authenticationResult?.IsAuthenticated != true) return null;
+            if (authenticationResult.IsAuthenticated != true) return null;
 
         }
 
