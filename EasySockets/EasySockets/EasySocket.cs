@@ -152,8 +152,8 @@ public abstract class EasySocket : IEasySocket
     /// <summary>
     ///     Sends a message to all members of the sockets room matching the <see cref="RoomId" />
     /// </summary>
-    /// <inheritdoc cref="BroadCast(BroadCastFilter, string)" />
-    public Task BroadCast(string message)
+    /// <inheritdoc cref="Broadcast(EasySockets.Enums.BroadCastFilter,string)" />
+    public Task Broadcast(string message)
     {
         return Emit?.Invoke(this, BroadCastFilter.RoomMembers, message) ?? Task.CompletedTask;
     }
@@ -164,7 +164,7 @@ public abstract class EasySocket : IEasySocket
     /// <param name="filter">The broadcast level the message will reach</param>
     /// <param name="message">The message to be sent</param>
     /// <returns>The task representing the parallel asynchronous sending</returns>
-    public Task BroadCast(BroadCastFilter filter, string message)
+    public Task Broadcast(BroadCastFilter filter, string message)
     {
         return Emit?.Invoke(this, filter, message) ?? Task.CompletedTask;
     }
