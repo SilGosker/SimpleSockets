@@ -10,12 +10,12 @@ public interface IEasySocket : IAsyncDisposable
     /// <summary>
     ///     The room that the EasySocket is connected to.
     /// </summary>
-    public string RoomId { get; set; }
+    public string RoomId { get; }
 
     /// <summary>
     ///     The unique identifier of the EasySocket.
     /// </summary>
-    public string UserId { get; set; }
+    public string UserId { get; }
 
     /// <summary>
     ///     The function that handles the outgoing messages.
