@@ -7,7 +7,7 @@ using EasySockets.Enums;
 namespace EasySockets;
 
 [DebuggerDisplay("{RoomId}.{UserId} = {_webSocket.State}")]
-public abstract class EasySocket : IEasySocket
+public abstract class EasySocket : IEasySocket, IInternalEasySocket
 {
 	private readonly CancellationTokenSource _cts;
 	private readonly EasySocketOptions _options;
@@ -15,22 +15,40 @@ public abstract class EasySocket : IEasySocket
 	private bool _isDisposed;
 	private bool _isReceiving;
 
-	protected EasySocket(WebSocket webSocket, EasySocketOptions options, string roomId, string userId)
+	protected EasySocket(WebSocket webSocket, EasySocketOptions options)
 	{
 		_webSocket = webSocket ?? throw new ArgumentNullException(nameof(webSocket));
 		_cts = new CancellationTokenSource();
 		_options = options ?? throw new ArgumentNullException(nameof(options));
-		RoomId = roomId ?? throw new ArgumentNullException(nameof(roomId));
-		UserId = userId ?? throw new ArgumentNullException(nameof(userId));
 	}
 
+	public string RoomId { get; private set; }
 
-	public Func<IEasySocket, BroadCastFilter, string, Task>? Emit { get; set; } = null!;
-	public Action<IEasySocket>? DisposeAtSocketHandler { get; set; } = null!;
+	public string UserId { get; private set; }
 
-	public string RoomId { get; }
+	public void SetRoomId(string roomId)
+	{
+		RoomId = roomId;
+	}
 
-	public string UserId { get; }
+	public void SetUserId(string userId)
+	{
+		UserId = userId;
+	}
+
+	public Func<IEasySocket, BroadCastFilter, string, Task>? Emit { get; private set; }
+
+	Func<IEasySocket, BroadCastFilter, string, Task>? IInternalEasySocket.Emit
+	{
+		set => Emit = value;
+	}
+
+	public Action<IEasySocket>? DisposeAtSocketHandler { get; private set; }
+
+	Action<IEasySocket>? IInternalEasySocket.DisposeAtSocketHandler
+	{
+		set => DisposeAtSocketHandler = value;
+	}
 
 	public bool IsConnected()
 	{
