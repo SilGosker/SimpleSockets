@@ -7,7 +7,7 @@ using EasySockets.Enums;
 namespace EasySockets;
 
 [DebuggerDisplay("{RoomId}.{UserId} = {_webSocket.State}")]
-public abstract class EasySocket : IEasySocket, IInternalEasySocket
+public abstract class EasySocket : IEasySocket
 {
 	private readonly CancellationTokenSource _cts;
 	private readonly EasySocketOptions _options;
@@ -22,18 +22,19 @@ public abstract class EasySocket : IEasySocket, IInternalEasySocket
 		_options = options ?? throw new ArgumentNullException(nameof(options));
 	}
 
-	public string RoomId { get; private set; }
+	public string RoomId { get; private set; } = null!;
 
-	public string UserId { get; private set; }
+	public string UserId { get; private set; } = null!;
 
-	public void SetRoomId(string roomId)
+
+	string IInternalEasySocket.InternalRoomId
 	{
-		RoomId = roomId;
+		set => RoomId = value;
 	}
 
-	public void SetUserId(string userId)
+	string IInternalEasySocket.InternalUserId
 	{
-		UserId = userId;
+		set => UserId = value;
 	}
 
 	public Func<IEasySocket, BroadCastFilter, string, Task>? Emit { get; private set; }
