@@ -2,9 +2,8 @@
 using EasySockets.Builder;
 using EasySockets.DataModels;
 using EasySockets.Enums;
-using EasySockets.Interfaces;
 
-namespace EasySockets;
+namespace EasySockets.Events;
 
 internal static class EasySocketEventHolder
 {
@@ -13,17 +12,18 @@ internal static class EasySocketEventHolder
 
 public abstract class EventSocket<TEvent> : EasySocket, IEventSocket where TEvent : IEasySocketEvent
 {
-    protected EventSocket(WebSocket webSocket, EasySocketOptions options) : base(webSocket, options)
-    {
-    }
+	protected EventSocket(WebSocket webSocket, EasySocketOptions options, string roomId, string userId)
+		: base(webSocket, options, roomId, userId)
+	{
+	}
 
-    /// <summary>
-    ///     Sends a message to the client websocket.
-    /// </summary>
-    /// <param name="message">The message to be sent.</param>
-    /// <param name="event">The event id/name</param>
-    /// <returns>A task representing the asynchronous operation of sending the message to the client.</returns>
-    public Task SendToClient(string message, string @event)
+	/// <summary>
+	///     Sends a message to the client websocket.
+	/// </summary>
+	/// <param name="message">The message to be sent.</param>
+	/// <param name="event">The event id/name</param>
+	/// <returns>A task representing the asynchronous operation of sending the message to the client.</returns>
+	public Task SendToClient(string message, string @event)
     {
         return SendToClient(BindEvent(message, @event) ?? "");
     }
@@ -66,7 +66,7 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket where TEven
     /// <returns>The task representing the parallel asynchronous sending</returns>
     public Task Broadcast(BroadCastFilter filter, string @event, string message)
     {
-        return (Emit?.Invoke(this, filter, BindEvent(@event, message) ?? "") ?? Task.CompletedTask);
+        return Emit?.Invoke(this, filter, BindEvent(@event, message) ?? "") ?? Task.CompletedTask;
     }
 
 	/// <summary>
@@ -75,8 +75,8 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket where TEven
 	/// <inheritdoc cref="Broadcast(BroadCastFilter, string, string)" />
 	public Task Broadcast(string @event, string message)
     {
-        return (Emit?.Invoke(this, BroadCastFilter.EqualRoomId, BindEvent(@event, message) ?? "") ??
-               Task.CompletedTask);
+        return Emit?.Invoke(this, BroadCastFilter.EqualRoomId, BindEvent(@event, message) ?? "") ??
+               Task.CompletedTask;
     }
 
     public sealed override async Task OnMessage(string message)
@@ -164,4 +164,6 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket where TEven
     {
         return Task.CompletedTask;
     }
+
+
 }

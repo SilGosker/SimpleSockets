@@ -1,6 +1,6 @@
-﻿using EasySockets.Authentication;
+using EasySockets.Authentication;
 using EasySockets.DataModels;
-using EasySockets.Interfaces;
+using EasySockets.Events;
 
 namespace EasySockets.Builder;
 
@@ -44,7 +44,7 @@ public class EasySocketBuilder
 	    if (options == null)
 		    throw new ArgumentException($"The {nameof(configure)} method cannot make the options null",
 			    nameof(configure));
-	    EasySocketInstanceFactory.AddType(url, new EasySocketTypeContainer(typeof(TEasySocket), options));
+	    EasySocketInstanceFactory.AddType(url, new EasySocketTypeCache(typeof(TEasySocket), options));
 	    return this;
     }
 }
