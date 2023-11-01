@@ -12,17 +12,18 @@ internal static class EasySocketEventHolder
 
 public abstract class EventSocket<TEvent> : EasySocket, IEventSocket where TEvent : IEasySocketEvent
 {
-    protected EventSocket(WebSocket webSocket, EasySocketOptions options) : base(webSocket, options)
-    {
-    }
+	protected EventSocket(WebSocket webSocket, EasySocketOptions options, string roomId, string userId)
+		: base(webSocket, options, roomId, userId)
+	{
+	}
 
-    /// <summary>
-    ///     Sends a message to the client websocket.
-    /// </summary>
-    /// <param name="message">The message to be sent.</param>
-    /// <param name="event">The event id/name</param>
-    /// <returns>A task representing the asynchronous operation of sending the message to the client.</returns>
-    public Task SendToClient(string message, string @event)
+	/// <summary>
+	///     Sends a message to the client websocket.
+	/// </summary>
+	/// <param name="message">The message to be sent.</param>
+	/// <param name="event">The event id/name</param>
+	/// <returns>A task representing the asynchronous operation of sending the message to the client.</returns>
+	public Task SendToClient(string message, string @event)
     {
         return SendToClient(BindEvent(message, @event) ?? "");
     }
@@ -163,4 +164,6 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket where TEven
     {
         return Task.CompletedTask;
     }
+
+
 }

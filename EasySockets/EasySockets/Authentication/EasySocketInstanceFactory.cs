@@ -32,8 +32,7 @@ internal class EasySocketInstanceFactory
                 _ => authenticationResult
             };
 
-            // ReSharper disable once ConditionalAccessQualifierIsNonNullableAccordingToAPIContract : never trust your users input
-            if (authenticationResult?.IsAuthenticated != true) return null;
+            if (authenticationResult.IsAuthenticated != true) return null;
 
         }
 
@@ -42,20 +41,15 @@ internal class EasySocketInstanceFactory
             : await context.WebSockets.AcceptWebSocketAsync();
 
         if (ws == null) return null;
-        if (ActivatorUtilities.CreateInstance(scope.ServiceProvider, simpleSocketTypeCache.EasySocketType, ws, simpleSocketTypeCache.Options) is not IEasySocket simpleSocket)
+        if (ActivatorUtilities.CreateInstance(scope.ServiceProvider,
+	            simpleSocketTypeCache.EasySocketType,
+	            ws,
+	            simpleSocketTypeCache.Options
+            ) is not IEasySocket simpleSocket)
             return null;
 
-        try
-        {
-            simpleSocket.UserId = authenticationResult.UserId ?? defaultUserId ?? throw new InvalidOperationException($"{nameof(EasySocket.UserId)} cannot be null after successful authentication");
-            simpleSocket.RoomId = authenticationResult.RoomId ?? defaultRoomId ?? throw new InvalidOperationException($"{nameof(EasySocket.RoomId)} cannot be null after successful authentication");
-        }
-        catch (Exception)
-        {
-            throw new InvalidOperationException(
-                "The UserId or RoomId should not be set in the constructor of any EasySocket");
-        }
-
+        simpleSocket.InternalRoomId = authenticationResult.RoomId ?? defaultRoomId ?? throw new InvalidOperationException("The authenticationResult.RoomId and the default roomId should not be null after successful authentication");
+        simpleSocket.InternalRoomId = authenticationResult.UserId ?? defaultUserId ?? throw new InvalidOperationException("The authenticationResult.UserId and the default userId should not be null after successful authentication");
         return simpleSocket;
     }
 }
