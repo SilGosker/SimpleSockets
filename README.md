@@ -36,6 +36,7 @@ builder.Services.AddEasySocketService();
 
 var app = builder.Build();
 
+app.UseHttpsRedirection();
 //other tools you might want to add/configure to your pipeline.
 
 app.UseEasySockets();
@@ -365,7 +366,7 @@ app.UseEasySockets(options =>
 app.Run();
 ```
 We have changed the `GetDefaultRoomId` and `GetDefaultUserId` to a method that returns what otherwise the authenticators would return.
-*Note that if a client would connect to `/chat` without the `slug` query parameter, the system would throw an exception. **The GetDefaultRoomId and  GetDefaultUserId should never return `null`.***
+*Note that if a client would connect to `/chat` without the `slug` query parameter, the system would throw an exception. **The GetDefaultRoomId and  GetDefaultUserId should never return `null`.** If they would **and** no RoomId or UserId is specified in the last `EasysocketAuthenticationResult`, the system would throw an exception **after** the websocket is accepted, causing an 'unclean' closing status of the websocket.*
 ### Manipulating EasySockets with the IEasySocketService
 
 The `IEasySocketService` allows you to manipulate the websocket connections outside of the EasySocket instances, meaning in any other controller, mapped endpoint or custom service. This allows for dynamic behaviors to be set up.
