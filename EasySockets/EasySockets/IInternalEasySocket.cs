@@ -4,9 +4,8 @@ namespace EasySockets;
 
 public interface IInternalEasySocket
 {
-	internal void SetRoomId(string roomId);
-
-	internal void SetUserId(string userId);
+	internal string InternalRoomId { set; }
+	internal string InternalUserId { set; }
 
 	internal Func<IEasySocket, BroadCastFilter, string, Task>? Emit { set; }
 

@@ -41,6 +41,7 @@ internal class EasySocketInstanceFactory
             : await context.WebSockets.AcceptWebSocketAsync();
 
         if (ws == null) return null;
+
         if (ActivatorUtilities.CreateInstance(scope.ServiceProvider,
 	            simpleSocketTypeCache.EasySocketType,
 	            ws,
@@ -48,8 +49,8 @@ internal class EasySocketInstanceFactory
             ) is not IEasySocket simpleSocket)
             return null;
 
-        simpleSocket.SetRoomId(authenticationResult.RoomId ?? defaultRoomId ?? throw new InvalidOperationException("The authenticationResult.RoomId and the default roomId should not be null after successful authentication"));
-        simpleSocket.SetUserId(authenticationResult.UserId ?? defaultUserId ?? throw new InvalidOperationException("The authenticationResult.UserId and the default userId should not be null after successful authentication"));
+        simpleSocket.InternalRoomId = authenticationResult.RoomId ?? defaultRoomId ?? throw new InvalidOperationException("The authenticationResult.RoomId and the default roomId should not be null after successful authentication");
+        simpleSocket.InternalUserId = authenticationResult.UserId ?? defaultUserId ?? throw new InvalidOperationException("The authenticationResult.UserId and the default userId should not be null after successful authentication");
         return simpleSocket;
     }
 }
