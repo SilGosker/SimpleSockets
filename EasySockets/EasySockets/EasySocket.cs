@@ -6,7 +6,7 @@ using EasySockets.Enums;
 
 namespace EasySockets;
 
-[DebuggerDisplay("{RoomId}.{UserId} = {_webSocket.State}")]
+[DebuggerDisplay("{RoomId}.{ClientId} = {_webSocket.State}")]
 public abstract class EasySocket : IEasySocket
 {
 	private readonly CancellationTokenSource _cts;
@@ -24,7 +24,7 @@ public abstract class EasySocket : IEasySocket
 
 	public string RoomId { get; private set; } = null!;
 
-	public string UserId { get; private set; } = null!;
+	public string ClientId { get; private set; } = null!;
 
 
 	string IInternalEasySocket.InternalRoomId
@@ -32,9 +32,9 @@ public abstract class EasySocket : IEasySocket
 		set => RoomId = value;
 	}
 
-	string IInternalEasySocket.InternalUserId
+	string IInternalEasySocket.InternalClientId
 	{
-		set => UserId = value;
+		set => ClientId = value;
 	}
 
 	public Func<IEasySocket, BroadCastFilter, string, Task>? Emit { get; private set; }

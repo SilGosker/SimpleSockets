@@ -14,12 +14,12 @@ internal class EasySocketInstanceFactory
         EasySocketTypes.Add(url, simpleSocketType);
     }
 
-    internal static async Task<IEasySocket?> GetAuthenticatedInstance(HttpContext context, bool isAuthenticatedByDefault, string defaultRoomId, string defaultUserId)
+    internal static async Task<IEasySocket?> GetAuthenticatedInstance(HttpContext context, bool isAuthenticatedByDefault, string defaultRoomId, string defaultClientId)
     {
         var simpleSocketTypeCache = EasySocketTypes.GetValueOrDefault(context.Request.Path.ToString());
         if (simpleSocketTypeCache is null) return null;
         using var scope = context.RequestServices.CreateScope();
-        EasySocketAuthenticationResult authenticationResult = new(simpleSocketTypeCache.Options.IsDefaultAuthenticated ?? isAuthenticatedByDefault, defaultRoomId, defaultUserId);
+        EasySocketAuthenticationResult authenticationResult = new(simpleSocketTypeCache.Options.IsDefaultAuthenticated ?? isAuthenticatedByDefault, defaultRoomId, defaultClientId);
 
         foreach (var authenticatorType in simpleSocketTypeCache.Options.Authenticators)
         {
@@ -41,6 +41,7 @@ internal class EasySocketInstanceFactory
             : await context.WebSockets.AcceptWebSocketAsync();
 
         if (ws == null) return null;
+
         if (ActivatorUtilities.CreateInstance(scope.ServiceProvider,
 	            simpleSocketTypeCache.EasySocketType,
 	            ws,
@@ -49,7 +50,7 @@ internal class EasySocketInstanceFactory
             return null;
 
         simpleSocket.InternalRoomId = authenticationResult.RoomId ?? defaultRoomId ?? throw new InvalidOperationException("The authenticationResult.RoomId and the default roomId should not be null after successful authentication");
-        simpleSocket.InternalRoomId = authenticationResult.UserId ?? defaultUserId ?? throw new InvalidOperationException("The authenticationResult.UserId and the default userId should not be null after successful authentication");
+        simpleSocket.InternalClientId = authenticationResult.ClientId ?? defaultClientId ?? throw new InvalidOperationException("The authenticationResult.ClientId and the default userId should not be null after successful authentication");
         return simpleSocket;
     }
 }

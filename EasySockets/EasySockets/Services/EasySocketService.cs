@@ -41,7 +41,7 @@ internal sealed class EasySocketService : IEasySocketService
 
     public bool Any(string roomId, string userId)
     {
-        return _rooms.Any(e => e.Id == roomId && e.Sockets.Any(o => o.UserId == userId && o.IsConnected()));
+        return _rooms.Any(e => e.Id == roomId && e.Sockets.Any(o => o.ClientId == userId && o.IsConnected()));
     }
 
     public bool Any(string roomId)
@@ -68,7 +68,7 @@ internal sealed class EasySocketService : IEasySocketService
     public Task ForceLeave(string roomId, string userId)
     {
         return Task.WhenAll(_rooms.SingleOrDefault(e => e.Id == roomId)?.Sockets
-                                .Where(e => e.IsConnected() && e.UserId == userId)
+                                .Where(e => e.IsConnected() && e.ClientId == userId)
                                 .Select(e => e.DisposeAsync().AsTask())
                             ?? Enumerable.Empty<Task>());
     }
@@ -92,13 +92,13 @@ internal sealed class EasySocketService : IEasySocketService
     public Task SendToClient(string roomId, string userId, string @event, string message)
     {
         return Task.WhenAll(_rooms.SingleOrDefault(e => e.Id == roomId)?.Sockets
-                                .Where(e => e.IsConnected() && e.UserId == userId)
+                                .Where(e => e.IsConnected() && e.ClientId == userId)
                                 .Select(e => e is IEventSocket o ? o.SendToClient(message, @event) : Task.CompletedTask)
                             ?? Enumerable.Empty<Task>());
     }
     public async Task SendToClient(string roomId, string userId, string message)
     {
-        await _rooms.FirstOrDefault(e => e.Id == roomId)?.Sockets.FirstOrDefault(e => e.UserId == userId)
+        await _rooms.FirstOrDefault(e => e.Id == roomId)?.Sockets.FirstOrDefault(e => e.ClientId == userId)
             ?.SendToClient(message)!;
     }
 
@@ -121,7 +121,7 @@ internal sealed class EasySocketService : IEasySocketService
 
         if (broadCastFilter.HasFlag(BroadCastFilter.Members))
         {
-            simpleSockets = simpleSockets.Where(e => e.UserId != sender.UserId);
+            simpleSockets = simpleSockets.Where(e => e.ClientId != sender.ClientId);
         }
 
         return Task.WhenAll(simpleSockets.Select(e => e.SendToClient(message)));
@@ -134,7 +134,7 @@ internal sealed class EasySocketService : IEasySocketService
         var room = _rooms.SingleOrDefault(e => e.Id == caster.RoomId);
         if (room == null) return;
 
-        room.Sockets.RemoveAll(e => e.UserId == caster.UserId && !e.IsConnected());
+        room.Sockets.RemoveAll(e => e.ClientId == caster.ClientId && !e.IsConnected());
         if (room.Sockets.All(e => !e.IsConnected()))
         {
             _rooms.Remove(room);
