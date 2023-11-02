@@ -102,6 +102,11 @@ internal sealed class EasySocketService : IEasySocketService
             ?.SendToClient(message)!;
     }
 
+    public IEnumerable<IGrouping<string, IEasySocket>> GetGroupings()
+    {
+	    return _rooms.SelectMany(e => e.Sockets).GroupBy(e => e.RoomId);
+    }
+
     private Task BroadCast(IEasySocket? sender, BroadCastFilter broadCastFilter, string? message)
     {
         if (string.IsNullOrEmpty(message) || sender == null || broadCastFilter == BroadCastFilter.Everyone)
