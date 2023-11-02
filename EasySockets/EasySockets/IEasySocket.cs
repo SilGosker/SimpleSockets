@@ -15,7 +15,7 @@ public interface IEasySocket : IAsyncDisposable, IInternalEasySocket
 	/// <summary>
 	///     The unique identifier of the EasySocket.
 	/// </summary>
-	public string UserId { get; }
+	public string ClientId { get; }
 	/// <summary>
 	///     The event that is fired when the EasySocket should start receiving messages.
 	/// </summary>

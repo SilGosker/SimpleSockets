@@ -12,8 +12,8 @@ internal static class EasySocketEventHolder
 
 public abstract class EventSocket<TEvent> : EasySocket, IEventSocket where TEvent : IEasySocketEvent
 {
-	protected EventSocket(WebSocket webSocket, EasySocketOptions options, string roomId, string userId)
-		: base(webSocket, options, roomId, userId)
+	protected EventSocket(WebSocket webSocket, EasySocketOptions options)
+		: base(webSocket, options)
 	{
 	}
 
