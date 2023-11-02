@@ -1,4 +1,4 @@
-﻿using EasySockets.Enums;
+using EasySockets.Enums;
 using EasySockets.Events;
 
 namespace EasySockets.Services;
@@ -102,7 +102,7 @@ internal sealed class EasySocketService : IEasySocketService
             ?.SendToClient(message)!;
     }
 
-    public IEnumerable<IGrouping<string, IEasySocket>> GetGroupings()
+    public IEnumerable<IGrouping<string, IEasySocket>> GetGroups()
     {
 	    return _rooms.SelectMany(e => e.Sockets).GroupBy(e => e.RoomId);
     }
