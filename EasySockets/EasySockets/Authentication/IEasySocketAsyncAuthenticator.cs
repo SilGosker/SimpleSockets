@@ -20,7 +20,7 @@ public interface IEasySocketAsyncAuthenticator
     ///         The default authentication result can configured through the
     ///         <see
     ///             cref="AppBuilderExtensions.UseEasySockets(Microsoft.AspNetCore.Builder.IApplicationBuilder, Action{EasySocketMiddlewareOptions})" />
-    ///         and the <see cref="EasySocketBuilder.AddEasySocket(string,Type, Action{EasySocketOptions})" />.
+    ///         and the <see cref="EasySocketBuilder.AddEasySocket{TEasySocketType}(string, Action{EasySocketOptions})" />.
     ///     </para>
     /// </param>
     /// <param name="context">The current ongoing request</param>

@@ -6,7 +6,7 @@ namespace EasySockets.Events;
 
 public abstract class EventSocket : EventSocket<EasySocketEvent>
 {
-	protected EventSocket(WebSocket webSocket, EasySocketOptions options, string roomId, string userId) : base(webSocket, options, roomId, userId)
+	protected EventSocket(WebSocket webSocket, EasySocketOptions options) : base(webSocket, options)
 	{
 	}
 

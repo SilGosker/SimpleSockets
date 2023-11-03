@@ -7,7 +7,7 @@ namespace EasySockets.Builder;
 public class EasySocketMiddlewareOptions
 {
     private Func<HttpContext, string> _getDefaultRoomId = _ => "__0";
-    private Func<HttpContext, string> _getDefaultUserId = _ => Guid.NewGuid().ToString();
+    private Func<HttpContext, string> _getDefaultClientId = _ => Guid.NewGuid().ToString();
     private WebSocketOptions _webSocketOptions = new();
 
     /// <summary>
@@ -31,7 +31,7 @@ public class EasySocketMiddlewareOptions
     /// <summary>
     ///     <para>
     ///         The default way of getting a new userId that will be used if no authenticator is provided or if the definitive
-    ///         <see cref="EasySocketAuthenticationResult.UserId" /> is null.
+    ///         <see cref="EasySocketAuthenticationResult.ClientId" /> is null.
     ///         <para>
     ///             If returns null, the middleware switches back to <c>Guid.NewGuid()</c>.
     ///         </para>
@@ -40,10 +40,10 @@ public class EasySocketMiddlewareOptions
     ///         The default is method that returns <c>Guid.NewGuid()</c>.
     ///     </para>
     /// </summary>
-    public Func<HttpContext, string> GetDefaultUserId
+    public Func<HttpContext, string> GetDefaultClientId
     {
-        get => _getDefaultUserId;
-        set => _getDefaultUserId = value ?? throw new ArgumentNullException(nameof(value));
+        get => _getDefaultClientId;
+        set => _getDefaultClientId = value ?? throw new ArgumentNullException(nameof(value));
     }
 
     /// <summary>

@@ -30,22 +30,23 @@ Lets start by adding EasySockets to your application. apply the following code:
 ```C#
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddEasySocketService();
+builder.Services.AddEasySocketServices();
 
 //other dependencies that you might want to add to your DI container
 
 var app = builder.Build();
 
+app.UseHttpsRedirection();
 //other tools you might want to add/configure to your pipeline.
 
 app.UseEasySockets();
 ```
 
-The `builder.Services.AddEasySocketService();` adds the `IEasySocketService` available for DI. This manages all the websocket connections. You can manipulate those connections outside of the websocket instances. For example, you can send messages to the client in a controller or custom services.
+The `builder.Services.AddEasySocketServicesm();` adds the `IEasySocketService` available for DI. This manages all the websocket connections. You can manipulate those connections outside of the websocket instances. For example, you can send messages to the client in a controller or custom services.
 
-The `app.UseEasySockets();` adds the middleware that handles authentication and accepts (or declines) a websocket connection. If you want authentication based on the `HttpContext.User` property, make sure that you call this method **after** calling the `app.UseAuthentication()` and `app.UseAuthorization()`.
+The `app.UseEasySockets();` adds the middleware that handles authentication and accepts (or declines) a client. If you want authentication based on the `HttpContext.User` property, make sure that you call this method **after** calling the `app.UseAuthentication()`; and `app.UseAuthorization();`.
 
-This on its own doesn't do a whole lot. Why? Because no behavior is added to the pipeline. Every websocket request will result in an `403` error.
+This on its own doesn't do a whole lot. Why? Because no behavior is added to the pipeline. Every websocket request will result in an `403 - Forbidden` status code.
 
 So lets create a behavior that allows us to connect to the server:
 ```C#
@@ -83,7 +84,7 @@ public class ChatSocket : EasySocket
 
     public override Task OnMessage(string message)
     {
-        return BroadCast(message);
+        return Broadcast(message);
     }
 }
 ```
@@ -365,7 +366,7 @@ app.UseEasySockets(options =>
 app.Run();
 ```
 We have changed the `GetDefaultRoomId` and `GetDefaultUserId` to a method that returns what otherwise the authenticators would return.
-*Note that if a client would connect to `/chat` without the `slug` query parameter, the system would throw an exception. **The GetDefaultRoomId and  GetDefaultUserId should never return `null`.***
+*Note that if a client would connect to `/chat` without the `slug` query parameter, the system would throw an exception. **The GetDefaultRoomId and  GetDefaultUserId should never return `null`.** If they would **and** no RoomId or UserId is specified in the last `EasysocketAuthenticationResult`, the system would throw an exception **after** the websocket is accepted, causing an 'unclean' closing status of the websocket.*
 ### Manipulating EasySockets with the IEasySocketService
 
 The `IEasySocketService` allows you to manipulate the websocket connections outside of the EasySocket instances, meaning in any other controller, mapped endpoint or custom service. This allows for dynamic behaviors to be set up.

@@ -1,4 +1,4 @@
-﻿using System.Net.WebSockets;
+using System.Net.WebSockets;
 using EasySockets.Builder;
 using EasySockets.DataModels;
 using EasySockets.Enums;
@@ -12,8 +12,7 @@ internal static class EasySocketEventHolder
 
 public abstract class EventSocket<TEvent> : EasySocket, IEventSocket where TEvent : IEasySocketEvent
 {
-	protected EventSocket(WebSocket webSocket, EasySocketOptions options, string roomId, string userId)
-		: base(webSocket, options, roomId, userId)
+	protected EventSocket(WebSocket webSocket, EasySocketOptions options) : base(webSocket, options)
 	{
 	}
 
@@ -25,7 +24,7 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket where TEven
 	/// <returns>A task representing the asynchronous operation of sending the message to the client.</returns>
 	public Task SendToClient(string message, string @event)
     {
-        return SendToClient(BindEvent(message, @event) ?? "");
+	    return SendToClient(BindEvent(message, @event) ?? "");
     }
 
     /// <inheritdoc cref="SendToClient(string,string)" />
