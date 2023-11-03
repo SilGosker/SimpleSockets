@@ -33,10 +33,11 @@ internal class EasySocketInstanceFactory
             };
 
             if (authenticationResult.IsAuthenticated != true) return null;
-
         }
 
-        var ws = context.WebSockets.WebSocketRequestedProtocols.Count > 0
+		if (authenticationResult.IsAuthenticated != true) return null;
+
+		var ws = context.WebSockets.WebSocketRequestedProtocols.Count > 0
             ? await context.WebSockets.AcceptWebSocketAsync(context.WebSockets.WebSocketRequestedProtocols[0])
             : await context.WebSockets.AcceptWebSocketAsync();
 
