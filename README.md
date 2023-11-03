@@ -30,7 +30,7 @@ Lets start by adding EasySockets to your application. apply the following code:
 ```C#
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddEasySocketService();
+builder.Services.AddEasySocketServices();
 
 //other dependencies that you might want to add to your DI container
 
@@ -42,11 +42,11 @@ app.UseHttpsRedirection();
 app.UseEasySockets();
 ```
 
-The `builder.Services.AddEasySocketService();` adds the `IEasySocketService` available for DI. This manages all the websocket connections. You can manipulate those connections outside of the websocket instances. For example, you can send messages to the client in a controller or custom services.
+The `builder.Services.AddEasySocketServicesm();` adds the `IEasySocketService` available for DI. This manages all the websocket connections. You can manipulate those connections outside of the websocket instances. For example, you can send messages to the client in a controller or custom services.
 
-The `app.UseEasySockets();` adds the middleware that handles authentication and accepts (or declines) a websocket connection. If you want authentication based on the `HttpContext.User` property, make sure that you call this method **after** calling the `app.UseAuthentication()` and `app.UseAuthorization()`.
+The `app.UseEasySockets();` adds the middleware that handles authentication and accepts (or declines) a client. If you want authentication based on the `HttpContext.User` property, make sure that you call this method **after** calling the `app.UseAuthentication()`; and `app.UseAuthorization();`.
 
-This on its own doesn't do a whole lot. Why? Because no behavior is added to the pipeline. Every websocket request will result in an `403` error.
+This on its own doesn't do a whole lot. Why? Because no behavior is added to the pipeline. Every websocket request will result in an `403 - Forbidden` status code.
 
 So lets create a behavior that allows us to connect to the server:
 ```C#
@@ -84,7 +84,7 @@ public class ChatSocket : EasySocket
 
     public override Task OnMessage(string message)
     {
-        return BroadCast(message);
+        return Broadcast(message);
     }
 }
 ```
