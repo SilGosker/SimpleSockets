@@ -3,7 +3,7 @@
 public interface IEasySocketService
 {
 	/// <summary>
-	///     Checks if a client is connected and available
+	///     Checks if a client is connected.
 	/// </summary>
 	/// <param name="roomId">The room id of the socket</param>
 	/// <param name="clientId">The client id of the socket</param>
@@ -11,11 +11,17 @@ public interface IEasySocketService
 	public bool Any(string roomId, string clientId);
 
 	/// <summary>
-	///     Checks if a room is found and available
+	///     Checks if a room is found and at least 1 client in that room is connected.
 	/// </summary>
-	/// <param name="roomId">The room id of the socket</param>
+	/// <param name="roomId">The room identifier</param>
 	/// <returns>Whether the room is found and at least 1 socket is connected</returns>
 	public bool Any(string roomId);
+
+	/// <summary>
+	///		Checks if any client is connected.
+	/// </summary>
+	/// <returns>Whether any client is connected to the server.</returns>
+	public bool Any();
 
 	/// <summary>
 	///     Counts the amount of clients connected to a room
@@ -35,7 +41,7 @@ public interface IEasySocketService
 	/// </summary>
 	/// <param name="roomId">The room id</param>
 	/// <returns>The task representing the operation of the leave event and removal</returns>
-	public Task ForceLeave(string roomId);
+	public Task ForceLeaveAsync(string roomId);
 
 	/// <summary>
 	///     Forces a client to leave a room and instantiates the leave event
@@ -43,7 +49,7 @@ public interface IEasySocketService
 	/// <param name="roomId">The room id the client is found in</param>
 	/// <param name="clientId">The client id of the socket in the room</param>
 	/// <returns>The task representing the operation of the leave event and removal</returns>
-	public Task ForceLeave(string roomId, string clientId);
+	public Task ForceLeaveAsync(string roomId, string clientId);
 
 	/// <summary>
 	///     Sends a message to all the clients in a room with an event id or name
@@ -52,7 +58,7 @@ public interface IEasySocketService
 	/// <param name="event">The event id or name</param>
 	/// <param name="message">The message itself</param>
 	/// <returns>The task representing the parallel sending of the messages</returns>
-	public Task SendToRoom(string roomId, string @event, string message);
+	public Task SendToRoomAsync(string roomId, string @event, string message);
 
 	/// <summary>
 	///     Sends a message to all the clients in a room
@@ -60,7 +66,7 @@ public interface IEasySocketService
 	/// <param name="roomId">The room id in which the clients need to receive the messages</param>
 	/// <param name="message">The message</param>
 	/// <returns>The task representing the parallel sending of the messages</returns>
-	public Task SendToRoom(string roomId, string message);
+	public Task SendToRoomAsync(string roomId, string message);
 
 	/// <summary>
 	///     Sends a message to a client in a room with an event id or name
@@ -70,7 +76,7 @@ public interface IEasySocketService
 	/// <param name="event">The event id or name</param>
 	/// <param name="message">The message</param>
 	/// <returns>The task representing the sending of the message</returns>
-	public Task SendToClient(string roomId, string clientId, string @event, string message);
+	public Task SendToClientAsync(string roomId, string clientId, string @event, string message);
 
 	/// <summary>
 	///     Sends a message to a client in a room
@@ -79,7 +85,7 @@ public interface IEasySocketService
 	/// <param name="clientId">The client id which needs to receive the message</param>
 	/// <param name="message">The message</param>
 	/// <returns>The task representing the sending of the message</returns>
-	public Task SendToClient(string roomId, string clientId, string message);
+	public Task SendToClientAsync(string roomId, string clientId, string message);
 
 	/// <summary>
 	///     Lists all rooms and their clients
