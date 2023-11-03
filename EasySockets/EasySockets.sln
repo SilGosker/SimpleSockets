@@ -4,6 +4,10 @@ VisualStudioVersion = 17.6.33723.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasySockets", "EasySockets\EasySockets.csproj", "{3CDCE7C4-4692-462B-ADD0-2F4002743B17}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{5B438880-FBAC-4F11-9564-FF42E3AD8938}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Authentication", "Authentication\Authentication.csproj", "{9CAF77CD-B6B7-4566-B767-FC2CC1907186}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -14,9 +18,16 @@ Global
 		{3CDCE7C4-4692-462B-ADD0-2F4002743B17}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3CDCE7C4-4692-462B-ADD0-2F4002743B17}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3CDCE7C4-4692-462B-ADD0-2F4002743B17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9CAF77CD-B6B7-4566-B767-FC2CC1907186}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CAF77CD-B6B7-4566-B767-FC2CC1907186}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CAF77CD-B6B7-4566-B767-FC2CC1907186}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CAF77CD-B6B7-4566-B767-FC2CC1907186}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9CAF77CD-B6B7-4566-B767-FC2CC1907186} = {5B438880-FBAC-4F11-9564-FF42E3AD8938}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3EDCCD35-60F7-409A-BF5C-EED1488B007D}
