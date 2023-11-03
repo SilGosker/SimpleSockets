@@ -12,7 +12,7 @@ public static class ServiceCollectionExtensions
     ///     Adds the <see cref="IEasySocketService" /> to the dependency injection container.
     /// </summary>
     /// <param name="serviceCollection">The collection the <see cref="IEasySocketService" /> should be added to.</param>
-    public static void AddEasySocketService(this IServiceCollection serviceCollection)
+    public static void AddEasySocketServices(this IServiceCollection serviceCollection)
     {
         serviceCollection.AddSingleton<EasySocketService>(_ => EasySocketService.Create());
         serviceCollection.AddSingleton<IEasySocketService>(e => e.GetRequiredService<EasySocketService>());
