@@ -19,6 +19,6 @@ public class ChatSocket : EasySocket
 
     public override Task OnConnect()
     {
-        return Broadcast(BroadCastFilter.EqualRoomId, $"Welcome {UserId}. You are currently in room '{RoomId}'");
+        return Broadcast(BroadCastFilter.EqualRoomId, $"Welcome {ClientId}. You are currently in room '{RoomId}'");
     }
 }

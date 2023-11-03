@@ -6,7 +6,7 @@ using EasySockets.Enums;
 
 namespace EasySockets;
 
-[DebuggerDisplay("{RoomId}.{ClientId} = {_webSocket.State}")]
+[DebuggerDisplay("{ClientId} = {_webSocket.State}")]
 public abstract class EasySocket : IEasySocket
 {
 	private readonly CancellationTokenSource _cts;
@@ -18,14 +18,17 @@ public abstract class EasySocket : IEasySocket
 	protected EasySocket(WebSocket webSocket, EasySocketOptions options)
 	{
 		_webSocket = webSocket ?? throw new ArgumentNullException(nameof(webSocket));
-		_cts = new CancellationTokenSource();
 		_options = options ?? throw new ArgumentNullException(nameof(options));
+		_cts = new CancellationTokenSource();
 	}
+
+	public Func<IEasySocket, BroadCastFilter, string, Task>? Emit { get; private set; }
+
+	public Action<IEasySocket>? DisposeAtSocketHandler { get; private set; }
 
 	public string RoomId { get; private set; } = null!;
 
 	public string ClientId { get; private set; } = null!;
-
 
 	string IInternalEasySocket.InternalRoomId
 	{
@@ -37,14 +40,10 @@ public abstract class EasySocket : IEasySocket
 		set => ClientId = value;
 	}
 
-	public Func<IEasySocket, BroadCastFilter, string, Task>? Emit { get; private set; }
-
 	Func<IEasySocket, BroadCastFilter, string, Task>? IInternalEasySocket.Emit
 	{
 		set => Emit = value;
 	}
-
-	public Action<IEasySocket>? DisposeAtSocketHandler { get; private set; }
 
 	Action<IEasySocket>? IInternalEasySocket.DisposeAtSocketHandler
 	{
@@ -95,13 +94,12 @@ public abstract class EasySocket : IEasySocket
 				try
 				{
 					result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(chunks), _cts.Token);
-					sb.Append(_options.Encoding.GetString(chunks.AsSpan()).AsSpan().TrimEnd('\0'));
+					sb.Append(_options.Encoding.GetString(chunks.AsSpan().TrimEnd((byte)'\0')));
 				}
 				catch (WebSocketException)
 				{
 					break;
 				}
-
 
 			if (result.EndOfMessage && IsConnected()) await OnMessage(sb.ToString());
 
@@ -113,16 +111,6 @@ public abstract class EasySocket : IEasySocket
 		await DisposeAsync();
 	}
 
-	public virtual Task OnConnect()
-	{
-		return Task.CompletedTask;
-	}
-
-	public virtual Task OnDisconnect()
-	{
-		return Task.CompletedTask;
-	}
-
 	public async ValueTask DisposeAsync()
 	{
 		if (_isDisposed) return;
@@ -130,31 +118,48 @@ public abstract class EasySocket : IEasySocket
 
 		try
 		{
+			await OnDisconnect();
 			_cts.Cancel();
-			await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, _options.ClosingStatusDescription,
-				CancellationToken.None);
+
+			await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, _options.ClosingStatusDescription, CancellationToken.None);
 			_webSocket.Abort();
+		}
+		catch (WebSocketException)
+		{
+			// ignored
 		}
 		finally
 		{
 			_cts.Dispose();
 			_webSocket.Dispose();
 			_isDisposed = true;
-			try
-			{
-				await OnDisconnect();
-			}
-			finally
-			{
-				DisposeAtSocketHandler?.Invoke(this);
-			}
+			DisposeAtSocketHandler?.Invoke(this);
 		}
+	}
+
+
+	/// <summary>
+	///     The method invoked after the client successfully connected to the server.
+	/// </summary>
+	/// <returns>The task representing the asynchronous operation</returns>
+	public virtual Task OnConnect()
+	{
+		return Task.CompletedTask;
+	}
+
+	/// <summary>
+	///     The method invoked after the client is disconnected from the server.
+	/// </summary>
+	/// <returns>The task representing the asynchronous operation</returns>
+	public virtual Task OnDisconnect()
+	{
+		return Task.CompletedTask;
 	}
 
 	/// <summary>
 	///     Sends a message to all members of the sockets room matching the <see cref="RoomId" />
 	/// </summary>
-	/// <inheritdoc cref="Broadcast(EasySockets.Enums.BroadCastFilter,string)" />
+	/// <inheritdoc cref="Broadcast(BroadCastFilter, string)" />
 	public Task Broadcast(string message)
 	{
 		return Emit?.Invoke(this, BroadCastFilter.RoomMembers, message) ?? Task.CompletedTask;
@@ -171,5 +176,10 @@ public abstract class EasySocket : IEasySocket
 		return Emit?.Invoke(this, filter, message) ?? Task.CompletedTask;
 	}
 
+	/// <summary>
+	///     The method invoked when a message is received from the client.
+	/// </summary>
+	/// <param name="message">The message as a string received from the client.</param>
+	/// <returns>A task representing the asynchronous operation</returns>
 	public abstract Task OnMessage(string message);
 }
