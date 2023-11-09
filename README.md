@@ -626,8 +626,67 @@ In this section, we'll discuss:
 2. How to set up custom event registration
 3. How to apply this in the `IEasySocketService`.
 #### Events
-Currently we have 3 events available:
+The `EasySocket` class has 3 events available:
 1. The `OnConnect` method is invoked when the client successfully connects to the server.
 2. The `OnMessage` method is invoked whenever the server receives a message from the client. 
 3. The `OnDisconnect` method is invoked when the client disconnects from the server or when the server forces the client to disconnect.
+
+What if we as a developer want more? What if we only want to be notified when the client says `Foo` or `Bar`? Or what if we want to be notified differently based on what the client has to say? This is where events come in.
+
+Events are part of the full message send from the client to the server. An event can contain basically contain anything, so let's pick an example:
+```JSON
+{
+  "event": "Foo",
+  "message": "Bar"
+}
+```
+This whole json is sent from the client to the server. The message that needs to be processed is `Bar`, but the event is `Foo`. And this is the part that is so powerful, because we can invoke different pieces of code based on input of a client.
+
+#### Event types
+Event types are the way events are registered and extracted from the complete message. In the case of `EventSocket`, this is a simple JSON message as shown earlier. When referring to `Event Types`, we are referring to the **structure** of a message. When referring to an event, we are referring to the **identifier** or **name** of the event.
+
+Let's say in our application, if a client is typing, we want other clients in his room to know that he is typing. Currently this is not possible. If we would implement code that would send a message to the server whenever a client hits the keyboard, all other clients would receive the full message as a new message. The server doesn't know the difference between a typing event and a message event. It only knows about broadcasting a received message from the client. This can cause our code to be limited and unstructured.
+
+We can achieve this by changing our `ChatSocket` type:
+```C#
+using System.Net.WebSockets;
+using EasySockets.Builder;
+using EasySockets.Enums;
+using EasySockets.Events;
+
+public class ChatSocket : EventSocket
+{
+    public ChatSocket(WebSocket webSocket, EasySocketOptions options) : base(webSocket, options)
+    {
+    }
+
+    public override Task OnConnect()
+    {
+        return Broadcast(BroadCastFilter.EqualRoomId, $"Welcome {ClientId}. You are currently in room '{RoomId}'");
+    }
+}
+```
+We changed the subtype of `ChatSocket` from `EasySocket` to `EventSocket`. The `EventSocket` class contains some logic that registers events and invokes code based on one. Since the `EventSocket` processes each message, we can no longer override the `OnMessage` method. If you want, you can override the `OnFailedEventBinding(string)` method. This method is invoked when no registered event is found or when registering of the event fails. In our case this would be when the client sends invalid JSON.
+
+In our current code, nothing would happen. This is because we don't have any events registered. The way we do this is with the `On` method in the constructor:
+```C#
+using System.Net.WebSockets;
+using EasySockets.Builder;
+using EasySockets.Enums;
+using EasySockets.Events;
+
+public class ChatSocket : EventSocket
+{
+    public ChatSocket(WebSocket webSocket, EasySocketOptions options) : base(webSocket, options)
+    {
+        On("typing", message => Broadcast("typing", message));
+    }
+
+    public override Task OnConnect()
+    {
+        return Broadcast(BroadCastFilter.EqualRoomId, $"Welcome {ClientId}. You are currently in room '{RoomId}'");
+    }
+}
+```
+In our constructor we are registering a new action based on an event. This may feel familiar as `socket.io` uses the same structure. Whenever the server registers the event `typing`, we broadcast the message under the event `typing`.
 
