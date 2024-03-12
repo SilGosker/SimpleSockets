@@ -76,9 +76,6 @@ using EasySockets.Builder;
 
 public class ChatSocket : EasySocket
 {
-    public ChatSocket(WebSocket webSocket, EasySocketOptions options) : base(webSocket, options)
-    {
-    }
 
     public override Task OnMessage(string message)
     {
@@ -96,10 +93,6 @@ using EasySockets.Builder;
 
 public class ChatSocket : EasySocket
 {
-    public ChatSocket(WebSocket webSocket, EasySocketOptions options) : base(webSocket, options)
-    {
-    }
-
     public override Task OnMessage(string message)
     {
         return Broadcast(message);
@@ -266,10 +259,6 @@ using EasySockets.Builder;
 
 public class ChatSocket : EasySocket
 {
-    public ChatSocket(WebSocket webSocket, EasySocketOptions options) : base(webSocket, options)
-    {
-    }
-
     public override Task OnMessage(string message)
     {
         return Broadcast(message);
@@ -653,10 +642,6 @@ using EasySockets.Events;
 
 public class ChatSocket : EventSocket
 {
-    public ChatSocket(WebSocket webSocket, EasySocketOptions options) : base(webSocket, options)
-    {
-    }
-
     public override Task OnConnect()
     {
         return Broadcast(BroadCastFilter.EqualRoomId, $"Welcome {ClientId}. You are currently in room '{RoomId}'");
