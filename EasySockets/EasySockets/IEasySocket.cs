@@ -1,21 +1,19 @@
-﻿using EasySockets.Enums;
-
-namespace EasySockets;
+﻿namespace EasySockets;
 
 /// <summary>
 ///     The interface for a basic EasySocket class.
 /// </summary>
-public interface IEasySocket : IAsyncDisposable, IInternalEasySocket
+public interface IEasySocket : IDisposable, IInternalEasySocket
 {
 	/// <summary>
 	///     The room that the EasySocket is connected to.
 	/// </summary>
-	public string RoomId { get; }
+	public new string RoomId { get; }
 
 	/// <summary>
 	///     The unique identifier of the EasySocket.
 	/// </summary>
-	public string ClientId { get; }
+	public new string ClientId { get; }
 	/// <summary>
 	///     The event that is fired when the EasySocket should start receiving messages.
 	/// </summary>
@@ -50,4 +48,13 @@ public interface IEasySocket : IAsyncDisposable, IInternalEasySocket
 	/// <param name="message">The content of the message</param>
 	/// <returns>A task that represents the asynchronous operation</returns>
 	public Task SendToClient(string message);
+	
+    /// <summary>
+	///    Closes the websocket connection and disposes the EasySocket instance
+	/// </summary>
+	/// <returns>
+	///   A task that represents the asynchronous closing operation
+	/// </returns>
+    public Task CloseAsync();
+
 }

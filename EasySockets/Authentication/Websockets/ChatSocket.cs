@@ -1,17 +1,10 @@
-﻿using System.Net.WebSockets;
-using EasySockets;
-using EasySockets.Builder;
+﻿using EasySockets;
 using EasySockets.Enums;
 
 namespace Authentication.Websockets;
 
 public class ChatSocket : EasySocket
 {
-    public ChatSocket(WebSocket webSocket, EasySocketOptions options) : base(webSocket, options)
-    {
-
-    }
-
     public override Task OnMessage(string message)
     {
         return Broadcast(message);

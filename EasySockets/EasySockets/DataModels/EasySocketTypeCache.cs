@@ -3,7 +3,7 @@ using EasySockets.Builder;
 
 namespace EasySockets.DataModels;
 
-internal sealed class EasySocketTypeCache
+public sealed class EasySocketTypeCache
 {
     internal Type EasySocketType { get; set; }
     internal IReadOnlyList<Type> AuthenticatorTypes { get; init; }

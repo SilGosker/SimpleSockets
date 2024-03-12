@@ -1,7 +1,10 @@
-﻿namespace EasySockets.Events;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace EasySockets.Events;
 
 public class EasySocketEvent : IEasySocketEvent
 {
+
     public static implicit operator EasySocketEvent(string @event)
     {
         return new EasySocketEvent(@event);
@@ -9,11 +12,14 @@ public class EasySocketEvent : IEasySocketEvent
 
     public EasySocketEvent()
     {
+        Event = string.Empty;
+		Message = string.Empty;
     }
 
     public EasySocketEvent(string @event)
     {
         Event = @event;
+        Message = string.Empty;
     }
 
     public EasySocketEvent(string @event, string message)
@@ -22,8 +28,9 @@ public class EasySocketEvent : IEasySocketEvent
         Message = message;
     }
 
-    public string Event { get; set; } = null!;
-    public string Message { get; set; } = null!;
+    public string Event { get; set; }
+    
+    public string Message { get; set; }
 
     public string GetEvent()
     {

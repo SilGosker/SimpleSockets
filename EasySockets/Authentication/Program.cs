@@ -1,10 +1,10 @@
+using Authentication.Authenticators;
 using Authentication.Websockets;
 using EasySockets.Builder;
-using EasySockets.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddEasySocketService();
+builder.Services.AddEasySocketServices();
 
 // Add services to the container.
 

@@ -1,10 +1,10 @@
 # EasySockets documentation
-EasySockets is a powerful tool designed to simplify the process of working with websockets, especially when dealing with advanced features such as custom event binding and extracting, custom authentication and authorization and websocket manipulation wherever you want in your code. Whether you're a beginner looking for a straightforward way to create websocket applications or an expert in need of intricate functionalities, EasySockets is tailored to meet your requirements.
+EasySockets is a powerful tool designed to simplify the process of working with websockets, especially when dealing with advanced features such as custom event binding and extracting, custom authentication on connection level and websocket manipulation in the DI. Whether you're a beginner looking for a straightforward way to create websocket applications or an expert in need of intricate functionalities, EasySockets is tailored to meet your requirements.
 
 ## Features
 * Simple WebSocket Creation: Set up a websocket connection with minimal configuration.
 * Custom Event Binding: Easily bind custom events to your websockets and manage event-driven programming.
-* Custom Authentication/Authorization: EasySockets allows you to create your own authentication/authorization methods.
+* Custom Authentication on connection level: EasySockets allows you to create your own authentication/authorization methods per individual websocket connection.
 
 ## Installation
 With the Package Manager Console:
@@ -36,6 +36,7 @@ builder.Services.AddEasySocketServices();
 var app = builder.Build();
 
 app.UseHttpsRedirection();
+
 //other tools you might want to add/configure to your pipeline.
 
 app.UseEasySockets();
@@ -43,7 +44,7 @@ app.UseEasySockets();
 
 The `builder.Services.AddEasySocketServices();` adds the `IEasySocketService` available for DI. This manages all the websocket connections. You can manipulate those connections outside of the websocket instances. For example, you can send messages to the client in a controller or custom services. This is discussed later on in the tutorial.
 
-The `app.UseEasySockets();` adds the middleware that handles authentication and accepts (or declines) a client. If you want authentication based on the `HttpContext.User` property, make sure that you call this method **after** calling the `app.UseAuthentication()`; and `app.UseAuthorization();`.
+The `app.UseEasySockets();` adds the middleware that handles authentication and accepts (or declines) a client. If you want authentication based on the `HttpContext.User` property, make sure that you call this method **after** calling the `app.UseAuthentication()`; and `app.UseAuthorization();` methods.
 
 This on its own doesn't do a whole lot. Why? Because no behavior is added to the pipeline. Every websocket request will result in an `401 - Forbidden` status code.
 
@@ -55,19 +56,15 @@ using EasySockets.Builder;
 
 public class ChatSocket : EasySocket
 {
-    public ChatSocket(WebSocket webSocket, EasySocketOptions options) : base(webSocket, options)
-    {
-    }
-
     public override Task OnMessage(string message)
     {
         return Task.CompletedTask;
     }
 }
 ```
-This is the bare minimum behavior. The long constructor and the overridden `OnMessage` method  is required to make the code compile and work. The `OnMessage` method is invoked whenever the server receives a message from the client.
+This is the bare minimum behavior. The overridden `OnMessage` method  is required to make the code compile. The `OnMessage` method is invoked whenever the server receives a message from the client.
 
-*Note that dependency injection is available here. If needed you can inject your custom services into our `ChatSocket` class*.
+*Note: You can inject your custom services into our `ChatSocket` class using DI*.
 
 At the moment, we simply return `Task.CompletedTask`. But in our chat application, we want other clients that are connected to the server to receive the client's message!
 

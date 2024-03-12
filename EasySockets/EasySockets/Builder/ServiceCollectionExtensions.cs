@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using EasySockets.Services;
+﻿using EasySockets.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EasySockets.Builder;
 
@@ -12,9 +12,28 @@ public static class ServiceCollectionExtensions
     ///     Adds the <see cref="IEasySocketService" /> to the dependency injection container.
     /// </summary>
     /// <param name="serviceCollection">The collection the <see cref="IEasySocketService" /> should be added to.</param>
-    public static void AddEasySocketServices(this IServiceCollection serviceCollection)
+    /// <param name="configure">A function to configure the provided <see cref="EasySocketMiddlewareOptions" />.</param>
+    public static void AddEasySocketServices(this IServiceCollection serviceCollection,
+        Action<EasySocketMiddlewareOptions>? configure = null)
     {
-        serviceCollection.AddSingleton<EasySocketService>(_ => EasySocketService.Create());
+        if (serviceCollection == null) throw new ArgumentNullException(nameof(serviceCollection));
+
+        if (serviceCollection.Any(x => x.ServiceType == typeof(IEasySocketService)))
+            throw new InvalidOperationException("The EasySocketService has already been added to the service collection.");
+
+        serviceCollection.AddSingleton<EasySocketService>();
         serviceCollection.AddSingleton<IEasySocketService>(e => e.GetRequiredService<EasySocketService>());
+
+        serviceCollection.AddSingleton<EasySocketAuthenticator>();
+        serviceCollection.AddSingleton<EasySocketTypeHolder>();
+
+        if (configure != null)
+        {
+            serviceCollection.Configure<EasySocketMiddlewareOptions>(configure);
+        }
+        else
+        {
+            serviceCollection.AddOptions<EasySocketMiddlewareOptions>();
+        }
     }
 }

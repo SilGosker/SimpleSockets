@@ -14,7 +14,7 @@ public class EasySocketOptions
 
 	/// <summary>
 	///     The size of chunks when receiving messages. <br /><br />
-	///     Increasing this will allocate more memory for each authenticated request. (Not for each message) <br />
+	///     Increasing this will allocate more memory for each message received and sent.
 	///     Decreasing this will cause receiving the full message to take more time.<br /><br />
 	///     Default is 100 bytes (100B).
 	/// </summary>
@@ -23,23 +23,24 @@ public class EasySocketOptions
 		get => _chunkSize;
 		set
 		{
-			if (value < 0) throw new ArgumentOutOfRangeException(nameof(value), "Chunk size cannot be less than 0");
+			if (value < 1) throw new ArgumentOutOfRangeException(nameof(value), "Chunk size cannot be less than 1");
 			_chunkSize = value;
 		}
 	}
 
-    /// <summary>
-    ///     Whether or not this socket is authenticated by default. <br /><br />
-    ///     overrides the <see cref="EasySocketMiddlewareOptions" />.
-    ///     <see cref="EasySocketMiddlewareOptions.IsDefaultAuthenticated" /> property if not null.
-    ///     <br />
-    ///     Does not override the use of an authenticator.<br /><br />
-    ///     If not null, the value of the first <see cref="EasySocketAuthenticationResult" />.
-    ///     <see cref="EasySocketAuthenticationResult.IsAuthenticated" /> will be
-    ///     the value this property.<br /><br />
-    ///     The default is null.
-    /// </summary>
-    public bool? IsDefaultAuthenticated { get; set; } = null;
+	/// <summary>
+	///     Whether or not this socket is authenticated by default. <br /><br />
+	///     overrides the
+	///     <see cref="EasySocketMiddlewareOptions.IsDefaultAuthenticated" /> property if not null.
+	///     <br />
+	///     Does not override the use of an authenticator.<br /><br />
+	///     If not null, the value of the first
+	///     <see cref="EasySocketAuthenticationResult.IsAuthenticated" /> will be
+	///     the value this property.<br /><br />
+	///     The default is null.
+	/// </summary>
+	public bool? IsDefaultAuthenticated { get; set; } = null;
+
 	/// <summary>
 	///     The encoding that will be used to encode en decode messages from and to bytes. <br /><br />
 	///     The default is <see cref="Encoding.UTF8" />
@@ -65,7 +66,7 @@ public class EasySocketOptions
 	/// </summary>
 	/// <typeparam name="TAuthenticator">The type of the authenticator</typeparam>
 	public void AddAuthenticator<TAuthenticator>()
-		where TAuthenticator : IEasySocketAuthenticator
+		where TAuthenticator : class, IEasySocketAuthenticator
 	{
 		Authenticators.Add(typeof(TAuthenticator));
 	}
@@ -75,7 +76,7 @@ public class EasySocketOptions
 	/// </summary>
 	/// <typeparam name="TAuthenticator">The type of the authenticator</typeparam>
 	public void AddAsyncAuthenticator<TAuthenticator>()
-		where TAuthenticator : IEasySocketAsyncAuthenticator
+		where TAuthenticator : class, IEasySocketAsyncAuthenticator
 	{
 		Authenticators.Add(typeof(TAuthenticator));
 	}

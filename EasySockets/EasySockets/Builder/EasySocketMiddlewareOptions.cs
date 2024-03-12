@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using EasySockets.Authentication;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using EasySockets.Authentication;
 
 namespace EasySockets.Builder;
 
 public class EasySocketMiddlewareOptions
 {
-    private Func<HttpContext, string> _getDefaultRoomId = _ => "__0";
     private Func<HttpContext, string> _getDefaultClientId = _ => Guid.NewGuid().ToString();
+    private Func<HttpContext, string> _getDefaultRoomId = _ => "__0";
     private WebSocketOptions _webSocketOptions = new();
 
     /// <summary>
@@ -48,9 +48,15 @@ public class EasySocketMiddlewareOptions
 
     /// <summary>
     ///     <para>
-    ///         Whether the client is authenticated by default if no authenticator is used and if
-    ///         <see cref="EasySocketOptions"/>.<see cref="EasySocketOptions.IsDefaultAuthenticated" /> is <c>null</c>. <br />
-    ///         The <see cref="EasySocketOptions"/>.<see cref="EasySocketOptions.IsDefaultAuthenticated" /> can be configured through the <see cref="AppBuilderExtensions.UseEasySockets" />
+    ///         Whether the client is authenticated by default
+    ///         <para>
+    ///             This option will only be used when no authenticator are used and if the configured
+    ///             <see cref="EasySocketOptions.IsDefaultAuthenticated" /> is <c>null</c>
+    ///             <br />
+    ///             The <see cref="EasySocketOptions.IsDefaultAuthenticated" /> can be
+    ///             configured
+    ///             through the <see cref="AppBuilderExtensions.UseEasySockets" />
+    ///         </para>
     ///     </para>
     ///     <para>
     ///         The default is <c>false</c>.

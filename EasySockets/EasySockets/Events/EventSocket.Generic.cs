@@ -1,20 +1,10 @@
-using System.Net.WebSockets;
-using EasySockets.Builder;
 using EasySockets.DataModels;
 using EasySockets.Enums;
 
 namespace EasySockets.Events;
 
-internal static class EasySocketEventHolder
-{
-    internal static readonly Dictionary<EasySocketEventComparer, Func<string, Task>> Events = new();
-}
-
 public abstract class EventSocket<TEvent> : EasySocket, IEventSocket where TEvent : IEasySocketEvent
 {
-	protected EventSocket(WebSocket webSocket, EasySocketOptions options) : base(webSocket, options)
-	{
-	}
 
 	/// <summary>
 	///     Sends a message to the client websocket.
@@ -65,7 +55,7 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket where TEven
     /// <returns>The task representing the parallel asynchronous sending</returns>
     public Task Broadcast(BroadCastFilter filter, string @event, string message)
     {
-        return Emit?.Invoke(this, filter, BindEvent(@event, message) ?? "") ?? Task.CompletedTask;
+        return Broadcast(filter, BindEvent(@event, message) ?? "");
     }
 
 	/// <summary>
@@ -74,8 +64,7 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket where TEven
 	/// <inheritdoc cref="Broadcast(BroadCastFilter, string, string)" />
 	public Task Broadcast(string @event, string message)
     {
-        return Emit?.Invoke(this, BroadCastFilter.EqualRoomId, BindEvent(@event, message) ?? "") ??
-               Task.CompletedTask;
+        return Broadcast(BroadCastFilter.EqualRoomId, BindEvent(@event, message) ?? "");
     }
 
     public sealed override async Task OnMessage(string message)
@@ -163,6 +152,4 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket where TEven
     {
         return Task.CompletedTask;
     }
-
-
 }

@@ -1,20 +1,14 @@
-﻿using System.Net.WebSockets;
-using System.Text.Json;
-using EasySockets.Builder;
+﻿using System.Text.Json;
 
 namespace EasySockets.Events;
 
 public abstract class EventSocket : EventSocket<EasySocketEvent>
 {
-	protected EventSocket(WebSocket webSocket, EasySocketOptions options) : base(webSocket, options)
-	{
-	}
-
-	public sealed override EasySocketEvent? ExtractEvent(string message)
+    public sealed override EasySocketEvent? ExtractEvent(string message)
     {
         try
         {
-            return JsonSerializer.Deserialize<EasySocketEvent>(message);
+            return JsonSerializer.Deserialize<EasySocketEvent>(message, EasySocketEventConverter.EasySocketEventSerializerOptions);
         }
         catch
         {
@@ -22,7 +16,7 @@ public abstract class EventSocket : EventSocket<EasySocketEvent>
         }
     }
 
-    public sealed override string? ExtractMessage(EasySocketEvent @event, string message)
+    public sealed override string ExtractMessage(EasySocketEvent @event, string message)
     {
         return @event.Message;
     }
@@ -31,13 +25,11 @@ public abstract class EventSocket : EventSocket<EasySocketEvent>
     {
         try
         {
-            return JsonSerializer.Serialize(new EasySocketEvent { Event = @event, Message = message });
+            return JsonSerializer.Serialize(new EasySocketEvent(@event, message), EasySocketEventConverter.EasySocketEventSerializerOptions);
         }
         catch
         {
             return null;
         }
     }
-
-
 }

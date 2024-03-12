@@ -4,9 +4,13 @@ VisualStudioVersion = 17.6.33723.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasySockets", "EasySockets\EasySockets.csproj", "{3CDCE7C4-4692-462B-ADD0-2F4002743B17}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{5B438880-FBAC-4F11-9564-FF42E3AD8938}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{774F5CDF-D96B-46E6-89A7-AA6F81DEFCDF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Authentication", "Authentication\Authentication.csproj", "{9CAF77CD-B6B7-4566-B767-FC2CC1907186}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "EasySocketsTests\UnitTests.csproj", "{7B94317E-27BB-4AE0-8264-0F1F174FD740}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{4679D5FE-F9FE-4E76-A4B2-FA99030917E6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EasySocketBasicChat", "EasySocketBasicChat\EasySocketBasicChat.csproj", "{B1168BC9-84B1-4E24-A219-C6F38221383F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,16 +22,21 @@ Global
 		{3CDCE7C4-4692-462B-ADD0-2F4002743B17}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3CDCE7C4-4692-462B-ADD0-2F4002743B17}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3CDCE7C4-4692-462B-ADD0-2F4002743B17}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9CAF77CD-B6B7-4566-B767-FC2CC1907186}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9CAF77CD-B6B7-4566-B767-FC2CC1907186}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9CAF77CD-B6B7-4566-B767-FC2CC1907186}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9CAF77CD-B6B7-4566-B767-FC2CC1907186}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B94317E-27BB-4AE0-8264-0F1F174FD740}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B94317E-27BB-4AE0-8264-0F1F174FD740}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B94317E-27BB-4AE0-8264-0F1F174FD740}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B94317E-27BB-4AE0-8264-0F1F174FD740}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1168BC9-84B1-4E24-A219-C6F38221383F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1168BC9-84B1-4E24-A219-C6F38221383F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1168BC9-84B1-4E24-A219-C6F38221383F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1168BC9-84B1-4E24-A219-C6F38221383F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{9CAF77CD-B6B7-4566-B767-FC2CC1907186} = {5B438880-FBAC-4F11-9564-FF42E3AD8938}
+		{7B94317E-27BB-4AE0-8264-0F1F174FD740} = {774F5CDF-D96B-46E6-89A7-AA6F81DEFCDF}
+		{B1168BC9-84B1-4E24-A219-C6F38221383F} = {4679D5FE-F9FE-4E76-A4B2-FA99030917E6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3EDCCD35-60F7-409A-BF5C-EED1488B007D}

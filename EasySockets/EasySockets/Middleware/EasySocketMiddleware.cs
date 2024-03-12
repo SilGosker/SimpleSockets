@@ -1,7 +1,4 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using EasySockets.Authentication;
-using EasySockets.Builder;
 using EasySockets.Services;
 
 namespace EasySockets.Middleware;
@@ -9,16 +6,16 @@ namespace EasySockets.Middleware;
 internal sealed class SocketMiddleware
 {
     private readonly RequestDelegate _next;
-    private readonly EasySocketService _simpleSocketService;
-    private readonly IServiceScopeFactory _scopeFactory;
-    private readonly EasySocketMiddlewareOptions _options;
+    private readonly EasySocketService _easySocketService;
+    private readonly EasySocketAuthenticator _easySocketAuthenticator;
+    private readonly EasySocketTypeHolder _easySocketTypeHolder;
 
-    public SocketMiddleware(RequestDelegate next, EasySocketService simpleSocketService, IServiceScopeFactory scopeFactory, EasySocketMiddlewareOptions options)
+    public SocketMiddleware(RequestDelegate next, EasySocketService easySocketService, EasySocketAuthenticator easySocketAuthenticator, EasySocketTypeHolder easySocketTypeHolder)
     {
         _next = next;
-        _simpleSocketService = simpleSocketService;
-        _scopeFactory = scopeFactory;
-        _options = options;
+        _easySocketService = easySocketService;
+        _easySocketAuthenticator = easySocketAuthenticator;
+        _easySocketTypeHolder = easySocketTypeHolder;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -29,18 +26,31 @@ internal sealed class SocketMiddleware
             return;
         }
 
-        var simpleSocket = await EasySocketInstanceFactory.GetAuthenticatedInstance(context,
-            _options.IsDefaultAuthenticated,
-            _options.GetDefaultRoomId(context),
-            _options.GetDefaultClientId(context));
+        if (!_easySocketTypeHolder.TryGetValue(context.Request.Path.ToString(), out var easySocketTypeCache))
+        {
+            await _next.Invoke(context);
+            return;
+        }
 
-        if (simpleSocket == null)
+        var authenticationResult = await _easySocketAuthenticator.GetAuthenticationResultAsync(
+            easySocketTypeCache,
+            context);
+
+        if (!authenticationResult.IsAuthenticated)
         {
             context.Response.StatusCode = 401;
             return;
         }
 
-        await _simpleSocketService.AddSocket(simpleSocket);
-        _simpleSocketService.RemoveSocket(simpleSocket);
+        var easySocket = await _easySocketAuthenticator.GetInstance(easySocketTypeCache, context.WebSockets, authenticationResult.RoomId!, authenticationResult.ClientId!);
+
+        if (easySocket == null)
+        {
+            context.Response.StatusCode = 401;
+            return;
+        }
+
+        await _easySocketService.AddSocket(easySocket);
+        _easySocketService.RemoveSocket(easySocket);
     }
 }
