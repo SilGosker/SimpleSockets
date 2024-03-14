@@ -145,7 +145,11 @@ public abstract class EasySocket : IEasySocket
                     break;
                 }
 
-            if (result.EndOfMessage && IsConnected()) await OnMessage(sb.ToString()).ConfigureAwait(false);
+            if (result.EndOfMessage && IsConnected())
+            {
+                await OnMessage(sb.ToString()).ConfigureAwait(false);
+                sb.Clear();
+            }
         }
 
         await CloseAsync();
