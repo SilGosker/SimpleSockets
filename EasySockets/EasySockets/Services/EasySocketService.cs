@@ -29,8 +29,8 @@ internal sealed class EasySocketService : IEasySocketService
             room.Sockets.Add(socket);
         }
 
-        await socket.OnConnect();
-        await socket.ReceiveMessages();
+        await socket.OnConnect().ConfigureAwait(false);
+        await socket.ReceiveMessages().ConfigureAwait(false);
     }
 
     public bool Any(string roomId, string userId)

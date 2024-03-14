@@ -7,7 +7,7 @@ namespace EasySockets.Builder;
 /// <summary>
 ///     The class to further configure a specific EasySocket.
 /// </summary>
-public class EasySocketBuilder
+public sealed class EasySocketBuilder
 {
 	private readonly EasySocketTypeHolder _easySocketTypeHolder;
 	public EasySocketBuilder(EasySocketTypeHolder easySocketTypeHolder)

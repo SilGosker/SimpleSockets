@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace EasySockets.Builder;
 
-public class EasySocketMiddlewareOptions
+public sealed class EasySocketMiddlewareOptions
 {
     private Func<HttpContext, string> _getDefaultClientId = _ => Guid.NewGuid().ToString();
     private Func<HttpContext, string> _getDefaultRoomId = _ => "__0";

@@ -3,7 +3,7 @@ using EasySockets.Authentication;
 
 namespace EasySockets.Builder;
 
-public class EasySocketOptions
+public sealed class EasySocketOptions
 {
 	private int _chunkSize = 100;
 

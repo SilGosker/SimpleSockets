@@ -1,13 +1,14 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using EasySockets.DataModels;
 using EasySockets.Authentication;
 using EasySockets.Builder;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace EasySockets.Services;
 
-public class EasySocketAuthenticator
+public sealed class EasySocketAuthenticator
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly IOptions<EasySocketMiddlewareOptions> _options;

@@ -626,7 +626,7 @@ Events are part of the full message send from the client to the server. An event
   "message": "Bar"
 }
 ```
-This whole json is sent from the client to the server. The message that needs to be processed is `Bar`, but the event is `Foo`. And this is the part that is so powerful, because we can invoke different pieces of code based on input of a client.
+This whole json is sent from the client to the server. The message that needs to be processed is `Bar`, but the event is `Foo`. And this is the part that is so powerful, because we can invoke different pieces of code based on the input of any given client.
 
 #### Event types
 Event types are the way events are registered and extracted from the complete message. In the case of `EventSocket`, this is a simple JSON message as shown earlier. When referring to `Event Types`, we are referring to the **structure** of a message. When referring to an event, we are referring to the **identifier** or **name** of the event.
@@ -659,7 +659,7 @@ using EasySockets.Events;
 
 public class ChatSocket : EventSocket
 {
-    public ChatSocket(WebSocket webSocket, EasySocketOptions options) : base(webSocket, options)
+    public ChatSocket()
     {
         On("typing", message => Broadcast("typing", message));
     }

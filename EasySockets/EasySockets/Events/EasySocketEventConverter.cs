@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace EasySockets.Events;
 
-public class EasySocketEventConverter : JsonConverter<EasySocketEvent>
+public sealed class EasySocketEventConverter : JsonConverter<EasySocketEvent>
 {
     public static readonly JsonSerializerOptions EasySocketEventSerializerOptions = new()
     {

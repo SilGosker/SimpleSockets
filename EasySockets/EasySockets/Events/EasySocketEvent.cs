@@ -1,8 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-
+﻿
 namespace EasySockets.Events;
 
-public class EasySocketEvent : IEasySocketEvent
+public sealed class EasySocketEvent : IEasySocketEvent
 {
 
     public static implicit operator EasySocketEvent(string @event)

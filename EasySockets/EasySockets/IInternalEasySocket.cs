@@ -1,4 +1,4 @@
-﻿using System.Net.WebSockets;
+using System.Net.WebSockets;
 using EasySockets.Builder;
 using EasySockets.Enums;
 
