@@ -76,7 +76,7 @@ public abstract class EasySocket : IEasySocket
             return;
         }
 
-        var buffer = new byte[_options.ChunkSize];
+        var buffer = new byte[Math.Min(_options.ChunkSize, message.Length)];
 
         try
         {
@@ -152,7 +152,7 @@ public abstract class EasySocket : IEasySocket
             }
         }
 
-        await CloseAsync();
+        await CloseAsync().ConfigureAwait(false);
     }
 
     /// <summary>
