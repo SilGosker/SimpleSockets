@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Text;
 using EasySockets.Builder;
@@ -68,7 +68,7 @@ public abstract class EasySocket : IEasySocket
     /// </summary>
     /// <param name="message">The message to be sent.</param>
     /// <returns>A task representing the asynchronous operation of sending the message to the client.</returns>
-    public async Task SendToClient(string message)
+    public async Task SendToClientAsync(string message)
     {
         if (!IsConnected())
         {

@@ -20,7 +20,7 @@ public interface IEasySocket : IDisposable, IInternalEasySocket
 	/// <returns>
 	///     A task that should keep the EasySocket middleware alive during the lifetime of the clients connection
 	/// </returns>
-	public Task ReceiveMessages();
+	public Task ReceiveMessagesAsync();
 
 	/// <summary>
 	///     Checks the connection status of the EasySocket.
@@ -47,7 +47,7 @@ public interface IEasySocket : IDisposable, IInternalEasySocket
 	/// </summary>
 	/// <param name="message">The content of the message</param>
 	/// <returns>A task that represents the asynchronous operation</returns>
-	public Task SendToClient(string message);
+	public Task SendToClientAsync(string message);
 	
     /// <summary>
 	///    Closes the websocket connection and disposes the EasySocket instance

@@ -14,7 +14,7 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket where TEven
 	/// <returns>A task representing the asynchronous operation of sending the message to the client.</returns>
 	public Task SendToClient(string message, string @event)
     {
-	    return SendToClient(BindEvent(message, @event) ?? "");
+	    return SendToClientAsync(BindEvent(message, @event) ?? "");
     }
 
     /// <inheritdoc cref="SendToClient(string,string)" />

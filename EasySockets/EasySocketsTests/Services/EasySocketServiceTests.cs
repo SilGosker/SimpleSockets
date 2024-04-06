@@ -13,8 +13,8 @@ public class EasySocketServiceTests
     {
         // Arrange
         var mockSocket = new Mock<IEasySocket>();
-        mockSocket.Setup(s => s.ReceiveMessages()).Returns(isConnected ? Task.CompletedTask : Task.Delay(10));
-        mockSocket.Setup(s => s.SendToClient(string.Empty)).Verifiable();
+        mockSocket.Setup(s => s.ReceiveMessagesAsync()).Returns(isConnected ? Task.CompletedTask : Task.Delay(10));
+        mockSocket.Setup(s => s.SendToClientAsync(string.Empty)).Verifiable();
         mockSocket.Setup(s => s.IsConnected()).Returns(isConnected);
         mockSocket.SetupGet(s => s.RoomId).Returns("roomId");
         var service = new EasySocketService();
@@ -37,8 +37,8 @@ public class EasySocketServiceTests
         foreach (var roomId in roomIds)
         {
             var mockSocket = new Mock<IEasySocket>();
-            mockSocket.Setup(s => s.ReceiveMessages()).Returns(Task.Delay(10));
-            mockSocket.Setup(s => s.SendToClient(string.Empty)).Verifiable();
+            mockSocket.Setup(s => s.ReceiveMessagesAsync()).Returns(Task.Delay(10));
+            mockSocket.Setup(s => s.SendToClientAsync(string.Empty)).Verifiable();
             mockSocket.Setup(s => s.IsConnected()).Returns(true);
             mockSocket.SetupGet(s => s.RoomId).Returns(roomId);
             sockets.Add(mockSocket);
@@ -66,8 +66,8 @@ public class EasySocketServiceTests
         foreach (var roomId in roomIds)
         {
             var mockSocket = new Mock<IEasySocket>();
-            mockSocket.Setup(s => s.ReceiveMessages()).Returns(Task.Delay(10));
-            mockSocket.Setup(s => s.SendToClient(string.Empty)).Verifiable();
+            mockSocket.Setup(s => s.ReceiveMessagesAsync()).Returns(Task.Delay(10));
+            mockSocket.Setup(s => s.SendToClientAsync(string.Empty)).Verifiable();
             mockSocket.Setup(s => s.IsConnected()).Returns(true);
             mockSocket.SetupGet(s => s.RoomId).Returns(roomId);
             sockets.Add(mockSocket);
@@ -92,8 +92,8 @@ public class EasySocketServiceTests
     {
         // Arrange
         var mockSocket = new Mock<IEasySocket>();
-        mockSocket.Setup(s => s.ReceiveMessages()).Returns(Task.Delay(10));
-        mockSocket.Setup(s => s.SendToClient(string.Empty)).Verifiable();
+        mockSocket.Setup(s => s.ReceiveMessagesAsync()).Returns(Task.Delay(10));
+        mockSocket.Setup(s => s.SendToClientAsync(string.Empty)).Verifiable();
         mockSocket.Setup(s => s.IsConnected()).Returns(true);
         mockSocket.SetupGet(s => s.RoomId).Returns("roomId");
 
@@ -115,8 +115,8 @@ public class EasySocketServiceTests
         string roomIdConnected = "roomId";
         string roomIdDisconnected = "roomId1";
         var mockSocket = new Mock<IEasySocket>();
-        mockSocket.Setup(s => s.ReceiveMessages()).Returns(Task.Delay(10));
-        mockSocket.Setup(s => s.SendToClient(string.Empty)).Verifiable();
+        mockSocket.Setup(s => s.ReceiveMessagesAsync()).Returns(Task.Delay(10));
+        mockSocket.Setup(s => s.SendToClientAsync(string.Empty)).Verifiable();
         mockSocket.Setup(s => s.IsConnected()).Returns(true);
         mockSocket.SetupGet(s => s.RoomId).Returns(roomIdConnected);
 
@@ -139,8 +139,8 @@ public class EasySocketServiceTests
     {
         // Arrange
         var mockSocket = new Mock<IEasySocket>();
-        mockSocket.Setup(s => s.ReceiveMessages()).Returns(Task.Delay(10));
-        mockSocket.Setup(s => s.SendToClient(string.Empty)).Verifiable();
+        mockSocket.Setup(s => s.ReceiveMessagesAsync()).Returns(Task.Delay(10));
+        mockSocket.Setup(s => s.SendToClientAsync(string.Empty)).Verifiable();
         mockSocket.Setup(s => s.IsConnected()).Returns(true);
         mockSocket.SetupGet(s => s.RoomId).Returns(roomId);
         mockSocket.SetupGet(s => s.ClientId).Returns(connectedClient);
@@ -159,8 +159,8 @@ public class EasySocketServiceTests
     {
         // Arrange
         var mockSocket = new Mock<IEasySocket>();
-        mockSocket.Setup(s => s.ReceiveMessages()).Returns(Task.Delay(10));
-        mockSocket.Setup(s => s.SendToClient(string.Empty)).Verifiable();
+        mockSocket.Setup(s => s.ReceiveMessagesAsync()).Returns(Task.Delay(10));
+        mockSocket.Setup(s => s.SendToClientAsync(string.Empty)).Verifiable();
         mockSocket.Setup(s => s.IsConnected()).Returns(true);
         mockSocket.SetupGet(s => s.RoomId).Returns("roomId");
         var service = new EasySocketService();
@@ -178,8 +178,8 @@ public class EasySocketServiceTests
     {
         // Arrange
         var mockSocket = new Mock<IEasySocket>();
-        mockSocket.Setup(s => s.ReceiveMessages()).Returns(Task.Delay(10));
-        mockSocket.Setup(s => s.SendToClient(string.Empty)).Verifiable();
+        mockSocket.Setup(s => s.ReceiveMessagesAsync()).Returns(Task.Delay(10));
+        mockSocket.Setup(s => s.SendToClientAsync(string.Empty)).Verifiable();
         mockSocket.Setup(s => s.IsConnected()).Returns(true);
         mockSocket.SetupGet(s => s.RoomId).Returns("roomId");
         var service = new EasySocketService();
@@ -197,8 +197,8 @@ public class EasySocketServiceTests
     {
         // Arrange
         var mockSocket = new Mock<IEasySocket>();
-        mockSocket.Setup(s => s.ReceiveMessages()).Returns(Task.Delay(10));
-        mockSocket.Setup(s => s.SendToClient(string.Empty)).Verifiable();
+        mockSocket.Setup(s => s.ReceiveMessagesAsync()).Returns(Task.Delay(10));
+        mockSocket.Setup(s => s.SendToClientAsync(string.Empty)).Verifiable();
         mockSocket.Setup(s => s.IsConnected()).Returns(true);
         mockSocket.SetupGet(s => s.RoomId).Returns("roomId");
         mockSocket.SetupGet(s => s.ClientId).Returns("clientId");
@@ -243,8 +243,8 @@ public class EasySocketServiceTests
     {
         // Arrange
         var mockSocket = new Mock<IEasySocket>();
-        mockSocket.Setup(s => s.ReceiveMessages()).Returns(Task.Delay(10));
-        mockSocket.Setup(s => s.SendToClient(string.Empty)).Verifiable();
+        mockSocket.Setup(s => s.ReceiveMessagesAsync()).Returns(Task.Delay(10));
+        mockSocket.Setup(s => s.SendToClientAsync(string.Empty)).Verifiable();
         mockSocket.Setup(s => s.IsConnected()).Returns(true);
         mockSocket.SetupGet(s => s.RoomId).Returns("roomId");
         var service = new EasySocketService();
@@ -254,7 +254,7 @@ public class EasySocketServiceTests
         await service.SendToRoomAsync("roomId", "message");
 
         // Assert
-        mockSocket.Verify(s => s.SendToClient("message"), Times.Once);
+        mockSocket.Verify(s => s.SendToClientAsync("message"), Times.Once);
     }
 
     [Fact]
@@ -275,8 +275,8 @@ public class EasySocketServiceTests
     {
         // Arrange
         var mockSocket = new Mock<IEasySocket>();
-        mockSocket.Setup(s => s.ReceiveMessages()).Returns(Task.Delay(10));
-        mockSocket.Setup(s => s.SendToClient(string.Empty)).Verifiable();
+        mockSocket.Setup(s => s.ReceiveMessagesAsync()).Returns(Task.Delay(10));
+        mockSocket.Setup(s => s.SendToClientAsync(string.Empty)).Verifiable();
         mockSocket.Setup(s => s.IsConnected()).Returns(true);
         mockSocket.SetupGet(s => s.RoomId).Returns("roomId");
         mockSocket.SetupGet(s => s.ClientId).Returns("clientId");
@@ -287,7 +287,7 @@ public class EasySocketServiceTests
         await service.SendToClientAsync("roomId", "clientId", "message");
 
         // Assert
-        mockSocket.Verify(s => s.SendToClient("message"), Times.Once);
+        mockSocket.Verify(s => s.SendToClientAsync("message"), Times.Once);
     }
 
     [Fact]
@@ -308,8 +308,8 @@ public class EasySocketServiceTests
     {
         // Arrange
         var mockSocket = new Mock<IEasySocket>();
-        mockSocket.Setup(s => s.ReceiveMessages()).Returns(Task.Delay(10));
-        mockSocket.Setup(s => s.SendToClient(string.Empty)).Verifiable();
+        mockSocket.Setup(s => s.ReceiveMessagesAsync()).Returns(Task.Delay(10));
+        mockSocket.Setup(s => s.SendToClientAsync(string.Empty)).Verifiable();
         mockSocket.Setup(s => s.IsConnected()).Returns(true);
         mockSocket.SetupGet(s => s.RoomId).Returns("roomId");
         var service = new EasySocketService();

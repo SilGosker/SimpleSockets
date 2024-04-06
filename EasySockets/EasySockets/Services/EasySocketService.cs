@@ -30,7 +30,7 @@ internal sealed class EasySocketService : IEasySocketService
         }
 
         await socket.OnConnect().ConfigureAwait(false);
-        await socket.ReceiveMessages().ConfigureAwait(false);
+        await socket.ReceiveMessagesAsync().ConfigureAwait(false);
     }
 
     public bool Any(string roomId, string userId)
@@ -82,7 +82,7 @@ internal sealed class EasySocketService : IEasySocketService
     {
         var tasks =
             (_rooms.Where(e => e.Id == roomId)
-                .SelectMany(room => room.Sockets, (_, behavior) => behavior.SendToClient(message)));
+                .SelectMany(room => room.Sockets, (_, behavior) => behavior.SendToClientAsync(message)));
         return Task.WhenAll(tasks);
     }
 
@@ -97,7 +97,7 @@ internal sealed class EasySocketService : IEasySocketService
     public Task SendToClientAsync(string roomId, string userId, string message)
     {
         return _rooms.FirstOrDefault(e => e.Id == roomId)?.Sockets.FirstOrDefault(e => e.ClientId == userId)
-            ?.SendToClient(message) ?? Task.CompletedTask;
+            ?.SendToClientAsync(message) ?? Task.CompletedTask;
     }
 
     public IEnumerable<IGrouping<string, IEasySocket>> GetGroups()
@@ -127,13 +127,11 @@ internal sealed class EasySocketService : IEasySocketService
             simpleSockets = simpleSockets.Where(e => e.ClientId != sender.ClientId);
         }
 
-        return Task.WhenAll(simpleSockets.Select(e => e.SendToClient(message)));
+        return Task.WhenAll(simpleSockets.Select(e => e.SendToClientAsync(message)));
     }
 
-    internal void RemoveSocket(IEasySocket? caster)
+    internal void RemoveSocket(IEasySocket caster)
     {
-        if (caster == null) return;
-
         var room = _rooms.FirstOrDefault(e => e.Id == caster.RoomId);
 
         if (room == null) return;
