@@ -38,7 +38,7 @@ internal sealed class SocketMiddleware
 
         if (!authenticationResult.IsAuthenticated)
         {
-            context.Response.StatusCode = 401;
+            await _next.Invoke(context);
             return;
         }
 
@@ -46,7 +46,7 @@ internal sealed class SocketMiddleware
 
         if (easySocket == null)
         {
-            context.Response.StatusCode = 401;
+            await _next.Invoke(context);
             return;
         }
 
