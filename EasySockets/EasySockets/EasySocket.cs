@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Text;
 using EasySockets.Builder;
@@ -9,16 +9,11 @@ namespace EasySockets;
 [DebuggerDisplay("{ClientId} = {_webSocket.State}")]
 public abstract class EasySocket : IEasySocket
 {
-    private readonly CancellationTokenSource _cts;
+    private readonly CancellationTokenSource _cts = new();
     private EasySocketOptions _options = null!;
     private WebSocket _webSocket = null!;
     private bool _isDisposed;
     private bool _isReceiving;
-
-    protected EasySocket()
-    {
-        _cts = new CancellationTokenSource();
-    }
 
     string IInternalEasySocket.RoomId
     {
@@ -76,41 +71,39 @@ public abstract class EasySocket : IEasySocket
             return;
         }
 
-        var buffer = new byte[Math.Min(_options.ChunkSize, message.Length)];
+        Encoder encoder = _options.Encoding.GetEncoder();
+        var byteBuffer = new byte[_options.ChunkSize];
+        int charsProcessed = 0;
 
         try
         {
-            int offset = 0;
-
-            while (offset < message.Length)
+            while (charsProcessed < message.Length)
             {
-                int count = Math.Min(_options.ChunkSize, message.Length - offset);
+                bool flush = charsProcessed + _options.ChunkSize >= message.Length;
+                encoder.Convert(message.AsSpan()[charsProcessed..], byteBuffer, flush, out int charsUsed, out int bytesUsed, out _);
 
-                int target = offset + count;
+                await _webSocket
+                    .SendAsync(new ArraySegment<byte>(byteBuffer, 0, bytesUsed), WebSocketMessageType.Text, flush, _cts.Token)
+                    .ConfigureAwait(false);
 
-                for (int i = 0; offset < target; offset++, i++)
-                {
-                    buffer[i] = (byte)message[offset];
-                }
-
-                await _webSocket.SendAsync(new ArraySegment<byte>(buffer, 0, count), WebSocketMessageType.Text, false, _cts.Token).ConfigureAwait(false);
-
+                charsProcessed += charsUsed;
             }
-
-            await _webSocket.SendAsync(ArraySegment<byte>.Empty, WebSocketMessageType.Text, true, _cts.Token).ConfigureAwait(false);
         }
         catch (WebSocketException)
         {
             await CloseAsync().ConfigureAwait(false);
         }
+        
     }
+
 
     public async Task CloseAsync()
     {
         await OnDisconnect().ConfigureAwait(false);
         try
         {
-            await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, _options.ClosingStatusDescription, CancellationToken.None).ConfigureAwait(false);
+            await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, _options.ClosingStatusDescription,
+                CancellationToken.None).ConfigureAwait(false);
             _webSocket.Abort();
         }
         catch (WebSocketException)
@@ -121,7 +114,7 @@ public abstract class EasySocket : IEasySocket
         Dispose();
     }
 
-    public async Task ReceiveMessages()
+    public async Task ReceiveMessagesAsync()
     {
         if (_isReceiving) return;
         _isReceiving = true;
@@ -138,6 +131,8 @@ public abstract class EasySocket : IEasySocket
                 {
                     result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), _cts.Token).ConfigureAwait(false);
 
+                    if (result.MessageType != WebSocketMessageType.Text) continue;
+                    
                     sb.Append(_options.Encoding.GetString(buffer.AsSpan()[..result.Count]));
                 }
                 catch (WebSocketException)
