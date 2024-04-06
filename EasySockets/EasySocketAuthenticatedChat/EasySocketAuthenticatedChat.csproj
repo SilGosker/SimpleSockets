@@ -10,8 +10,4 @@
     <ProjectReference Include="..\EasySockets\EasySockets.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Authenticators\" />
-  </ItemGroup>
-
 </Project>
