@@ -1,7 +1,7 @@
 ﻿using EasySockets;
 using EasySockets.Enums;
 
-namespace EasySocketBasicChat.Sockets;
+namespace EasySocketAuthenticatedChat.Sockets;
 
 public class ChatSocket : EasySocket
 {
