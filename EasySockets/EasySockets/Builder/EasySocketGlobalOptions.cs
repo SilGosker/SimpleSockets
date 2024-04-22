@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace EasySockets.Builder;
 
-public sealed class EasySocketMiddlewareOptions
+public sealed class EasySocketGlobalOptions
 {
     private Func<HttpContext, string> _getDefaultClientId = _ => Guid.NewGuid().ToString();
     private Func<HttpContext, string> _getDefaultRoomId = _ => "__0";
@@ -45,24 +45,6 @@ public sealed class EasySocketMiddlewareOptions
         get => _getDefaultClientId;
         set => _getDefaultClientId = value ?? throw new ArgumentNullException(nameof(value));
     }
-
-    /// <summary>
-    ///     <para>
-    ///         Whether the client is authenticated by default
-    ///         <para>
-    ///             This option will only be used when no authenticator are used and if the configured
-    ///             <see cref="EasySocketOptions.IsDefaultAuthenticated" /> is <c>null</c>
-    ///             <br />
-    ///             The <see cref="EasySocketOptions.IsDefaultAuthenticated" /> can be
-    ///             configured
-    ///             through the <see cref="AppBuilderExtensions.UseEasySockets" />
-    ///         </para>
-    ///     </para>
-    ///     <para>
-    ///         The default is <c>false</c>.
-    ///     </para>
-    /// </summary>
-    public bool IsDefaultAuthenticated { get; set; } = false;
 
     /// <summary>
     ///     The <see cref="Microsoft.AspNetCore.Builder.WebSocketOptions" /> that will be used in the middleware.

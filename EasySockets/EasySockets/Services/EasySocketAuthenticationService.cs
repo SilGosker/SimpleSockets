@@ -1,32 +1,32 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using EasySockets.DataModels;
 using EasySockets.Authentication;
 using EasySockets.Builder;
-using Microsoft.Extensions.Logging;
+using EasySockets.Events;
 using Microsoft.Extensions.Options;
+using EasySockets.Services.Caching;
 
 namespace EasySockets.Services;
 
-public sealed class EasySocketAuthenticator
+internal sealed class EasySocketAuthenticationService
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly IOptions<EasySocketMiddlewareOptions> _options;
-    public EasySocketAuthenticator(IServiceScopeFactory serviceScopeFactory, IOptions<EasySocketMiddlewareOptions> options)
+    private readonly EasySocketGlobalOptions _options;
+    public EasySocketAuthenticationService(IServiceScopeFactory serviceScopeFactory, IOptions<EasySocketGlobalOptions> options)
     {
         _serviceScopeFactory = serviceScopeFactory;
-        _options = options;
+        _options = options.Value;
     }
 
-    public async Task<EasySocketAuthenticationResult> GetAuthenticationResultAsync(EasySocketTypeCache easySocketTypeCache, HttpContext context)
+    internal async Task<EasySocketAuthenticationResult> GetAuthenticationResultAsync(EasySocketTypeCache easySocketTypeCache, HttpContext context)
     {
-        var roomId = _options.Value.GetDefaultRoomId(context);
-        var clientId = _options.Value.GetDefaultClientId(context);
+        var roomId = _options.GetDefaultRoomId(context);
+        var clientId = _options.GetDefaultClientId(context);
 
         var scope = context.RequestServices;
 
         EasySocketAuthenticationResult authenticationResult = new(
-            easySocketTypeCache.Options.IsDefaultAuthenticated ?? _options.Value.IsDefaultAuthenticated,
+            easySocketTypeCache.Options.Authenticators.Count == 0,
             roomId,
             clientId);
 
@@ -50,7 +50,7 @@ public sealed class EasySocketAuthenticator
         return authenticationResult;
     }
 
-    public async Task<IEasySocket?> GetInstance(EasySocketTypeCache cache, WebSocketManager websockets, string roomId, string clientId)
+    internal async Task<IEasySocket?> GetInstanceAsync(EasySocketTypeCache cache, WebSocketManager websockets, string roomId, string clientId)
     {
         using var scope = _serviceScopeFactory.CreateScope();
         var ws = websockets.WebSocketRequestedProtocols.Count > 0
@@ -66,6 +66,11 @@ public sealed class EasySocketAuthenticator
         ((IInternalEasySocket)easySocket).RoomId = roomId;
         ((IInternalEasySocket)easySocket).ClientId = clientId;
         easySocket.Options = cache.Options;
+
+        if (easySocket is IInternalEventSocket eventSocket)
+        {
+            eventSocket.Events = ((EventSocketTypeCache)cache).EventInfos;
+        }
 
         return easySocket;
     }

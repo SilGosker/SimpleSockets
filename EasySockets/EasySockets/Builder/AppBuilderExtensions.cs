@@ -1,5 +1,5 @@
 using EasySockets.Middleware;
-using EasySockets.Services;
+using EasySockets.Services.Caching;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -18,7 +18,7 @@ public static class AppBuilderExtensions
 	/// <returns>A <see cref="EasySocketBuilder" /> To further configure the EasySockets.</returns>
 	public static EasySocketBuilder UseEasySockets(this IApplicationBuilder app)
 	{
-        var options = app.ApplicationServices.GetRequiredService<IOptions<EasySocketMiddlewareOptions>>();
+        var options = app.ApplicationServices.GetRequiredService<IOptions<EasySocketGlobalOptions>>();
 
 		app.UseWebSockets(options.Value.WebSocketOptions);
 		app.UseMiddleware<SocketMiddleware>();
