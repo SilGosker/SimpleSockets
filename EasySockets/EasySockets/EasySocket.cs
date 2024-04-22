@@ -72,14 +72,16 @@ public abstract class EasySocket : IEasySocket
         }
 
         Encoder encoder = _options.Encoding.GetEncoder();
-        var byteBuffer = new byte[_options.ChunkSize];
+        var decoder = _options.Encoding.GetDecoder();
+        var byteBuffer = new byte[_options.BufferSize];
+        int bufferCharCount = decoder.GetCharCount(byteBuffer, false);
         int charsProcessed = 0;
 
         try
         {
             while (charsProcessed < message.Length)
             {
-                bool flush = charsProcessed + _options.ChunkSize >= message.Length;
+                bool flush = charsProcessed + bufferCharCount >= message.Length;
                 encoder.Convert(message.AsSpan()[charsProcessed..], byteBuffer, flush, out int charsUsed, out int bytesUsed, out _);
 
                 await _webSocket
@@ -95,7 +97,6 @@ public abstract class EasySocket : IEasySocket
         }
         
     }
-
 
     public async Task CloseAsync()
     {
@@ -120,7 +121,7 @@ public abstract class EasySocket : IEasySocket
         _isReceiving = true;
 
         StringBuilder sb = new();
-        var buffer = new byte[_options.ChunkSize];
+        var buffer = new byte[_options.BufferSize];
 
         while (IsConnected() && !_cts.IsCancellationRequested && !_isDisposed)
         {

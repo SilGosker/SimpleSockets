@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using EasySockets.Services;
+using EasySockets.Services.Caching;
 
 namespace EasySockets.Middleware;
 
@@ -7,10 +8,10 @@ internal sealed class SocketMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly EasySocketService _easySocketService;
-    private readonly EasySocketAuthenticator _easySocketAuthenticator;
+    private readonly EasySocketAuthenticationService _easySocketAuthenticator;
     private readonly EasySocketTypeHolder _easySocketTypeHolder;
 
-    public SocketMiddleware(RequestDelegate next, EasySocketService easySocketService, EasySocketAuthenticator easySocketAuthenticator, EasySocketTypeHolder easySocketTypeHolder)
+    public SocketMiddleware(RequestDelegate next, EasySocketService easySocketService, EasySocketAuthenticationService easySocketAuthenticator, EasySocketTypeHolder easySocketTypeHolder)
     {
         _next = next;
         _easySocketService = easySocketService;
@@ -42,7 +43,7 @@ internal sealed class SocketMiddleware
             return;
         }
 
-        var easySocket = await _easySocketAuthenticator.GetInstance(easySocketTypeCache, context.WebSockets, authenticationResult.RoomId!, authenticationResult.ClientId!);
+        var easySocket = await _easySocketAuthenticator.GetInstanceAsync(easySocketTypeCache, context.WebSockets, authenticationResult.RoomId!, authenticationResult.ClientId!);
 
         if (easySocket == null)
         {

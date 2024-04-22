@@ -3,12 +3,6 @@ namespace EasySockets.Events;
 
 public sealed class EasySocketEvent : IEasySocketEvent
 {
-
-    public static implicit operator EasySocketEvent(string @event)
-    {
-        return new EasySocketEvent(@event);
-    }
-
     public EasySocketEvent()
     {
         Event = string.Empty;
@@ -30,9 +24,4 @@ public sealed class EasySocketEvent : IEasySocketEvent
     public string Event { get; set; }
     
     public string Message { get; set; }
-
-    public string GetEvent()
-    {
-        return Event;
-    }
 }

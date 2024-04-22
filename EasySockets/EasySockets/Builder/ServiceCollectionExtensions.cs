@@ -1,4 +1,5 @@
 ﻿using EasySockets.Services;
+using EasySockets.Services.Caching;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EasySockets.Builder;
@@ -12,28 +13,24 @@ public static class ServiceCollectionExtensions
     ///     Adds the <see cref="IEasySocketService" /> to the dependency injection container.
     /// </summary>
     /// <param name="serviceCollection">The collection the <see cref="IEasySocketService" /> should be added to.</param>
-    /// <param name="configure">A function to configure the provided <see cref="EasySocketMiddlewareOptions" />.</param>
-    public static void AddEasySocketServices(this IServiceCollection serviceCollection,
-        Action<EasySocketMiddlewareOptions>? configure = null)
+    /// <param name="configure">A function to configure the provided <see cref="EasySocketGlobalOptions" />.</param>
+    public static IServiceCollection AddEasySocketServices(this IServiceCollection serviceCollection,
+        Action<EasySocketGlobalOptions>? configure = null)
     {
         if (serviceCollection == null) throw new ArgumentNullException(nameof(serviceCollection));
 
         if (serviceCollection.Any(x => x.ServiceType == typeof(IEasySocketService)))
-            throw new InvalidOperationException("The EasySocketService has already been added to the service collection.");
+            throw new InvalidOperationException(
+                "The EasySocketService has already been added to the service collection.");
 
         serviceCollection.AddSingleton<EasySocketService>();
         serviceCollection.AddSingleton<IEasySocketService>(e => e.GetRequiredService<EasySocketService>());
 
-        serviceCollection.AddSingleton<EasySocketAuthenticator>();
+        serviceCollection.AddSingleton<EasySocketAuthenticationService>();
         serviceCollection.AddSingleton<EasySocketTypeHolder>();
 
-        if (configure != null)
-        {
-            serviceCollection.Configure<EasySocketMiddlewareOptions>(configure);
-        }
-        else
-        {
-            serviceCollection.AddOptions<EasySocketMiddlewareOptions>();
-        }
+        serviceCollection.Configure(configure ?? (_ => { }));
+
+        return serviceCollection;
     }
 }

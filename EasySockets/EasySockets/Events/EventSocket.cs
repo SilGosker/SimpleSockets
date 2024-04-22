@@ -1,9 +1,25 @@
 ﻿using System.Text.Json;
+using EasySockets.Enums;
 
 namespace EasySockets.Events;
 
 public abstract class EventSocket : EventSocket<EasySocketEvent>
 {
+    /// <param name="event">The event to broadcast</param>
+    /// <inheritdoc cref="EventSocket{TEvent}.Broadcast(string,string)"/>
+    public Task Broadcast(EasySocketEvent @event)
+    {
+        return Broadcast(@event.Event, @event.Message);
+    }
+
+    /// <param name="event">The event to broadcast</param>
+    /// <inheritdoc cref="EventSocket{TEvent}.Broadcast(BroadCastFilter,string,string)"/>
+    public Task Broadcast(BroadCastFilter filter, EasySocketEvent @event)
+    {
+        return Broadcast(filter, @event.Event, @event.Message);
+    }
+
+
     public sealed override EasySocketEvent? ExtractEvent(string message)
     {
         try
@@ -14,11 +30,6 @@ public abstract class EventSocket : EventSocket<EasySocketEvent>
         {
             return null;
         }
-    }
-
-    public sealed override string ExtractMessage(EasySocketEvent @event, string message)
-    {
-        return @event.Message;
     }
 
     public sealed override string? BindEvent(string @event, string message)

@@ -10,6 +10,7 @@ public sealed class EasySocketEventConverter : JsonConverter<EasySocketEvent>
         Converters = { new EasySocketEventConverter() },
         ReferenceHandler = ReferenceHandler.IgnoreCycles,
         PropertyNameCaseInsensitive = true
+        
     };
 
     public override EasySocketEvent Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -38,8 +39,8 @@ public sealed class EasySocketEventConverter : JsonConverter<EasySocketEvent>
 
                 switch (propertyName)
                 {
-                    case "Event" when options.PropertyNamingPolicy != JsonNamingPolicy.CamelCase || options.PropertyNameCaseInsensitive:
                     case "event" when options.PropertyNamingPolicy == JsonNamingPolicy.CamelCase || options.PropertyNameCaseInsensitive:
+                    case "Event" when options.PropertyNamingPolicy != JsonNamingPolicy.CamelCase || options.PropertyNameCaseInsensitive:
                         eventValue = reader.GetString();
                         eventPropertyExists = true;
                         break;

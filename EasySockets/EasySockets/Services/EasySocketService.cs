@@ -74,7 +74,7 @@ internal sealed class EasySocketService : IEasySocketService
     {
         return Task.WhenAll(_rooms.SingleOrDefault(e => e.Id == roomId)?.Sockets
                                 .Where(e => e.IsConnected())
-                                .Select(e => e is IEventSocket o ? o.SendToClient(message, @event) : Task.CompletedTask)
+                                .Select(e => e is IEventSocket o ? o.SendToClientAsync(@event, message) : Task.CompletedTask)
                             ?? Enumerable.Empty<Task>());
     }
 
@@ -90,7 +90,7 @@ internal sealed class EasySocketService : IEasySocketService
     {
         return Task.WhenAll(_rooms.FirstOrDefault(e => e.Id == roomId)?.Sockets
                                 .Where(e => e.IsConnected() && e.ClientId == userId)
-                                .Select(e => e is IEventSocket o ? o.SendToClient(message, @event) : Task.CompletedTask)
+                                .Select(e => e is IEventSocket o ? o.SendToClientAsync(@event, message) : Task.CompletedTask)
                             ?? Enumerable.Empty<Task>());
     }
 
@@ -100,7 +100,7 @@ internal sealed class EasySocketService : IEasySocketService
             ?.SendToClientAsync(message) ?? Task.CompletedTask;
     }
 
-    public IEnumerable<IGrouping<string, IEasySocket>> GetGroups()
+    public IEnumerable<IGrouping<string, IEasySocket>> GetGroupings()
     {
 	    return _rooms.SelectMany(e => e.Sockets).GroupBy(e => e.RoomId);
     }

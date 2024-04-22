@@ -94,5 +94,5 @@ public interface IEasySocketService
 	///     An enumerator that iterates through all rooms and their clients<br />
 	///     grouped based on the room's identifier
 	/// </returns>
-	public IEnumerable<IGrouping<string, IEasySocket>> GetGroups();
+	public IEnumerable<IGrouping<string, IEasySocket>> GetGroupings();
 }

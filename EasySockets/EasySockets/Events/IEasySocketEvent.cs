@@ -2,5 +2,5 @@
 
 public interface IEasySocketEvent
 {
-    public string GetEvent();
+    public string Event { get; }
 }
