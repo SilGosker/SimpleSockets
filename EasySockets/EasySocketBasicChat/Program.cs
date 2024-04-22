@@ -3,10 +3,7 @@ using EasySockets.Builder;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddEasySocketServices(e =>
-{
-    e.IsDefaultAuthenticated = true;
-});
+builder.Services.AddEasySocketServices();
 
 // Add services to the container.
 
