@@ -2,8 +2,10 @@
 
 public class MockEasySocket : EasySocket
 {
-	public override Task OnMessage(string message)
+    public override Task OnMessage(string message)
 	{
 		throw new NotImplementedException();
 	}
+
+
 }

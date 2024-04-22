@@ -1,4 +1,5 @@
 ﻿using EasySockets.Services;
+using EasySockets.Services.Caching;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -7,31 +8,36 @@ namespace EasySockets.Builder;
 
 public class ServiceCollectionExtensionsTests
 {
-    [Fact]
-    public void AddEasySocketServices_ExposesRequiredServices()
+    [Theory]
+    [InlineData(typeof(IEasySocketService))]
+    [InlineData(typeof(EasySocketTypeHolder))]
+    [InlineData(typeof(EasySocketAuthenticationService))]
+    [InlineData(typeof(EasySocketService))]
+    public void AddEasySocketServices_ExposesRequiredServices(Type type)
     {
         var serviceCollection = new ServiceCollection();
 
         serviceCollection.AddEasySocketServices();
 
-        Assert.Contains(serviceCollection, x => x.Lifetime == ServiceLifetime.Singleton && x.ServiceType == typeof(IEasySocketService));
-        Assert.Contains(serviceCollection, x => x.Lifetime == ServiceLifetime.Singleton && x.ServiceType == typeof(EasySocketTypeHolder));
-        Assert.Contains(serviceCollection, x => x.Lifetime == ServiceLifetime.Singleton && x.ServiceType == typeof(EasySocketAuthenticator));
+        Assert.Contains(serviceCollection, x => x.Lifetime == ServiceLifetime.Singleton && x.ServiceType == type);
     }
 
     [Fact]
-    public void AddEasySocketServices_ShouldExposeEasySocketMiddlewareOptions()
+    public void AddEasySocketServices_ShouldExposeEasySocketGlobalOptions()
     {
         var serviceCollection = new ServiceCollection();
 
         serviceCollection.AddEasySocketServices();
 
         var services = serviceCollection.BuildServiceProvider();
-        services.GetRequiredService<IOptions<EasySocketMiddlewareOptions>>();
+        var options = services.GetRequiredService<IOptions<EasySocketGlobalOptions>>();
+
+        Assert.NotNull(options);
+        Assert.NotNull(options.Value);
     }
 
     [Fact]
-    public void AddEasySocketServices_ConfiguresEasySocketMiddleWareOptions()
+    public void AddEasySocketServices_WhenConfiguring_ConfiguresEasySocketGlobalOptions()
     {
         var keepAliveInterval = TimeSpan.FromSeconds(1234);
         var receiveBufferSize = 1234;
@@ -48,17 +54,15 @@ public class ServiceCollectionExtensionsTests
         {
             options.GetDefaultClientId = _ => "Test";
             options.GetDefaultRoomId = _ => "Test";
-            options.IsDefaultAuthenticated = true;
             options.WebSocketOptions = websocketOptions;
         });
 
         var services = serviceCollection.BuildServiceProvider();
-        var options = services.GetRequiredService<IOptions<EasySocketMiddlewareOptions>>();
+        var options = services.GetRequiredService<IOptions<EasySocketGlobalOptions>>();
 
 
         Assert.Equal("Test", options.Value.GetDefaultClientId(null!));
         Assert.Equal("Test", options.Value.GetDefaultRoomId(null!));
-        Assert.True(options.Value.IsDefaultAuthenticated);
         Assert.Equal(keepAliveInterval, options.Value.WebSocketOptions.KeepAliveInterval);
         Assert.Equal(receiveBufferSize, options.Value.WebSocketOptions.ReceiveBufferSize);
     }

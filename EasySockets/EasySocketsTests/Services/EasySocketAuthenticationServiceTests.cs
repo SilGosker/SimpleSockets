@@ -1,7 +1,7 @@
 ﻿using EasySockets.Authentication;
 using EasySockets.Builder;
-using EasySockets.DataModels;
 using EasySockets.Mock;
+using EasySockets.Services.Caching;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -9,26 +9,21 @@ using Moq;
 
 namespace EasySockets.Services;
 
-public class EasySocketAuthenticatorTests
+public class EasySocketAuthenticationServiceTests
 {
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public async Task GetAuthenticationResultAsync_WhenNoAuthenticatorsAreConfigured_ShouldReturnConfiguredAuthenticationResult(bool globallyAuthenticated)
+    [Fact]
+    public async Task GetAuthenticationResultAsync_WhenNoAuthenticatorsAreConfigured_ShouldReturnTrue()
     {
         // Arrange
         var serviceScopeFactoryMock = new Mock<IServiceScopeFactory>();
-        var optionsMock = new Mock<IOptions<EasySocketMiddlewareOptions>>();
-        optionsMock.SetupGet(x => x.Value).Returns(new EasySocketMiddlewareOptions()
-        {
-            IsDefaultAuthenticated = globallyAuthenticated
-        });
+        var optionsMock = new Mock<IOptions<EasySocketGlobalOptions>>();
+        optionsMock.SetupGet(x => x.Value).Returns(new EasySocketGlobalOptions());
 
         var easySocketTypeCache = new EasySocketTypeCache(typeof(EasySocket), new());
 
         var context = new DefaultHttpContext();
 
-        var authenticator = new EasySocketAuthenticator(serviceScopeFactoryMock.Object, optionsMock.Object);
+        var authenticator = new EasySocketAuthenticationService(serviceScopeFactoryMock.Object, optionsMock.Object);
 
         // Act
         var task = authenticator.GetAuthenticationResultAsync(easySocketTypeCache, context);
@@ -36,38 +31,7 @@ public class EasySocketAuthenticatorTests
 
         // Assert
         Assert.NotNull(task);
-        Assert.Equal(globallyAuthenticated, authenticationResult.IsAuthenticated);
-    }
-
-    [Theory]
-    [InlineData(true, true)]
-    [InlineData(false, false)]
-    [InlineData(true, false)]
-    [InlineData(false, true)]
-    public async Task GetAuthenticationResultAsync_WhenNoAuthenticatorsAreConfigured_ShouldPreferSocketSpecificAuthenticationResult(
-            bool globallyAuthenticated, bool socketAuthenticated)
-    {
-        var serviceScopeFactoryMock = new Mock<IServiceScopeFactory>();
-        var optionsMock = new Mock<IOptions<EasySocketMiddlewareOptions>>();
-        optionsMock.SetupGet(x => x.Value).Returns(new EasySocketMiddlewareOptions()
-        {
-            IsDefaultAuthenticated = globallyAuthenticated
-        });
-
-        var easySocketTypeCache = new EasySocketTypeCache(typeof(EasySocket), new()
-        {
-            IsDefaultAuthenticated = socketAuthenticated
-        });
-
-        var context = new DefaultHttpContext();
-
-        var authenticator = new EasySocketAuthenticator(serviceScopeFactoryMock.Object, optionsMock.Object);
-
-        var task = authenticator.GetAuthenticationResultAsync(easySocketTypeCache, context);
-        var authenticationResult = await task;
-
-        Assert.NotNull(task);
-        Assert.Equal(socketAuthenticated, authenticationResult.IsAuthenticated);
+        Assert.True(authenticationResult.IsAuthenticated);
     }
 
     [Theory]
@@ -77,14 +41,14 @@ public class EasySocketAuthenticatorTests
     {
         var serviceProvider = new ServiceCollection().BuildServiceProvider();
 
-        var optionsMock = new Mock<IOptions<EasySocketMiddlewareOptions>>();
-        optionsMock.Setup(x => x.Value).Returns(new EasySocketMiddlewareOptions()
+        var optionsMock = new Mock<IOptions<EasySocketGlobalOptions>>();
+        optionsMock.Setup(x => x.Value).Returns(new EasySocketGlobalOptions()
         {
-            IsDefaultAuthenticated = authenticated,
             GetDefaultClientId = _ => clientId,
             GetDefaultRoomId = _ => roomId
         });
 
+        MockEasySocketAuthenticator.Authenticated = authenticated;
         var easySocketTypeCache = new EasySocketTypeCache(typeof(EasySocket), new EasySocketOptions
         {
             Authenticators = new List<Type>
@@ -98,13 +62,13 @@ public class EasySocketAuthenticatorTests
             RequestServices = serviceProvider
         };
 
-        var authenticator = new EasySocketAuthenticator(context.RequestServices.GetRequiredService<IServiceScopeFactory>(), optionsMock.Object);
+        var authenticator = new EasySocketAuthenticationService(context.RequestServices.GetRequiredService<IServiceScopeFactory>(), optionsMock.Object);
 
         // Act
         var authenticationResult = await authenticator.GetAuthenticationResultAsync(easySocketTypeCache, context);
 
         // Assert
-        Assert.Equal(MockEasySocketAuthenticator.Authenticated, authenticationResult.IsAuthenticated);
+        Assert.Equal(authenticated, authenticationResult.IsAuthenticated);
         Assert.Equal(MockEasySocketAuthenticator.RoomId, authenticationResult.RoomId);
         Assert.Equal(MockEasySocketAuthenticator.ClientId, authenticationResult.ClientId);
     }
@@ -116,9 +80,12 @@ public class EasySocketAuthenticatorTests
             string? roomId, string? clientId)
     {
         var serviceProvider = new ServiceCollection().BuildServiceProvider();
+        var mockType = new Mock<IEasySocketAuthenticator>();
+        mockType.Setup(x => x.Authenticate(It.IsAny<EasySocketAuthenticationResult>(), It.IsAny<HttpContext>()))
+            .Returns(true);
 
-        var optionsMock = new Mock<IOptions<EasySocketMiddlewareOptions>>();
-        optionsMock.Setup(x => x.Value).Returns(new EasySocketMiddlewareOptions()
+        var optionsMock = new Mock<IOptions<EasySocketGlobalOptions>>();
+        optionsMock.Setup(x => x.Value).Returns(new EasySocketGlobalOptions()
         {
             GetDefaultClientId = _ => clientId!,
             GetDefaultRoomId = _ => roomId!
@@ -126,7 +93,7 @@ public class EasySocketAuthenticatorTests
 
         var easySocketTypeCache = new EasySocketTypeCache(typeof(EasySocket), new()
         {
-            Authenticators = new List<Type> { typeof(MockEasySocketAuthenticatorReturningNull) }
+            Authenticators = new List<Type> { mockType.Object.GetType() }
         });
 
         var context = new DefaultHttpContext()
@@ -134,7 +101,7 @@ public class EasySocketAuthenticatorTests
             RequestServices = serviceProvider
         };
 
-        var authenticator = new EasySocketAuthenticator(context.RequestServices.GetRequiredService<IServiceScopeFactory>(), optionsMock.Object);
+        var authenticator = new EasySocketAuthenticationService(context.RequestServices.GetRequiredService<IServiceScopeFactory>(), optionsMock.Object);
 
         var authenticationResult = authenticator.GetAuthenticationResultAsync(easySocketTypeCache, context);
         await Assert.ThrowsAsync<InvalidOperationException>(async () => await authenticationResult);
@@ -146,8 +113,8 @@ public class EasySocketAuthenticatorTests
         var serviceCollection = new ServiceCollection();
         var serviceProvider = serviceCollection.BuildServiceProvider();
 
-        var optionsMock = new Mock<IOptions<EasySocketMiddlewareOptions>>();
-        optionsMock.Setup(x => x.Value).Returns(new EasySocketMiddlewareOptions());
+        var optionsMock = new Mock<IOptions<EasySocketGlobalOptions>>();
+        optionsMock.Setup(x => x.Value).Returns(new EasySocketGlobalOptions());
 
         var easySocketTypeCache = new EasySocketTypeCache(typeof(EasySocket), new()
         {
@@ -158,7 +125,7 @@ public class EasySocketAuthenticatorTests
         {
             RequestServices = serviceProvider
         };
-        var authenticator = new EasySocketAuthenticator(context.RequestServices.GetRequiredService<IServiceScopeFactory>(), optionsMock.Object);
+        var authenticator = new EasySocketAuthenticationService(context.RequestServices.GetRequiredService<IServiceScopeFactory>(), optionsMock.Object);
 
         var authenticationResult = await authenticator.GetAuthenticationResultAsync(easySocketTypeCache, context);
 

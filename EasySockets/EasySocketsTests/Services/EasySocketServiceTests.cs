@@ -316,7 +316,7 @@ public class EasySocketServiceTests
         service.AddSocket(mockSocket.Object);
 
         // Act
-        var groups = service.GetGroups();
+        var groups = service.GetGroupings();
 
         // Assert
         Assert.Single(groups);
@@ -329,7 +329,7 @@ public class EasySocketServiceTests
         var service = new EasySocketService();
 
         // Act
-        var groups = service.GetGroups();
+        var groups = service.GetGroupings();
 
         // Assert
         Assert.Empty(groups);

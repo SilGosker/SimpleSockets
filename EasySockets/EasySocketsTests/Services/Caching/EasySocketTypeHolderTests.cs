@@ -1,7 +1,7 @@
-﻿using EasySockets.DataModels;
+﻿using EasySockets.Builder;
 using EasySockets.Mock;
 
-namespace EasySockets.Services;
+namespace EasySockets.Services.Caching;
 
 public class EasySocketTypeHolderTests
 {
@@ -10,7 +10,7 @@ public class EasySocketTypeHolderTests
     {
         var url = "url";
         var easySocketTypeHolder = new EasySocketTypeHolder();
-        var easySocketTypeCache = new EasySocketTypeCache(typeof(MockEasySocket), null);
+        var easySocketTypeCache = new EasySocketTypeCache(typeof(MockEasySocket), new EasySocketOptions());
         easySocketTypeHolder.AddType(url, easySocketTypeCache);
 
         Assert.Throws<InvalidOperationException>(() => easySocketTypeHolder.AddType(url, easySocketTypeCache));
@@ -30,7 +30,7 @@ public class EasySocketTypeHolderTests
     {
         var url = "url";
         var easySocketTypeHolder = new EasySocketTypeHolder();
-        var easySocketTypeCache = new EasySocketTypeCache(typeof(MockEasySocket), null);
+        var easySocketTypeCache = new EasySocketTypeCache(typeof(MockEasySocket), new EasySocketOptions());
         easySocketTypeHolder.AddType(url, easySocketTypeCache);
 
         Assert.True(easySocketTypeHolder.TryGetValue(url, out _));
@@ -41,7 +41,7 @@ public class EasySocketTypeHolderTests
     {
         var url = "url";
         var easySocketTypeHolder = new EasySocketTypeHolder();
-        var easySocketTypeCache = new EasySocketTypeCache(typeof(MockEasySocket), null);
+        var easySocketTypeCache = new EasySocketTypeCache(typeof(MockEasySocket), new EasySocketOptions());
         easySocketTypeHolder.AddType(url, easySocketTypeCache);
 
         Assert.True(easySocketTypeHolder.TryGetValue(url, out var result));

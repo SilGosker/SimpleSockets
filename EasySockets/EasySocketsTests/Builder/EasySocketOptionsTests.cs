@@ -1,50 +1,58 @@
-﻿using System.Text;
-// ReSharper disable UseObjectOrCollectionInitializer : Unnecessary in this case, as it divides the arrange/act/assert sections of the tests
+﻿// ReSharper disable UseObjectOrCollectionInitializer : Unnecessary in this case, as it divides the arrange/act/assert sections of the tests
+#pragma warning disable IDE0017
+
+using System.Text;
 
 namespace EasySockets.Builder;
 
 public class EasySocketOptionsTests
 {
-	[Fact]
-	public void ChunkSizeSetter_IfLowerThanOne_ShouldThrowArgumentOutOfRangeException()
+	[Theory]
+	[InlineData(-1)]
+	[InlineData(0)]
+	public void ChunkSizeSetter_IfLowerThanOne_ShouldThrowArgumentOutOfRangeException(int chunkSize)
 	{
 		// Arrange
 		var options = new EasySocketOptions();
 
 		// Act & Assert
-		Assert.Throws<ArgumentOutOfRangeException>(() => options.ChunkSize = -1);
-        Assert.Throws<ArgumentOutOfRangeException>(() => options.ChunkSize = 0);
+		Assert.Throws<ArgumentOutOfRangeException>(() => options.BufferSize = chunkSize);
+        Assert.Throws<ArgumentOutOfRangeException>(() => options.BufferSize = chunkSize);
     }
 
     [Fact]
 	public void PropertySetters_WhenSetToNull_ShouldThrowArgumentNullException()
 	{
-		// Arrange
-		var options = new EasySocketOptions();
+        // Arrange
+        EasySocketOptions options = new();
 
 		// Act & Assert
 		Assert.Throws<ArgumentNullException>(() => options.Encoding = null!);
         Assert.Throws<ArgumentNullException>(() => options.ClosingStatusDescription = null!);
     }
 
-	[Fact]
-	public void ChunkSizeSetter_WhenSetToValidValue_ShouldUpdateValue()
+	[Theory]
+	[InlineData(1)]
+	[InlineData(100)]
+	[InlineData(1000)]
+	[InlineData(int.MaxValue)]
+	public void ChunkSizeSetter_WhenSetToValidValue_ShouldUpdateValue(int chunkSize)
 	{
-		// Arrange
-		var options = new EasySocketOptions();
+        // Arrange
+        EasySocketOptions options = new();
 
-		// Act
-		options.ChunkSize = 100;
+        // Act
+		options.BufferSize = chunkSize;
 
 		// Assert
-        Assert.Equal(100, options.ChunkSize);
+        Assert.Equal(chunkSize, options.BufferSize);
 	}
 
 	[Fact]
 	public void EncodingSetter_WhenSetToValidValue_ShouldUpdateValue()
 	{
         // Arrange
-		var options = new EasySocketOptions();
+        EasySocketOptions options = new();
 
 		// Act
 		options.Encoding = Encoding.ASCII;
@@ -56,8 +64,8 @@ public class EasySocketOptionsTests
 	[Fact]
 	public void ClosingStatusDescriptionSetter_WhenSetToValidValue_ShouldUpdateValue()
 	{
-		// Arrange
-		var options = new EasySocketOptions();
+        // Arrange
+        EasySocketOptions options = new();
 
 		// Act
         options.ClosingStatusDescription = "Test";

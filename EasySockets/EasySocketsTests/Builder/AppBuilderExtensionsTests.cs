@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using EasySockets.Middleware;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 
@@ -7,7 +8,7 @@ namespace EasySockets.Builder;
 public class AppBuilderExtensionsTests
 {
     [Fact]
-    public void UseEasySockets_WhenEasySocketServicesAreAdded_ShouldNotReturnNull()
+    public void UseEasySockets_WhenEasySocketServicesAreAdded_ShouldReturnEasySocketBuilder()
     {
         // Arrange
         var services = new ServiceCollection();

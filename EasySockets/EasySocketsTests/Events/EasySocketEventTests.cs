@@ -64,7 +64,7 @@ public class EasySocketEventTests
         var easySocketEvent = new EasySocketEvent(@event);
 
         // Act
-        var result = easySocketEvent.GetEvent();
+        var result = easySocketEvent.Event;
 
         // Assert
         Assert.Equal(@event, result);
@@ -76,7 +76,8 @@ public class EasySocketEventTests
         // Arrange
         var @event = "test event";
         var message = "test message";
-        var easySocketEvent = new EasySocketEvent();
+        // ReSharper disable once UseObjectOrCollectionInitializer
+        EasySocketEvent easySocketEvent = new();
 
         // Act
         easySocketEvent.Event = @event;
