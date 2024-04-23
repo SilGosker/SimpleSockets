@@ -31,13 +31,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEasySocketServices();
 
-// other dependencies that you might want to add to your DI container
+// Add services to the container.
 
 var app = builder.Build();
 
 app.UseHttpsRedirection();
 
-// other tools you might want to add/configure to your pipeline.
+// Configure the HTTP request pipeline.
 
 app.UseEasySockets();
 ```
@@ -46,7 +46,7 @@ The `builder.Services.AddEasySocketServices();` adds the `IEasySocketService` av
 
 The `app.UseEasySockets();` adds the middleware that handles authentication and accepts (or declines) a client. If you want authentication based on the `HttpContext.User` property, make sure that you call this method **after** calling the `app.UseAuthentication()`; and `app.UseAuthorization();` methods.
 
-This on its own doesn't do a whole lot. Why? Because no behavior is configured. Every websocket request currently results in an `401 - Forbidden` status code.
+This on its own doesn't do a whole lot. Why? Because nothing is configured yet. Every websocket request will fail its handshake protocol.
 
 So lets create a behavior that allows us to connect to the server:
 ```C#
@@ -227,8 +227,7 @@ using EasySockets.Authentication;
 
 public class ChatAuthenticator : IEasySocketAuthenticator
 {
-    public EasySocketAuthenticationResult Authenticate(EasySocketAuthenticationResult currentAuthenticationResult,
-        HttpContext context)
+    public EasySocketAuthenticationResult Authenticate(EasySocketAuthenticationResult currentAuthenticationResult, HttpContext context)
     {
         if (!context.Request.Query.TryGetValue("slug", out var slug))
         {
@@ -269,6 +268,7 @@ Now if you run the application and connect 2 clients to `/chat?slug=room0` and s
 You can access the room identifier and client identifier in the EasySocket class using the `RoomId` and `ClientId` properties. To showcase this, let's build in a welcoming message. When the user successfully connects to the server, we want the server to send back a welcoming message:
 ```C#
 using EasySockets;
+using EasySockets.Enums;
 
 public class ChatSocket : EasySocket
 {
@@ -283,7 +283,7 @@ public class ChatSocket : EasySocket
     }
 }
 ```
-*Note: A different overload of the `Broadcast` method is used to specify the requirement that other clients should match to receive the message. The default requirement is a matching room, ignoring the instance that called the `Broadcast` method. In our case, we want this instance to also receive the welcoming message, so we only want the matching room requirement. This will include the client that just connected.*
+*Note: A different overload of the `Broadcast` method is used to specify the requirement that other clients should match the current instance's room identifier to receive the message. The default requirement is a matching room, ignoring the instance that called the `Broadcast` method. In our case, we want this instance to also receive the welcoming message, so we only want the matching room requirement. This will include the client that just connected.*
 
 If you would make a request to `/chat?slug=room0`, the client would immediately receive his welcoming message.
 
@@ -293,8 +293,7 @@ using EasySockets.Authentication;
 
 public class ChatAuthenticator : IEasySocketAuthenticator
 {
-    public EasySocketAuthenticationResult Authenticate(EasySocketAuthenticationResult currentAuthenticationResult,
-        HttpContext context)
+    public EasySocketAuthenticationResult Authenticate(EasySocketAuthenticationResult currentAuthenticationResult, HttpContext context)
     {
         if (!context.Request.Query.TryGetValue("slug", out var slug))
         {
@@ -336,17 +335,17 @@ app.UseEasySockets()
 app.Run();
 ```
 We have changed the `GetDefaultRoomId` and `GetDefaultUserId` to a function that returns what would otherwise be configured by the authenticators.
-*Note that if a client would connect to `/chat` without the `slug` query parameter, the system would throw an exception. **The GetDefaultRoomId and  GetDefaultUserId should never return `null`.** If they would **and** no RoomId or UserId is specified in the last `EasysocketAuthenticationResult`, EasySockets will throw an exception **after** the websocket is accepted, causing an 'unclean' closing status of the websocket.*
+*Note that if a client would connect to `/chat` without the `slug` query parameter, the system would throw an exception. **The GetDefaultRoomId and  GetDefaultUserId should never return `null`.** If they would **and** no RoomId or ClientId is specified in the last `EasysocketAuthenticationResult`, EasySockets will throw an exception **after** the websocket is accepted, causing an 'unclean' closing status of the websocket.*
 ### Manipulating EasySockets with the IEasySocketService
 The `IEasySocketService` allows you to manipulate the websocket connections outside of the EasySocket instances, meaning in any other controller, mapped endpoint or custom service. This allows for dynamic behaviors to be set up.
-
-*Note: This part uses the code from the previous chapter.*
 
 In this tutorial, we'll discuss the following topics:
 1. Sending messages back to the client.
 2. Sending messages to all clients in a room.
 3. Disconnecting clients from the server.
 4. Checking connection states.
+
+*Note: This part uses the code from the previous chapter.*
 
 We will be using the `MapGet` method in the code examples below. This is done to showcase the feature. Note that the `IEasySocketService` is available in the DI container, meaning you can also use it in controllers, custom services and other places that use DI. 
 #### Sending messages to the client
@@ -741,26 +740,26 @@ public class XmlEventSocket : EventSocket<XmlEvent>
 }
 ```
 A few methods need to be implemented, so let's go over them:
-* The `ExtractEvent` method needs to parse a fully received message into an object given into the generic type of the `EventSocket<TEvent>` class. If one of the event methods accepts this object's type as a parameter, the object returned will be injected into the method.
+* The `ExtractEvent` method needs to parse a fully received message into an object given into the generic type of the `EventSocket<TEvent>` class. If one of the event methods accepts this object's type as a parameter, the object returned will be injected into the method. If extracting fails, you should return `null`. If at any point during the websocket connection any exception is thrown, the websocket connection will close and result in a `500 - Internal Server Error` status code.
 * The `BindEvent` method combines an event and a message together into a single string that can be sent over the websocket connection.
 
-In our case, we want to simply deserialize an XML string into an object in the `ExtractEvent` method, and serialize the object into an XML string in the `BindEvent` method:
+In our case, we want to simply deserialize an XML string into an object in the `ExtractEvent` method, and serialize the object into a XML string in the `BindEvent` method:
 ```C#
 using System.Xml.Serialization;
 using EasySockets.Events;
 
 public class XmlEventSocket : EventSocket<XmlEvent>
 {
-    private static readonly XmlSerializer _serializer = new(typeof(XmlEvent));
+    private static readonly XmlSerializer Serializer = new(typeof(XmlEvent));
 
     public override XmlEvent? ExtractEvent(string message)
     {
         try
         {
             using var reader = new StringReader(message);
-            return (XmlEvent?)_serializer.Deserialize(reader);
+            return (XmlEvent?)Serializer.Deserialize(reader);
         }
-        catch (Exception)
+        catch
         {
             return null;
         }
@@ -776,9 +775,51 @@ public class XmlEventSocket : EventSocket<XmlEvent>
 
         using var writer = new StringWriter();
         
-        _serializer.Serialize(writer, xmlEvent);
+        Serializer.Serialize(writer, xmlEvent);
         
         return writer.ToString();
     }
 }
 ```
+Great, now we have fully configured our custom event binder! Let's change our `ChatSocket` subtype to that of the `XmlEventSocket` type:
+```C#
+using EasySockets.Enums;
+
+public class ChatSocket : XmlEventSocket
+{
+    public Task OnTyping()
+    {
+        return Broadcast("Typing", ClientId + " is typing...");
+    }
+
+    public Task OnMessage(XmlEvent @event)
+    {
+        return Broadcast(@event.Event, @event.Message);
+    }
+
+    public override Task OnConnect()
+    {
+        return Broadcast(BroadCastFilter.EqualRoomId, "Connected", $"Welcome {ClientId}. You are currently in room '{RoomId}'");
+    }
+}
+```
+Notice a small difference; we aren't passing the `XmlEvent` instance down to the `Broadcast` method. Since EasySocket does not know what represents the message part in an event instance, this method isn't implemented in the `EasySocket<TEvent>` class. If you wish you can implement this for yourself, but for the sake of simplicity in the tutorial we won't go over this process.
+
+Now let's test our newly created custom event binding websocket connection!
+1. Make 2 websocket requests to `/chat?roomId=room0`
+2. Send the following XML:
+```XML
+<XmlEvent>
+    <Event>Typing</Event>
+</XmlEvent>
+```
+3. Other clients will receive the following XML back:
+```XML
+<?xml version="1.0" encoding="utf-16"?>
+<XmlEvent xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Event>Typing</Event>
+  <Message>{ClientId} is typing...</Message>
+</XmlEvent>
+```
+
+And that's all their is to `EasySockets`. Feel free to give this project a star if you liked it. If you have any suggestions for new features or code changes let me know!
