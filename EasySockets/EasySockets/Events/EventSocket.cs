@@ -19,7 +19,6 @@ public abstract class EventSocket : EventSocket<EasySocketEvent>
         return Broadcast(filter, @event.Event, @event.Message);
     }
 
-
     public sealed override EasySocketEvent? ExtractEvent(string message)
     {
         try

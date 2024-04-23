@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using EasySockets.Services;
 using EasySockets.Services.Caching;
 
@@ -27,7 +27,7 @@ internal sealed class SocketMiddleware
             return;
         }
 
-        if (!_easySocketTypeHolder.TryGetValue(context.Request.Path.ToString(), out var easySocketTypeCache))
+        if (!_easySocketTypeHolder.TryGetValue(context.Request.Path, out var easySocketTypeCache))
         {
             await _next.Invoke(context);
             return;
