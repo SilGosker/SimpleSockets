@@ -123,7 +123,7 @@ public class ChatSocket : EasySocket
     {
 	    if (IsConnected())
 	    {
-		    return Broadcast("Left!");
+	        return Broadcast("Left!");
 	    }
         return Task.CompletedTask;
     }
@@ -365,19 +365,19 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 
 app.UseEasySockets()
-	.AddEasySocket<ChatSocket>("/chat", options =>
-	{
-		options.AddAuthenticator<ChatAuthenticator>();
-	});
+    .AddEasySocket<ChatSocket>("/chat", options =>
+    {
+        options.AddAuthenticator<ChatAuthenticator>();
+    });
 
 app.MapGet("/clients/{roomId}/{clientId}", async (
-	string roomId,
-	string clientId,
-	[FromServices] IEasySocketService easySocketService,
-	[Required] [FromQuery] string message) =>
+    string roomId,
+    string clientId,
+    [FromServices] IEasySocketService easySocketService,
+    [Required] [FromQuery] string message) =>
 {
-	await easySocketService.SendToClientAsync(roomId, clientId, message);
-	return $"Send '{message}' to {clientId} in {roomId}";
+    await easySocketService.SendToClientAsync(roomId, clientId, message);
+    return $"Send '{message}' to {clientId} in {roomId}";
 });
 
 app.Run();
@@ -409,23 +409,24 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 
 app.UseEasySockets()
-	.AddEasySocket<ChatSocket>("/chat", options =>
-	{
-		options.AddAuthenticator<ChatAuthenticator>();
-	});
+    .AddEasySocket<ChatSocket>("/chat", options =>
+    {
+        options.AddAuthenticator<ChatAuthenticator>();
+    });
 
 app.MapGet("/clients/{roomId}/{clientId}", async (
-	string roomId,
-	string clientId,
-	[FromServices] IEasySocketService easySocketService,
-	[Required] [FromQuery] string message) =>
+    string roomId,
+    string clientId,
+    [FromServices] IEasySocketService easySocketService,
+    [Required] [FromQuery] string message) =>
 {
-	if (!easySocketService.Any(roomId, clientId))
-	{
-		return $"Client {clientId} not found in room {roomId}";
-	}
-	await easySocketService.SendToClientAsync(roomId, clientId, message);
-	return $"Send '{message}' to {clientId} in {roomId}";
+    if (!easySocketService.Any(roomId, clientId))
+    {
+        return $"Client {clientId} not found in room {roomId}";
+    }
+
+    await easySocketService.SendToClientAsync(roomId, clientId, message);
+    return $"Send '{message}' to {clientId} in {roomId}";
 });
 
 app.Run();
@@ -449,25 +450,26 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 
 app.UseEasySockets()
-	.AddEasySocket<ChatSocket>("/chat", options =>
-	{
-		options.AddAuthenticator<ChatAuthenticator>();
-	});
+    .AddEasySocket<ChatSocket>("/chat", options =>
+    {
+        options.AddAuthenticator<ChatAuthenticator>();
+    });
 
 app.MapGet("/clients/{roomId}", async (
-	string roomId,
-	[FromServices] IEasySocketService easySocketService,
-	[Required][FromQuery] string message) =>
+    string roomId,
+    [FromServices] IEasySocketService easySocketService,
+    [Required] [FromQuery] string message) =>
 {
-	if (!easySocketService.Any(roomId))
-	{
-		return $"Room {roomId} not found";
-	}
-	await easySocketService.SendToRoomAsync(roomId, message);
-	return $"Sent '{message}' to all clients in {roomId}";
+    if (!easySocketService.Any(roomId))
+    {
+        return $"Room {roomId} not found";
+    }
+
+    await easySocketService.SendToRoomAsync(roomId, message);
+    return $"Sent '{message}' to all clients in {roomId}";
 });
 
-await app.RunAsync();
+app.Run();
 ```
 This will set the http `clients/{roomId}?message=` endpoint open. To test the code, do the following:
 1. Make 2 websocket requests to `/chat?slug=room0`.
@@ -489,22 +491,22 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 
 app.UseEasySockets()
-	.AddEasySocket<ChatSocket>("/chat", options =>
-	{
-		options.AddAuthenticator<ChatAuthenticator>();
-	});
+    .AddEasySocket<ChatSocket>("/chat", options =>
+    {
+        options.AddAuthenticator<ChatAuthenticator>();
+    });
 
 
 app.MapGet("/clients/disconnect/{roomId}/{clientId}", async (
-	string roomId,
-	string clientId,
-	[FromServices] IEasySocketService service) =>
+    string roomId,
+    string clientId,
+    [FromServices] IEasySocketService service) =>
 {
-	await service.ForceLeaveAsync(roomId, clientId);
-	return $"{clientId} in room '{roomId}' disconnected from the server.";
+    await service.ForceLeaveAsync(roomId, clientId);
+    return $"{clientId} in room '{roomId}' disconnected from the server.";
 });
 
-await app.RunAsync();
+app.Run();
 ```
 This sets open the `/clients/disconnect{roomId}/{clientId}` http endpoint open. If the service finds a room with the identifier being equal to `roomId` containing a client that has the same identifier as `clientId` and is connected, the service will force a disconnect event to that client.
 
@@ -520,8 +522,6 @@ Welcome 1062523944. You are currently in room 'room0'
 
 If needed, you can disconnect all clients in a room from the server:
 ```C#
-using Authentication.Authenticators;
-using Authentication.Websockets;
 using EasySockets.Builder;
 using EasySockets.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -535,22 +535,22 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 
 app.UseEasySockets()
-	.AddEasySocket<ChatSocket>("/chat", options =>
-	{
-		options.AddAuthenticator<ChatAuthenticator>();
-	});
+    .AddEasySocket<ChatSocket>("/chat", options =>
+    {
+        options.AddAuthenticator<ChatAuthenticator>();
+    });
 
 
 app.MapGet("/clients/disconnect/{roomId}", async (
-	string roomId,
-	string clientId,
-	[FromServices] IEasySocketService service) =>
+    string roomId,
+    string clientId,
+    [FromServices] IEasySocketService service) =>
 {
-	await service.ForceLeaveAsync(roomId);
-	return $"Disconnected all clients in room '{roomId}' from the server.";
+    await service.ForceLeaveAsync(roomId);
+    return $"Disconnected all clients in room '{roomId}' from the server.";
 });
 
-await app.RunAsync();
+app.Run();
 ```
 This works the same as explained in **sending messages to all clients** and **Disconnecting clients**, so we won't go over the full explanation of this functionality.
 
@@ -641,22 +641,22 @@ To test this, do the following:
 2. Send the following JSON over the websocket:
 ```JSON
 {
-	"Event": "Typing",
-	"Message": ""
+    "Event": "Typing",
+    "Message": ""
 }
 ```
 3. Other clients will receive the following JSON (with the `{ClientId}` section replaced with a random guid):
 ```JSON
 {
-	"Event": "Typing",
-	"Message": "{ClientId} is typing..."
+    "Event": "Typing",
+    "Message": "{ClientId} is typing..."
 }
 ```
 5. Send the following JSON over the websocket:
 ```JSON
 {
-	"Event": "Message",
-	"Message": "Hello World!"
+    "Event": "Message",
+    "Message": "Hello World!"
 }
 ```
 5. Other clients will receive that exact event.
@@ -700,8 +700,8 @@ The code above works exactly the same as when the method names had the `On` suff
 Now this is cool, but not really customizable. Currently, our event structure looks like the following:
 ```JSON
 {
-	"Event": "event",
-	"Message": "message"
+    "Event": "event",
+    "Message": "message"
 }
 ```
 If any field is missing or more fields are added to this JSON, the server would reject the message and not invoke anything. To change this we can register our own custom event type. This means we can change the whole structure of a message with little changes to our code base. This is extremely powerful since you can optimize your websocket connection to your needs. For example, if you need less overhead when receiving messages you could restructure your messages and reduce overhead to a single character:
