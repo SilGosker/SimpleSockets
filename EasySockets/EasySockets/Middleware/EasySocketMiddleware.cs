@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using EasySockets.Services;
 using EasySockets.Services.Caching;
 
@@ -39,7 +39,7 @@ internal sealed class SocketMiddleware
 
         if (!authenticationResult.IsAuthenticated)
         {
-            await _next.Invoke(context);
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
             return;
         }
 
