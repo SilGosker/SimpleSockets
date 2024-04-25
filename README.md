@@ -1,12 +1,29 @@
-# EasySockets documentation
 EasySockets is a powerful tool designed to simplify the process of working with websockets, especially when dealing with advanced features such as custom event binding and extracting, custom authentication on connection level and websocket manipulation in the DI. Whether you're a beginner looking for a straightforward way to create websocket applications or an expert in need of intricate functionalities, EasySockets is tailored to meet your requirements.
-
-## Features
+# Contents
+* [Features](#Features)
+* [Installation](#Installation)
+* [Examples](#Examples)
+	* [Basic usage](#Basic_Usage)
+	* [Authentication and authorization](#Authentication_and_Authorization)
+		* [Rooms](#Rooms)
+		* [Authenticators](#Authenticators)
+		* [Dividing clients in rooms](#Dividing_clients_in_rooms)
+		* [Client identification](#Client_identification)
+		* [Identification through configuration](#Identification_Through_Configuration)
+	* [Manipulating EasySockets with the IEasySocketService](#EasySocketService)
+		* [Sending messages to a client](#Sending_messages_to_the_client)
+		* [Sending messages to all clients in a room](#Sending_messages_to_all_clients_in_a_room)
+		* [Disconnecting clients](#Disconnecting_clients)
+	* [Event driven development](#Event_driven_development)
+		* [Events](#Events)
+		* [Event types](#Event_types)
+		* [Event type registration](#Event_type_registration)
+# Features <a href="#Features"></a>
 * Simple WebSocket Creation: Set up a websocket connection with minimal configuration.
 * Custom Event Binding: Easily bind custom events to your websockets and manage event-driven programming.
 * Custom Authentication on connection level: EasySockets allows you to create your own authentication/authorization methods per individual websocket connection.
 
-## Installation
+# Installation <a href="#Installation"></a>
 With the Package Manager Console:
 ```
 Install-Package EasySockets
@@ -17,13 +34,15 @@ nuget install EasySockets
 ```
 When using the Nuget Exporer, search for `EasySockets` and install the package.
 
-## Examples
+# Examples <a href="#Examples"></a>
 This section will go through the process of adding EasySockets to your application.
 As an example, we will be making a small chat application and expand this the more we dive deep into the rich features EasySockets has to offer.
 
+More examples can be found in the `Examples` folder, though they do not differ a lot from the examples given in this tutorial.
+
 *do note that this is will only guide you through the backend process, not the frontend. When referring to 'make a request', you should find your own implementation of doing so. This can be through the browser and connecting using the JavaScript `Websocket` class, or using an application like Postman. Also note that the websocket protocol  is `ws` or `wss` depending on your SSL certificate*
 
-### Basic Usage
+## Basic usage <a href="Basic_usage"></a>
 Lets start by adding EasySockets to your application. apply the following code:
 
 ```C#
@@ -40,6 +59,8 @@ app.UseHttpsRedirection();
 // Configure the HTTP request pipeline.
 
 app.UseEasySockets();
+
+app.Run();
 ```
 
 The `builder.Services.AddEasySocketServices();` adds the `IEasySocketService` available for DI. This manages all the websocket connections. You can manipulate those connections outside of the websocket instances. For example, you can send messages to the client in a controller or custom services. This is discussed later on in the tutorial.
@@ -79,7 +100,7 @@ public class ChatSocket : EasySocket
     }
 }
 ```
-Instead of returning `Task.CompletedTask`, we return the task returned by the build-in `Broadcast` method. When `Broadcast` is called, the passed string will be sent to all other connected clients. The [Authentication and Authorization](#auth) section will explain more about how this works behind the scenes.
+Instead of returning `Task.CompletedTask`, we return the task returned by the build-in `Broadcast` method. When `Broadcast` is called, the passed string will be sent to all other connected clients. The [Authentication and Authorization](#Authentication_and_Authorization) section will explain more about how this works behind the scenes.
 
 Of course we can send an extra message when the client connects or leaves the server:
 ```C#
@@ -160,16 +181,17 @@ Whenever a websocket request is made to `/chat`, a `ChatSocket` instance will be
 Now if you run the application and make a websocket request to `/chat`, you should connect to the server. If you make a second (and third, fourth en so on) request and send a message, all other clients will receive that message!
 
 *Note: If at any point during the websocket connection any exception is thrown, the websocket connection will close and result in a `500 - Internal Server Error` status code.*
-### Authentication and Authorization <a name="auth" />
+## Authentication and Authorization <a name="#Authentication_and_Authorization" />
 Cool, you have built your very simple backend chat-application!
 Next up is authentication and authorization. The following topics are discussed:
-* Rooms functionality.
-* Authenticating a client.
-* Dividing clients in (customizable) rooms.
-* Client identifier customization.
+* [Rooms functionality](#Rooms).
+* [Authenticating a client](#Authenticators).
+* [Dividing clients in (customizable) rooms](#Dividing_clients_in_rooms).
+* [Client identifier customization](#Client_identification).
+* [Identification through configuration](#Identification_Through_Configuration).
 
 *Note: This part uses the code from the previous chapter.*
-#### Rooms
+### Rooms <a href="#rooms"></a>
 A room works how real-life rooms work. If you and another person are having a conversation in the kitchen, people in the bedroom won't hear you and the other way around. This principle works the same in EasySockets. People in room `ABC` won't get to hear what is broadcasted from room `XYZ`.
 
 We currently have a problem with our chat application: By default, each and every user is connected to the same room (room `__0`). If we want more privacy built into our chat application, we should fix this. 
@@ -180,15 +202,14 @@ This can be solved using 2 methods:
 
 First we'll discuss setting up an authenticator, since this is what you'll do the most as it is the best practice when using EasySockets.
 
-#### Authenticators
+### Authenticators <a href="#Authenticators"></a>
 By default, an EasySocket is allowed to connect to the server unless specified otherwise. This can be specified by setting up authenticators and adding them to the easysockets configuration. To set up an authenticator, create a class that implements the `IEasySocketAuthenticator` or `IEasySocketAsyncAuthenticator`.
 ```C#
 using EasySockets.Authentication;
 
 public class ChatAuthenticator : IEasySocketAuthenticator
 {
-    public EasySocketAuthenticationResult Authenticate(EasySocketAuthenticationResult currentAuthenticationResult,
-        HttpContext context)
+    public EasySocketAuthenticationResult Authenticate(EasySocketAuthenticationResult currentAuthenticationResult, HttpContext context)
     {
 	    return true;
     }
@@ -221,6 +242,7 @@ Lets break down exactly how the code above behaves:
 
 In this example, we will use the `IEasySocketAuthenticator` since we don't need asynchronous operations.
 
+### Dividing clients in rooms <a href="#Dividing_clients_in_rooms"></a>
 Let's build our authentication system. In this example, we will use a `slug` query parameter that contains a string. If no slug parameter is found, we return `false`, indicating that the websocket is not allowed to connect to the server. Otherwise, we return a successful authentication result with the slug as the room identifier:
 ```C#
 using EasySockets.Authentication;
@@ -286,7 +308,7 @@ public class ChatSocket : EasySocket
 *Note: A different overload of the `Broadcast` method is used to specify the requirement that other clients should match the current instance's room identifier to receive the message. The default requirement is a matching room, ignoring the instance that called the `Broadcast` method. In our case, we want this instance to also receive the welcoming message, so we only want the matching room requirement. This will include the client that just connected.*
 
 If you would make a request to `/chat?slug=room0`, the client would immediately receive his welcoming message.
-
+### Client identification <a href="#Client_identification"></a>
 You can not only manipulate the room the user comes into, you can also manipulate the unique identifier the client is assigned. The default is a random guid, but you can manipulate this to your needs:
 ```C#
 using EasySockets.Authentication;
@@ -306,7 +328,7 @@ public class ChatAuthenticator : IEasySocketAuthenticator
 ```
 In this example, we set the unique identifier to a random number instead of a random guid. You'll learn why this is important later in the tutorial.
 
-#### Identification through configuration
+### Identification through configuration <a href="#Identification_Through_Configuration"></a>
 We can change the default identification, meaning obtaining the room and client identifiers for any client:
 ```C#
 using System.Text;
@@ -336,7 +358,7 @@ app.Run();
 ```
 We have changed the `GetDefaultRoomId` and `GetDefaultUserId` to a function that returns what would otherwise be configured by the authenticators.
 *Note that if a client would connect to `/chat` without the `slug` query parameter, the system would throw an exception. **The GetDefaultRoomId and  GetDefaultUserId should never return `null`.** If they would **and** no RoomId or ClientId is specified in the last `EasysocketAuthenticationResult`, EasySockets will throw an exception **after** the websocket is accepted, causing an 'unclean' closing status of the websocket.*
-### Manipulating EasySockets with the IEasySocketService
+## Manipulating EasySockets with the IEasySocketService <a href="#EasySocketService"></a>
 The `IEasySocketService` allows you to manipulate the websocket connections outside of the EasySocket instances, meaning in any other controller, mapped endpoint or custom service. This allows for dynamic behaviors to be set up.
 
 In this tutorial, we'll discuss the following topics:
@@ -348,7 +370,7 @@ In this tutorial, we'll discuss the following topics:
 *Note: This part uses the code from the previous chapter.*
 
 We will be using the `MapGet` method in the code examples below. This is done to showcase the feature. Note that the `IEasySocketService` is available in the DI container, meaning you can also use it in controllers, custom services and other places that use DI. 
-#### Sending messages to the client
+### Sending messages to the client <a href="#Sending_messages_to_the_client"></a>
 Sending messages back to the client is pretty easy:
 ```C#
 using System.ComponentModel.DataAnnotations;
@@ -432,7 +454,7 @@ app.MapGet("/clients/{roomId}/{clientId}", async (
 app.Run();
 ```
 The `IEasySocketService.Any(string, string)` method will check whether a room with its identifier being equal to the `roomId` exists, whether a client in that room exists where its identifier equals the `clientId` and if that client is connected. If one of these requirements fail (no room present, no client present or the client isn't connected), the result will be that no client has been found.
-#### Sending messages to all clients in a room
+### Sending messages to all clients in a room <a href="Sending_messages_to_all_clients_in_a_room"></a>
 You can also send messages to all clients in a room. To do this, you need to know the room's identifier. Let's make another endpoint corresponding to this function:
 
 ```C#
@@ -475,7 +497,7 @@ This will set the http `clients/{roomId}?message=` endpoint open. To test the co
 1. Make 2 websocket requests to `/chat?slug=room0`.
 2. Make an http request to `clients/room0?message=hello%20world`
 3. Both clients that are connected to `room0` will receive `hello world`.
-#### Disconnecting clients from the server
+### Disconnecting clients <a href="#Disconnecting_clients"></a>
 If needed, you can disconnect clients from these kinds of http endpoints. Be very cautious when using these functions, because the affected clients will instantly disconnect from the server. If these functions are available to everyone, everyone will be able to disconnect clients from the server. So unless the following is exactly what you would want, **Don't apply the following examples in your application.** These are mere examples to showcase the feature.
 ```C#
 using EasySockets.Builder;
@@ -561,14 +583,14 @@ There are some other methods available in the `IEasySocketService`, some of them
 5. `IEasySocketService.Count(string)` counts the total number of websocket connections in a specified room.
 6. `IEasySocketService.GetGroupings()` returns an `IEnumerable<IGrouping<string, IEasySocket>>`. This returns all rooms and their websockets. If any custom logic is needed when listing all connections and their states, this can be used.
 
-### Event driven development
+## Event driven development <a href="#Event_driven_development"></a>
 Now this is all pretty cool, but the logic in the `ChatSocket` isn't very expandable. If we ever need to implement a lot of custom logic based on the input of a client, we would have to create some sort of fancy switch case, which isn't really optimal nor what we want. This is where event driven development comes in.
 
 In this section, we'll discuss:
 1. How to use events.
 2. How to set up custom event registration.
 3. How to apply this in the `IEasySocketService`.
-#### Events
+### Events <a href="#Events"></a>
 The `EasySocket` class has 3 events available:
 1. The `OnConnect` method is invoked when the client successfully connects to the server.
 2. The `OnMessage` method is invoked whenever the server receives a message from the client. 
@@ -585,7 +607,7 @@ Events are part of the full message send from the client to the server. An event
 ```
 This whole json is sent from the client to the server. The message that needs to be processed is `Bar`, but the event is `Foo`. And this is the part that is so powerful, because we can invoke different pieces of code based on the input of any given client.
 
-#### Event types
+### Event types <a href="#Event_types"></a>
 Event types are the way events are registered and extracted from the complete message. In the case of `EventSocket`, this is the simple JSON message as shown earlier. When referring to `Event Types`, we are referring to the **structure** of a message. When referring to an `event`, we are referring to the **identifier** or **name** of the event type instance.
 
 Let's say in our application, if a client is typing, we want other clients in his room to know that he is typing. Currently this is not possible. If we would implement code that would send a message to the server whenever a client hits the keyboard, all other clients would receive the full message as a new message. The server doesn't know the difference between a typing event and a message event. It only knows about broadcasting a received message from the client. So lets change that!
@@ -696,7 +718,7 @@ The code above works exactly the same as when the method names had the `On` suff
 
 *Note: You can apply as many `InvokeOn` attributes as you want on a single method. Each time one of the events is received, the method is invoked. Just be careful not to have duplicate events names present on a single EasySocket class.*
 
-### Event type registration
+## Event type registration <a href="#Event_type_registration"></a>
 Now this is cool, but not really customizable. Currently, our event structure looks like the following:
 ```JSON
 {
