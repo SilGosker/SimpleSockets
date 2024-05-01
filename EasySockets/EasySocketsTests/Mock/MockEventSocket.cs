@@ -4,11 +4,6 @@ namespace EasySockets.Mock;
 
 public class MockEventSocket : EventSocket<MockEvent>
 {
-
-    public MockEventSocket()
-    {
-
-    }
     public virtual Task OnEventAsync(string _)
     {
         return Task.CompletedTask;
@@ -19,13 +14,7 @@ public class MockEventSocket : EventSocket<MockEvent>
 
     }
 
-
     public override MockEvent? ExtractEvent(string message)
-    {
-        throw new NotImplementedException();
-    }
-
-    public override string? ExtractMessage(MockEvent @event, string message)
     {
         throw new NotImplementedException();
     }
