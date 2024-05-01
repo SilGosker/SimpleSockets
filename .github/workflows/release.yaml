@@ -16,7 +16,7 @@ jobs:
     - name: Build
       run: dotnet build ./EasySockets/EasySockets/EasySockets.csproj -c Release
     - name: Test
-      run: dotnet test ./EasySockets/EasySockets/EasySockets.csproj -c Release --no-build
+      run: dotnet test ./EasySockets/EasySockets.sln -c Release --no-build
     - name: Pack nugets
       run: dotnet pack ./EasySockets/EasySockets/EasySockets.csproj -c Release --no-build --output .
     - name: Push to NuGet
