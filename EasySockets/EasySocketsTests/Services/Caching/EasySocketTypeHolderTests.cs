@@ -8,7 +8,7 @@ public class EasySocketTypeHolderTests
     [Fact]
     public void AddType_WhenUrlAlreadyExists_ShouldThrowInvalidOperationException()
     {
-        var url = "url";
+        var url = "/url";
         var easySocketTypeHolder = new EasySocketTypeHolder();
         var easySocketTypeCache = new EasySocketTypeCache(typeof(MockEasySocket), new EasySocketOptions());
         easySocketTypeHolder.AddType(url, easySocketTypeCache);
@@ -19,7 +19,7 @@ public class EasySocketTypeHolderTests
     [Fact]
     public void TryGetValue_WhenUrlDoesNotExist_ShouldReturnFalse()
     {
-        var url = "url";
+        var url = "/url";
         var easySocketTypeHolder = new EasySocketTypeHolder();
 
         Assert.False(easySocketTypeHolder.TryGetValue(url, out _));
@@ -28,7 +28,7 @@ public class EasySocketTypeHolderTests
     [Fact]
     public void TryGetValue_WhenUrlExists_ShouldReturnTrue()
     {
-        var url = "url";
+        var url = "/url";
         var easySocketTypeHolder = new EasySocketTypeHolder();
         var easySocketTypeCache = new EasySocketTypeCache(typeof(MockEasySocket), new EasySocketOptions());
         easySocketTypeHolder.AddType(url, easySocketTypeCache);
@@ -39,7 +39,7 @@ public class EasySocketTypeHolderTests
     [Fact]
     public void TryGetValue_WhenUrlExists_ShouldReturnEasySocketTypeCache()
     {
-        var url = "url";
+        var url = "/url";
         var easySocketTypeHolder = new EasySocketTypeHolder();
         var easySocketTypeCache = new EasySocketTypeCache(typeof(MockEasySocket), new EasySocketOptions());
         easySocketTypeHolder.AddType(url, easySocketTypeCache);
