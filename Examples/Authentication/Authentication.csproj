@@ -7,11 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EasySockets\EasySockets.csproj" />
+    <Folder Include="Authenticators\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Authenticators\" />
+    <PackageReference Include="EasySockets" Version="1.0.0" />
   </ItemGroup>
 
 </Project>
