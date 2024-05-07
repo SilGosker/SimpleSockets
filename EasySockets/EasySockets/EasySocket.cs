@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Text;
 using EasySockets.Builder;
@@ -12,8 +12,12 @@ public abstract class EasySocket : IEasySocket
     private readonly CancellationTokenSource _cts = new();
     private EasySocketOptions _options = null!;
     private WebSocket _webSocket = null!;
+    private readonly Queue<string> _messagePipeline = new();
     private bool _isDisposed;
     private bool _isReceiving;
+    private bool _isSending;
+    private byte[] _byteBuffer = Array.Empty<byte>();
+    private int _bufferCharCount;
 
     string IInternalEasySocket.RoomId
     {
@@ -32,7 +36,12 @@ public abstract class EasySocket : IEasySocket
 
     EasySocketOptions IInternalEasySocket.Options
     {
-        set => _options = value;
+        set
+        {
+            _options = value;
+            _byteBuffer = new byte[_options.BufferSize];
+            _bufferCharCount = _options.Encoding.GetMaxCharCount(_options.BufferSize);
+        }
     }
 
     private Func<IEasySocket, BroadCastFilter, string, Task>? _emit;
@@ -63,40 +72,14 @@ public abstract class EasySocket : IEasySocket
     /// </summary>
     /// <param name="message">The message to be sent.</param>
     /// <returns>A task representing the asynchronous operation of sending the message to the client.</returns>
-    public async Task SendToClientAsync(string message)
+    public Task SendToClientAsync(string message)
     {
-        if (!IsConnected())
-        {
-            await CloseAsync().ConfigureAwait(false);
-            return;
-        }
+        if (!IsConnected()) return Task.CompletedTask;
 
-        Encoder encoder = _options.Encoding.GetEncoder();
-        var decoder = _options.Encoding.GetDecoder();
-        var byteBuffer = new byte[_options.BufferSize];
-        int bufferCharCount = decoder.GetCharCount(byteBuffer, false);
-        int charsProcessed = 0;
-
-        try
-        {
-            while (charsProcessed < message.Length)
-            {
-                bool flush = charsProcessed + bufferCharCount >= message.Length;
-                encoder.Convert(message.AsSpan()[charsProcessed..], byteBuffer, flush, out int charsUsed, out int bytesUsed, out _);
-
-                await _webSocket
-                    .SendAsync(new ArraySegment<byte>(byteBuffer, 0, bytesUsed), WebSocketMessageType.Text, flush, _cts.Token)
-                    .ConfigureAwait(false);
-
-                charsProcessed += charsUsed;
-            }
-        }
-        catch (WebSocketException)
-        {
-            await CloseAsync().ConfigureAwait(false);
-        }
-        
+        _messagePipeline.Enqueue(message);
+        return StartSendingMessageAsync();
     }
+
 
     public async Task CloseAsync()
     {
@@ -167,6 +150,46 @@ public abstract class EasySocket : IEasySocket
     public virtual Task OnDisconnect()
     {
         return Task.CompletedTask;
+    }
+
+    private async Task StartSendingMessageAsync()
+    {
+        if (_isSending || !IsConnected()) return;
+
+        _isSending = true;
+        var encoder = _options.Encoding.GetEncoder();
+
+        while (_messagePipeline.Count > 0)
+        {
+            var message = _messagePipeline.Dequeue();
+
+            var charsProcessed = 0;
+
+            try
+            {
+                while (charsProcessed < message.Length)
+                {
+                    var flush = charsProcessed + _bufferCharCount >= message.Length;
+                    encoder.Convert(message.AsSpan()[charsProcessed..], _byteBuffer, flush, out var charsUsed,
+                        out var bytesUsed, out _);
+
+                    await _webSocket
+                        .SendAsync(new ArraySegment<byte>(_byteBuffer, 0, bytesUsed), WebSocketMessageType.Text, flush,
+                            _cts.Token)
+                        .ConfigureAwait(false);
+
+                    charsProcessed += charsUsed;
+                }
+
+                encoder.Reset();
+            }
+            catch (WebSocketException)
+            {
+                await CloseAsync().ConfigureAwait(false);
+            }
+        }
+
+        _isSending = false;
     }
 
     /// <summary>
