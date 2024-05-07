@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Net.WebSockets;
+using System.Reflection;
 using System.Threading.Tasks;
 using EasySockets.Enums;
 using EasySockets.Mock;
@@ -29,6 +30,10 @@ public class GenericEventSocketTests
     {
         // Arrange
         var eventSocket = new Mock<EventSocket<MockEvent>>();
+        var mockWebsocket = new Mock<WebSocket>();
+        mockWebsocket.Setup(x => x.State).Returns(WebSocketState.Open);
+        ((IInternalEasySocket)eventSocket.Object).WebSocket = mockWebsocket.Object;
+
         eventSocket.Setup(x => x.BindEvent(It.IsAny<string>(), It.IsAny<string>()))
             .Returns(string.Empty);
 
@@ -81,8 +86,11 @@ public class GenericEventSocketTests
     {
         // Arrange
         var eventSocket = new Mock<EventSocket<MockEvent>>();
-        eventSocket.Setup(x => x.BindEvent(It.IsAny<string>(), It.IsAny<string>()))
-            .Returns("MockEvent");
+        var mockWebsocket = new Mock<WebSocket>();
+        mockWebsocket.Setup(x => x.State).Returns(WebSocketState.Open);
+        ((IInternalEasySocket)eventSocket.Object).WebSocket = mockWebsocket.Object;
+
+        eventSocket.Setup(x => x.BindEvent(It.IsAny<string>(), It.IsAny<string>())).Returns("MockEvent");
 
         var message = "Hello, World!";
         var @event = new MockEvent { Event = "MockEvent" };

@@ -53,7 +53,7 @@ public class EventSocketEventInfoTests
         var message = new MockEvent();
 
         // Act
-        var result = eventSocketEventInfo.InvokeAsync(instance.Object, message);
+        var result = eventSocketEventInfo.InvokeAsync(instance.Object, message, message.Event);
 
         // Assert
         Assert.Equal(task, result);
@@ -70,7 +70,7 @@ public class EventSocketEventInfoTests
         var message = new MockEvent();
 
         // Act
-        var result = eventSocketEventInfo.InvokeAsync(instance.Object, message);
+        var result = eventSocketEventInfo.InvokeAsync(instance.Object, message, message.Event);
 
         // Assert
         Assert.Equal(Task.CompletedTask, result);

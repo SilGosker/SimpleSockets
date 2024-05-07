@@ -12,4 +12,5 @@ public interface IInternalEasySocket
     internal EasySocketOptions Options { set; }
 	internal Func<IEasySocket, BroadCastFilter, string, Task>? Emit { set; }
     internal Action<IEasySocket>? DisposeAtSocketHandler { set; }
+    internal Task ReceiveMessagesAsync();
 }
