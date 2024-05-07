@@ -14,15 +14,8 @@ public interface IEasySocket : IDisposable, IInternalEasySocket
 	///     The unique identifier of the EasySocket.
 	/// </summary>
 	public new string ClientId { get; }
-	/// <summary>
-	///     The event that is fired when the EasySocket should start receiving messages.
-	/// </summary>
-	/// <returns>
-	///     A task that should keep the EasySocket middleware alive during the lifetime of the clients connection
-	/// </returns>
-	public Task ReceiveMessagesAsync();
 
-	/// <summary>
+    /// <summary>
 	///     Checks the connection status of the EasySocket.
 	/// </summary>
 	/// <returns>
