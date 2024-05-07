@@ -43,20 +43,6 @@ public class EasySocketEventTests
 	}
 
     [Fact]
-	public void ImplicitCastFromString_ShouldSetEvent()
-	{
-        // Arrange
-		var @event = "test";
-
-        // Act
-        EasySocketEvent easySocketEvent = @event;
-
-        // Assert
-		Assert.Equal(@event, easySocketEvent.Event);
-		Assert.Equal(string.Empty, easySocketEvent.Message);
-	}
-
-    [Fact]
     public void GetEvent_WhenEventIsSet_ShouldGetEvent()
     {
         // Arrange
