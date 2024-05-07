@@ -10,21 +10,58 @@ public sealed class EasySocketOptions
     private string _closingStatusDescription = "Closing";
 
     private Encoding _encoding = Encoding.UTF8;
+    private int _receiveBufferSize = 100;
+    private int _sendBufferSize = 100;
     internal List<Type> Authenticators { get; set; } = new();
 
     /// <summary>
-    ///     The size of chunks when receiving messages. <br /><br />
-    ///     Increasing this will allocate more memory for each message received and sent.
-    ///     Decreasing this will cause receiving the full message to take more time.<br /><br />
+    ///     The size of chunks when receiving or sending messages. <br />
     ///     Default is 100 bytes (100B).
     /// </summary>
+    [Obsolete($"Use {nameof(ReceiveBufferSize)} and {nameof(SendBufferSize)} instead")]
     public int BufferSize
     {
         get => _bufferSize;
         set
         {
-            if (value < 1) throw new ArgumentOutOfRangeException(nameof(value), "Chunk size cannot be less than 1");
+            if (value < 1)
+                throw new ArgumentOutOfRangeException(nameof(value), $"{nameof(BufferSize)} cannot be less than 1");
             _bufferSize = value;
+            _receiveBufferSize = value;
+            _sendBufferSize = value;
+        }
+    }
+
+    /// <summary>
+    ///     The size of the byte array used to receive messages.<br />
+    ///     When expecting to receive large messages, it is recommended to increase this value.<br />
+    ///     Default is 100 bytes (100B).
+    /// </summary>
+    public int ReceiveBufferSize
+    {
+        get => _receiveBufferSize;
+        set
+        {
+            if (value < 1)
+                throw new ArgumentOutOfRangeException(nameof(value),
+                    $"{nameof(ReceiveBufferSize)} cannot be less than 1");
+            _receiveBufferSize = value;
+        }
+    }
+
+    /// <summary>
+    ///     The size of the byte array used to send messages.<br />
+    ///     When expecting to send large messages back to the client, it is recommended to increase this value.<br />
+    ///     Default is 100 bytes (100B).
+    /// </summary>
+    public int SendBufferSize
+    {
+        get => _sendBufferSize;
+        set
+        {
+            if (value < 1)
+                throw new ArgumentOutOfRangeException(nameof(value), $"{nameof(SendBufferSize)} cannot be less than 1");
+            _sendBufferSize = value;
         }
     }
 

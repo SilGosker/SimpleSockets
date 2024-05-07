@@ -39,8 +39,8 @@ public abstract class EasySocket : IEasySocket
         set
         {
             _options = value;
-            _byteBuffer = new byte[_options.BufferSize];
-            _bufferCharCount = _options.Encoding.GetMaxCharCount(_options.BufferSize);
+            _byteBuffer = new byte[_options.SendBufferSize];
+            _bufferCharCount = _options.Encoding.GetMaxCharCount(_options.SendBufferSize);
         }
     }
 
@@ -104,7 +104,7 @@ public abstract class EasySocket : IEasySocket
         _isReceiving = true;
 
         StringBuilder sb = new();
-        var buffer = new byte[_options.BufferSize];
+        var buffer = new byte[_options.ReceiveBufferSize];
 
         while (IsConnected() && !_cts.IsCancellationRequested && !_isDisposed)
         {
