@@ -10,7 +10,7 @@ public class EasySocketOptionsTests
 	[Theory]
 	[InlineData(-1)]
 	[InlineData(0)]
-	public void ChunkSizeSetter_IfLowerThanOne_ShouldThrowArgumentOutOfRangeException(int chunkSize)
+	public void BufferSizeSetter_IfLowerThanOne_ShouldThrowArgumentOutOfRangeException(int chunkSize)
 	{
 		// Arrange
 		var options = new EasySocketOptions();
@@ -21,7 +21,7 @@ public class EasySocketOptionsTests
     }
 
     [Fact]
-	public void PropertySetters_WhenSetToNull_ShouldThrowArgumentNullException()
+	public void EncodingSetter_WhenSetToNull_ShouldThrowArgumentNullException()
 	{
         // Arrange
         EasySocketOptions options = new();
@@ -36,7 +36,7 @@ public class EasySocketOptionsTests
 	[InlineData(100)]
 	[InlineData(1000)]
 	[InlineData(int.MaxValue)]
-	public void ChunkSizeSetter_WhenSetToValidValue_ShouldUpdateValue(int chunkSize)
+	public void BufferSizeSetter_WhenSetToValidValue_ShouldUpdateValue(int chunkSize)
 	{
         // Arrange
         EasySocketOptions options = new();
@@ -47,6 +47,64 @@ public class EasySocketOptionsTests
 		// Assert
         Assert.Equal(chunkSize, options.BufferSize);
 	}
+
+	[Theory]
+	[InlineData(0)]
+	[InlineData(-1)]
+    public void ReceiveBufferSizeSetter_IfLowerThanOne_ShouldThrowArgumentOutOfRangeException(int value)
+    {
+        // Arrange
+        var options = new EasySocketOptions();
+
+        // Act & Assert
+        Assert.Throws<ArgumentOutOfRangeException>(() => options.ReceiveBufferSize = value);
+    }
+
+	[Theory]
+	[InlineData(0)]
+	[InlineData(-1)]
+	public void SendBufferSizeSetter_IfLowerThanOne_ShouldThrowArgumentOutOfRangeException(int value)
+    {
+        // Arrange
+        var options = new EasySocketOptions();
+
+        // Act & Assert
+        Assert.Throws<ArgumentOutOfRangeException>(() => options.SendBufferSize = value);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(100)]
+    [InlineData(1000)]
+    [InlineData(int.MaxValue)]
+    public void ReceiveBufferSizeSetter_WhenSetToValidValue_ShouldUpdateValue(int value)
+    {
+        // Arrange
+        EasySocketOptions options = new();
+
+        // Act
+        options.ReceiveBufferSize = value;
+
+        // Assert
+        Assert.Equal(value, options.ReceiveBufferSize);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(100)]
+    [InlineData(1000)]
+    [InlineData(int.MaxValue)]
+    public void SendBufferSizeSetter_WhenSetToValidValue_ShouldUpdateValue(int value)
+    {
+        // Arrange
+        EasySocketOptions options = new();
+
+        // Act
+        options.SendBufferSize = value;
+
+        // Assert
+        Assert.Equal(value, options.SendBufferSize);
+    }
 
 	[Fact]
 	public void EncodingSetter_WhenSetToValidValue_ShouldUpdateValue()
