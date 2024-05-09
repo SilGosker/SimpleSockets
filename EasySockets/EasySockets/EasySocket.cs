@@ -9,6 +9,8 @@ namespace EasySockets;
 [DebuggerDisplay("{ClientId} = {_webSocket.State}")]
 public abstract class EasySocket : IEasySocket
 {
+    private EasySocketOptions _options = null!;
+    private WebSocket _webSocket = null!;
     private readonly Queue<string> _messagePipeline = new();
     private int _bufferCharCount;
 
@@ -18,9 +20,7 @@ public abstract class EasySocket : IEasySocket
     private bool _isDisposed;
     private bool _isReceiving;
     private bool _isSending;
-    private EasySocketOptions _options = null!;
     private byte[] _sendBuffer = Array.Empty<byte>();
-    private WebSocket _webSocket = null!;
 
     string IInternalEasySocket.RoomId
     {
