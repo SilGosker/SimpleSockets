@@ -9,14 +9,18 @@ namespace EasySockets;
 [DebuggerDisplay("{ClientId} = {_webSocket.State}")]
 public abstract class EasySocket : IEasySocket
 {
-    private EasySocketOptions _options = null!;
-    private WebSocket _webSocket = null!;
     private readonly Queue<string> _messagePipeline = new();
+    private int _bufferCharCount;
+
+    private Action<IEasySocket>? _disposeAtSocketHandler;
+
+    private Func<IEasySocket, BroadCastFilter, string, Task>? _emit;
     private bool _isDisposed;
     private bool _isReceiving;
     private bool _isSending;
+    private EasySocketOptions _options = null!;
     private byte[] _sendBuffer = Array.Empty<byte>();
-    private int _bufferCharCount;
+    private WebSocket _webSocket = null!;
 
     string IInternalEasySocket.RoomId
     {
@@ -42,10 +46,6 @@ public abstract class EasySocket : IEasySocket
             _bufferCharCount = _options.Encoding.GetMaxCharCount(_options.SendBufferSize);
         }
     }
-
-    private Action<IEasySocket>? _disposeAtSocketHandler;
-
-    private Func<IEasySocket, BroadCastFilter, string, Task>? _emit;
 
     public string RoomId { get; private set; } = null!;
 
