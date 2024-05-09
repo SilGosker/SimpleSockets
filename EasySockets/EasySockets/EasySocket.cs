@@ -15,7 +15,7 @@ public abstract class EasySocket : IEasySocket
     private bool _isDisposed;
     private bool _isReceiving;
     private bool _isSending;
-    private byte[] _byteBuffer = Array.Empty<byte>();
+    private byte[] _sendBuffer = Array.Empty<byte>();
     private int _bufferCharCount;
 
     string IInternalEasySocket.RoomId
@@ -38,8 +38,8 @@ public abstract class EasySocket : IEasySocket
         set
         {
             _options = value;
-            _byteBuffer = new byte[_options.BufferSize];
-            _bufferCharCount = _options.Encoding.GetMaxCharCount(_options.BufferSize);
+            _sendBuffer = new byte[_options.SendBufferSize];
+            _bufferCharCount = _options.Encoding.GetMaxCharCount(_options.SendBufferSize);
         }
     }
 
@@ -111,7 +111,7 @@ public abstract class EasySocket : IEasySocket
         _isReceiving = true;
 
         StringBuilder sb = new();
-        var buffer = new byte[_options.BufferSize];
+        var buffer = new byte[_options.ReceiveBufferSize];
 
         while (IsConnected() && !_isDisposed)
         {
@@ -177,11 +177,11 @@ public abstract class EasySocket : IEasySocket
                 while (charsProcessed < message.Length)
                 {
                     var flush = charsProcessed + _bufferCharCount >= message.Length;
-                    encoder.Convert(message.AsSpan()[charsProcessed..], _byteBuffer, flush, out var charsUsed,
+                    encoder.Convert(message.AsSpan()[charsProcessed..], _sendBuffer, flush, out var charsUsed,
                         out var bytesUsed, out _);
 
                     await _webSocket
-                        .SendAsync(new ArraySegment<byte>(_byteBuffer, 0, bytesUsed), WebSocketMessageType.Text, flush, cancellationToken)
+                        .SendAsync(new ArraySegment<byte>(_sendBuffer, 0, bytesUsed), WebSocketMessageType.Text, flush, cancellationToken)
                         .ConfigureAwait(false);
 
                     charsProcessed += charsUsed;
