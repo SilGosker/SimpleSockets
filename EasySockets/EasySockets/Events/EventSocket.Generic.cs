@@ -20,10 +20,15 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket
 	/// <returns>A task representing the asynchronous operation of sending the message to the client.</returns>
 	public Task SendToClientAsync(string @event, string message)
     {
+        return SendToClientAsync(@event, message, CancellationToken.None);
+    }
+
+    public Task SendToClientAsync(string @event, string message, CancellationToken cancellationToken)
+    {
         var bound = BindEvent(@event, message);
         if (bound == null) return Task.CompletedTask;
 
-	    return SendToClientAsync(bound);
+        return SendToClientAsync(bound, cancellationToken);
     }
 
     /// <inheritdoc cref="SendToClientAsync(string,string)" />
