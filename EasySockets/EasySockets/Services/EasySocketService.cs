@@ -6,7 +6,7 @@ namespace EasySockets.Services;
 internal sealed class EasySocketService : IEasySocketService
 {
     private readonly List<EasySocketRoom> _rooms = new();
-    
+
     public bool Any()
     {
         return _rooms.Any(e => e.Sockets.Any(o => o.IsConnected()));
@@ -51,7 +51,8 @@ internal sealed class EasySocketService : IEasySocketService
     public Task ForceLeaveAsync(string roomId, string clientId, CancellationToken cancellationToken)
     {
         return _rooms.FirstOrDefault(e => e.Id == roomId)?.Sockets
-            .FirstOrDefault(e => e.IsConnected() && e.ClientId == clientId)?.CloseAsync(cancellationToken) ?? Task.CompletedTask;
+                   .FirstOrDefault(e => e.IsConnected() && e.ClientId == clientId)?.CloseAsync(cancellationToken) ??
+               Task.CompletedTask;
     }
 
     public Task SendToRoomAsync(string roomId, string message)
@@ -74,7 +75,7 @@ internal sealed class EasySocketService : IEasySocketService
     {
         return Task.WhenAll(_rooms.SingleOrDefault(e => e.Id == roomId)?.Sockets
                                 .Where(e => e.IsConnected())
-                                .Select(e => e is IEventSocket o 
+                                .Select(e => e is IEventSocket o
                                     ? o.SendToClientAsync(@event, message, cancellationToken)
                                     : Task.CompletedTask)
                             ?? Enumerable.Empty<Task>());

@@ -16,7 +16,7 @@ public interface IEasySocketService
     public bool Any(string roomId);
 
     /// <summary>
-    ///     Checks if a connected client specified by the <paramref name="roomId"/> and <paramref name="clientId"/> is found.
+    ///     Checks if a connected client specified by the <paramref name="roomId" /> and <paramref name="clientId" /> is found.
     /// </summary>
     /// <param name="roomId">The room identifier the client needs to match.</param>
     /// <param name="clientId">The identifier the client.</param>
@@ -54,7 +54,7 @@ public interface IEasySocketService
     /// </summary>
     /// <param name="roomId">The room identifier the client needs to match to instantiate the leave event.</param>
     /// <param name="clientId">The client identifier the client needs to match to instantiate the leave event.</param>
-    /// <param name="cancellationToken">The <seealso cref="CancellationToken"/> to cancel the asynchronous operation.</param>
+    /// <param name="cancellationToken">The <seealso cref="CancellationToken" /> to cancel the asynchronous operation.</param>
     /// <returns>The task representing the asynchronous operation of the leave event and removal.</returns>
     public Task ForceLeaveAsync(string roomId, string clientId, CancellationToken cancellationToken);
 
@@ -76,7 +76,7 @@ public interface IEasySocketService
     /// <param name="roomId">The room identifier the client needs to match to receive the message.</param>
     /// <param name="event">The event identifier or name.</param>
     /// <param name="message">The message to be sent to the clients.</param>
-    /// <param name="cancellationToken">The <seealso cref="CancellationToken"/> to cancel the asynchronous operation.</param>
+    /// <param name="cancellationToken">The <seealso cref="CancellationToken" /> to cancel the asynchronous operation.</param>
     /// <returns>The task representing the asynchronous parallel sending of the messages.</returns>
     public Task SendToRoomAsync(string roomId, string @event, string message, CancellationToken cancellationToken);
 
@@ -99,7 +99,7 @@ public interface IEasySocketService
     /// <param name="clientId">The identifier the client should match to receive the message.</param>
     /// <param name="event">The event identifier or name.</param>
     /// <param name="message">The message to be sent to the client.</param>
-    /// <param name="cancellationToken">The <seealso cref="CancellationToken"/> to cancel the operation the message sending.</param>
+    /// <param name="cancellationToken">The <seealso cref="CancellationToken" /> to cancel the operation the message sending.</param>
     /// <returns>The task representing the sending of the message</returns>
     public Task SendToClientAsync(string roomId, string clientId, string @event, string message,
         CancellationToken cancellationToken);

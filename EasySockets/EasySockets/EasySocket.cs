@@ -9,14 +9,18 @@ namespace EasySockets;
 [DebuggerDisplay("{ClientId} = {_webSocket.State}")]
 public abstract class EasySocket : IEasySocket
 {
-    private EasySocketOptions _options = null!;
-    private WebSocket _webSocket = null!;
     private readonly Queue<string> _messagePipeline = new();
+    private int _bufferCharCount;
+
+    private Action<IEasySocket>? _disposeAtSocketHandler;
+
+    private Func<IEasySocket, BroadCastFilter, string, Task>? _emit;
     private bool _isDisposed;
     private bool _isReceiving;
     private bool _isSending;
+    private EasySocketOptions _options = null!;
     private byte[] _sendBuffer = Array.Empty<byte>();
-    private int _bufferCharCount;
+    private WebSocket _webSocket = null!;
 
     string IInternalEasySocket.RoomId
     {
@@ -42,10 +46,6 @@ public abstract class EasySocket : IEasySocket
             _bufferCharCount = _options.Encoding.GetMaxCharCount(_options.SendBufferSize);
         }
     }
-
-    private Func<IEasySocket, BroadCastFilter, string, Task>? _emit;
-
-    private Action<IEasySocket>? _disposeAtSocketHandler;
 
     public string RoomId { get; private set; } = null!;
 
@@ -94,7 +94,9 @@ public abstract class EasySocket : IEasySocket
         await OnDisconnect().ConfigureAwait(false);
         try
         {
-            await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, _options.ClosingStatusDescription, cancellationToken).ConfigureAwait(false);
+            await _webSocket
+                .CloseAsync(WebSocketCloseStatus.NormalClosure, _options.ClosingStatusDescription, cancellationToken)
+                .ConfigureAwait(false);
             _webSocket.Abort();
         }
         catch (WebSocketException)
@@ -120,10 +122,11 @@ public abstract class EasySocket : IEasySocket
             while (!result.EndOfMessage)
                 try
                 {
-                    result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None).ConfigureAwait(false);
+                    result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None)
+                        .ConfigureAwait(false);
 
                     if (result.MessageType != WebSocketMessageType.Text) continue;
-                    
+
                     sb.Append(_options.Encoding.GetString(buffer.AsSpan()[..result.Count]));
                 }
                 catch (WebSocketException)
@@ -159,6 +162,22 @@ public abstract class EasySocket : IEasySocket
         return Task.CompletedTask;
     }
 
+    public void Dispose()
+    {
+        if (_isDisposed) return;
+        try
+        {
+            GC.SuppressFinalize(this);
+            _webSocket.Dispose();
+            _disposeAtSocketHandler?.Invoke(this);
+            _isDisposed = true;
+        }
+        catch
+        {
+            // ignored
+        }
+    }
+
     private async Task StartSendingMessageAsync(CancellationToken cancellationToken)
     {
         if (_isSending || !IsConnected()) return;
@@ -181,7 +200,8 @@ public abstract class EasySocket : IEasySocket
                         out var bytesUsed, out _);
 
                     await _webSocket
-                        .SendAsync(new ArraySegment<byte>(_sendBuffer, 0, bytesUsed), WebSocketMessageType.Text, flush, cancellationToken)
+                        .SendAsync(new ArraySegment<byte>(_sendBuffer, 0, bytesUsed), WebSocketMessageType.Text, flush,
+                            cancellationToken)
                         .ConfigureAwait(false);
 
                     charsProcessed += charsUsed;
@@ -224,20 +244,4 @@ public abstract class EasySocket : IEasySocket
     /// <param name="message">The message as a string received from the client.</param>
     /// <returns>A task representing the asynchronous operation</returns>
     public abstract Task OnMessage(string message);
-
-    public void Dispose()
-    {
-        if (_isDisposed) return;
-        try
-        {
-            GC.SuppressFinalize(this);
-            _webSocket.Dispose();
-            _disposeAtSocketHandler?.Invoke(this);
-            _isDisposed = true;
-        }
-        catch
-        {
-            // ignored
-        }
-    }
 }
