@@ -9,7 +9,7 @@ namespace EasySockets;
 [DebuggerDisplay("{ClientId} = {_webSocket.State}")]
 public abstract class EasySocket : IEasySocket
 {
-    private readonly Queue<string> _messagePipeline = new();
+    private readonly Queue<EasySocketMessage> _messagePipeline = new();
     private int _bufferCharCount;
 
     private Action<IEasySocket>? _disposeAtSocketHandler;
@@ -75,8 +75,11 @@ public abstract class EasySocket : IEasySocket
     {
         if (!IsConnected()) return Task.CompletedTask;
 
-        _messagePipeline.Enqueue(message);
-        return StartSendingMessageAsync(cancellationToken);
+        _messagePipeline.Enqueue(new EasySocketMessage(message)
+        {
+            CancellationToken = cancellationToken
+        });
+        return StartSendingMessageAsync();
     }
 
     public Task CloseAsync()
@@ -173,7 +176,7 @@ public abstract class EasySocket : IEasySocket
         }
     }
 
-    private async Task StartSendingMessageAsync(CancellationToken cancellationToken)
+    private async Task StartSendingMessageAsync()
     {
         if (_isSending || !IsConnected()) return;
 
@@ -182,8 +185,9 @@ public abstract class EasySocket : IEasySocket
 
         while (_messagePipeline.Count > 0)
         {
-            var message = _messagePipeline.Dequeue();
-
+            var easySocketMessage = _messagePipeline.Dequeue();
+            var message = easySocketMessage.Message;
+            var cancellationToken = easySocketMessage.CancellationToken;
             var charsProcessed = 0;
 
             try
