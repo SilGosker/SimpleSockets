@@ -212,6 +212,10 @@ public abstract class EasySocket : IEasySocket
             {
                 await CloseAsync(cancellationToken).ConfigureAwait(false);
             }
+            catch (OperationCanceledException)
+            {
+                continue;
+            }
         }
 
         _isSending = false;
