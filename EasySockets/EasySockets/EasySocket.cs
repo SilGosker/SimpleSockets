@@ -66,11 +66,6 @@ public abstract class EasySocket : IEasySocket
         return _webSocket.State == WebSocketState.Open;
     }
 
-    /// <summary>
-    ///     Sends a message to the client websocket.
-    /// </summary>
-    /// <param name="message">The message to be sent.</param>
-    /// <returns>A task representing the asynchronous operation of sending the message to the client.</returns>
     public Task SendToClientAsync(string message)
     {
         return SendToClientAsync(message, CancellationToken.None);
