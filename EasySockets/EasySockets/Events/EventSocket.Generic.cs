@@ -13,12 +13,7 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket
         set => _events = value;
     }
 
-    /// <summary>
-    ///     Sends a message to the client.
-    /// </summary>
-    /// <param name="message">The message to be sent.</param>
-    /// <param name="event">The event identifier or name</param>
-    /// <returns>A task representing the asynchronous operation of sending the message to the client.</returns>
+
     public Task SendToClientAsync(string @event, string message)
     {
         return SendToClientAsync(@event, message, CancellationToken.None);
