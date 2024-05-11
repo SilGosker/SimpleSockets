@@ -243,7 +243,7 @@ public class EasySocketServiceTests
     {
         // Arrange
         var mockSocket = new Mock<IEasySocket>();
-        mockSocket.Setup(s => s.ReceiveMessagesAsync()).Returns(Task.Delay(10));
+        mockSocket.Setup(s => s.ReceiveMessagesAsync()).Returns(Task.Delay(50));
         mockSocket.Setup(s => s.SendToClientAsync(string.Empty)).Verifiable();
         mockSocket.Setup(s => s.IsConnected()).Returns(true);
         mockSocket.SetupGet(s => s.RoomId).Returns("roomId");
@@ -254,7 +254,7 @@ public class EasySocketServiceTests
         await service.SendToRoomAsync("roomId", "message");
 
         // Assert
-        mockSocket.Verify(s => s.SendToClientAsync("message"), Times.Once);
+        mockSocket.Verify(s => s.SendToClientAsync("message", CancellationToken.None), Times.Once);
     }
 
     [Fact]
@@ -275,7 +275,7 @@ public class EasySocketServiceTests
     {
         // Arrange
         var mockSocket = new Mock<IEasySocket>();
-        mockSocket.Setup(s => s.ReceiveMessagesAsync()).Returns(Task.Delay(10));
+        mockSocket.Setup(s => s.ReceiveMessagesAsync()).Returns(Task.Delay(50));
         mockSocket.Setup(s => s.SendToClientAsync(string.Empty)).Verifiable();
         mockSocket.Setup(s => s.IsConnected()).Returns(true);
         mockSocket.SetupGet(s => s.RoomId).Returns("roomId");
@@ -287,7 +287,7 @@ public class EasySocketServiceTests
         await service.SendToClientAsync("roomId", "clientId", "message");
 
         // Assert
-        mockSocket.Verify(s => s.SendToClientAsync("message"), Times.Once);
+        mockSocket.Verify(s => s.SendToClientAsync("message", CancellationToken.None), Times.Once);
     }
 
     [Fact]
