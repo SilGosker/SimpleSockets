@@ -7,23 +7,24 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket
     where TEvent : IEasySocketEvent
 {
     private IReadOnlyList<EventSocketEventInfo> _events = null!;
+
     IReadOnlyList<EventSocketEventInfo> IInternalEventSocket.Events
     {
         set => _events = value;
     }
 
-    /// <summary>
-	///     Sends a message to the client websocket.
-	/// </summary>
-	/// <param name="message">The message to be sent.</param>
-	/// <param name="event">The event id/name</param>
-	/// <returns>A task representing the asynchronous operation of sending the message to the client.</returns>
-	public Task SendToClientAsync(string @event, string message)
+
+    public Task SendToClientAsync(string @event, string message)
+    {
+        return SendToClientAsync(@event, message, CancellationToken.None);
+    }
+
+    public Task SendToClientAsync(string @event, string message, CancellationToken cancellationToken)
     {
         var bound = BindEvent(@event, message);
         if (bound == null) return Task.CompletedTask;
 
-	    return SendToClientAsync(bound);
+        return SendToClientAsync(bound, cancellationToken);
     }
 
     /// <inheritdoc cref="SendToClientAsync(string,string)" />
@@ -33,13 +34,13 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket
     }
 
     /// <summary>
-    ///     Sends a message with an event id/name to the members matching the all members specified by the
-    ///     <paramref name="filter" />
+    ///     Sends a message with an event to the members matching the all members specified by the
+    ///     <paramref name="filter" />.
     /// </summary>
-    /// <param name="filter">The broadcast level the message will reach</param>
-    /// <param name="event">The event id/name</param>
-    /// <param name="message">The message to be sent</param>
-    /// <returns>The task representing the parallel asynchronous sending</returns>
+    /// <param name="filter">The broadcast level the message will reach.</param>
+    /// <param name="event">The event identifier or name.</param>
+    /// <param name="message">The message to be sent.</param>
+    /// <returns>The task representing the parallel asynchronous sending.</returns>
     public Task Broadcast(BroadCastFilter filter, string @event, string message)
     {
         var bound = BindEvent(@event, message);
@@ -54,11 +55,11 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket
         return Broadcast(filter, @event.Event, message);
     }
 
-	/// <summary>
-	///     Sends a message to the members matching the <see cref="EasySocket.RoomId" />.
-	/// </summary>
-	/// <inheritdoc cref="Broadcast(BroadCastFilter, string, string)" />
-	public Task Broadcast(string @event, string message)
+    /// <summary>
+    ///     Sends a message to all members of the sockets room matching the <see cref="EasySocket.RoomId" />
+    /// </summary>
+    /// <inheritdoc cref="Broadcast(BroadCastFilter, string, string)" />
+    public Task Broadcast(string @event, string message)
     {
         var bound = BindEvent(@event, message);
         if (bound == null) return Task.CompletedTask;
@@ -69,16 +70,10 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket
     public sealed override Task OnMessage(string message)
     {
         var @event = ExtractEvent(message);
-        if (@event is null)
-        {
-            return OnFailedEventBinding(message);
-        }
+        if (@event is null) return OnFailedEventBinding(message);
 
         var eventInfo = _events.FirstOrDefault(e => e.Contains(@event.Event));
-        if (eventInfo is null)
-        {
-            return Task.CompletedTask;
-        }
+        if (eventInfo is null) return Task.CompletedTask;
 
         return eventInfo.InvokeAsync(this, @event, message);
     }
@@ -97,7 +92,7 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket
     /// <param name="message">The full message received from the client</param>
     /// <returns>The event as a string, or <c>null</c> if the operation failed.</returns>
     public abstract TEvent? ExtractEvent(string message);
-    
+
     /// <summary>
     ///     Creates a message based on the given parameters. <br />
     ///     In the example used in <see cref="ExtractEvent" />,<br /> the code
@@ -123,5 +118,4 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket
     {
         return Task.CompletedTask;
     }
-
 }

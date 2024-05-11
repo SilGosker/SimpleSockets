@@ -9,15 +9,18 @@ namespace EasySockets;
 [DebuggerDisplay("{ClientId} = {_webSocket.State}")]
 public abstract class EasySocket : IEasySocket
 {
-    private readonly CancellationTokenSource _cts = new();
-    private EasySocketOptions _options = null!;
-    private WebSocket _webSocket = null!;
     private readonly Queue<string> _messagePipeline = new();
+    private int _bufferCharCount;
+
+    private Action<IEasySocket>? _disposeAtSocketHandler;
+
+    private Func<IEasySocket, BroadCastFilter, string, Task>? _emit;
     private bool _isDisposed;
     private bool _isReceiving;
     private bool _isSending;
+    private EasySocketOptions _options = null!;
     private byte[] _sendBuffer = Array.Empty<byte>();
-    private int _bufferCharCount;
+    private WebSocket _webSocket = null!;
 
     string IInternalEasySocket.RoomId
     {
@@ -44,10 +47,6 @@ public abstract class EasySocket : IEasySocket
         }
     }
 
-    private Func<IEasySocket, BroadCastFilter, string, Task>? _emit;
-
-    private Action<IEasySocket>? _disposeAtSocketHandler;
-
     public string RoomId { get; private set; } = null!;
 
     public string ClientId { get; private set; } = null!;
@@ -67,27 +66,32 @@ public abstract class EasySocket : IEasySocket
         return _webSocket.State == WebSocketState.Open;
     }
 
-    /// <summary>
-    ///     Sends a message to the client websocket.
-    /// </summary>
-    /// <param name="message">The message to be sent.</param>
-    /// <returns>A task representing the asynchronous operation of sending the message to the client.</returns>
     public Task SendToClientAsync(string message)
+    {
+        return SendToClientAsync(message, CancellationToken.None);
+    }
+
+    public Task SendToClientAsync(string message, CancellationToken cancellationToken)
     {
         if (!IsConnected()) return Task.CompletedTask;
 
         _messagePipeline.Enqueue(message);
-        return StartSendingMessageAsync();
+        return StartSendingMessageAsync(cancellationToken);
     }
 
+    public Task CloseAsync()
+    {
+        return CloseAsync(CancellationToken.None);
+    }
 
-    public async Task CloseAsync()
+    public async Task CloseAsync(CancellationToken cancellationToken)
     {
         await OnDisconnect().ConfigureAwait(false);
         try
         {
-            await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, _options.ClosingStatusDescription,
-                CancellationToken.None).ConfigureAwait(false);
+            await _webSocket
+                .CloseAsync(WebSocketCloseStatus.NormalClosure, _options.ClosingStatusDescription, cancellationToken)
+                .ConfigureAwait(false);
             _webSocket.Abort();
         }
         catch (WebSocketException)
@@ -106,17 +110,18 @@ public abstract class EasySocket : IEasySocket
         StringBuilder sb = new();
         var buffer = new byte[_options.ReceiveBufferSize];
 
-        while (IsConnected() && !_cts.IsCancellationRequested && !_isDisposed)
+        while (IsConnected() && !_isDisposed)
         {
             WebSocketReceiveResult result = new(0, WebSocketMessageType.Text, false);
 
             while (!result.EndOfMessage)
                 try
                 {
-                    result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), _cts.Token).ConfigureAwait(false);
+                    result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None)
+                        .ConfigureAwait(false);
 
                     if (result.MessageType != WebSocketMessageType.Text) continue;
-                    
+
                     sb.Append(_options.Encoding.GetString(buffer.AsSpan()[..result.Count]));
                 }
                 catch (WebSocketException)
@@ -152,7 +157,23 @@ public abstract class EasySocket : IEasySocket
         return Task.CompletedTask;
     }
 
-    private async Task StartSendingMessageAsync()
+    public void Dispose()
+    {
+        if (_isDisposed) return;
+        try
+        {
+            GC.SuppressFinalize(this);
+            _webSocket.Dispose();
+            _disposeAtSocketHandler?.Invoke(this);
+            _isDisposed = true;
+        }
+        catch
+        {
+            // ignored
+        }
+    }
+
+    private async Task StartSendingMessageAsync(CancellationToken cancellationToken)
     {
         if (_isSending || !IsConnected()) return;
 
@@ -175,7 +196,7 @@ public abstract class EasySocket : IEasySocket
 
                     await _webSocket
                         .SendAsync(new ArraySegment<byte>(_sendBuffer, 0, bytesUsed), WebSocketMessageType.Text, flush,
-                            _cts.Token)
+                            cancellationToken)
                         .ConfigureAwait(false);
 
                     charsProcessed += charsUsed;
@@ -185,7 +206,7 @@ public abstract class EasySocket : IEasySocket
             }
             catch (WebSocketException)
             {
-                await CloseAsync().ConfigureAwait(false);
+                await CloseAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -218,22 +239,4 @@ public abstract class EasySocket : IEasySocket
     /// <param name="message">The message as a string received from the client.</param>
     /// <returns>A task representing the asynchronous operation</returns>
     public abstract Task OnMessage(string message);
-
-    public void Dispose()
-    {
-        if (_isDisposed) return;
-        try
-        {
-            GC.SuppressFinalize(this);
-            _cts.Cancel();
-            _cts.Dispose();
-            _webSocket.Dispose();
-            _disposeAtSocketHandler?.Invoke(this);
-            _isDisposed = true;
-        }
-        catch
-        {
-            // ignored
-        }
-    }
 }
