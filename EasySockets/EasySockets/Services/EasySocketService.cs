@@ -9,7 +9,7 @@ internal sealed class EasySocketService : IEasySocketService
 
     public bool Any()
     {
-        return _rooms.Any(e => e.Sockets.Any(o => o.IsConnected()));
+        return _rooms.Count > 0;
     }
 
     public bool Any(string roomId)
@@ -111,6 +111,23 @@ internal sealed class EasySocketService : IEasySocketService
     public IEnumerable<IGrouping<string, IEasySocket>> GetGroupings()
     {
         return _rooms.SelectMany(e => e.Sockets).GroupBy(e => e.RoomId);
+    }
+
+    internal async Task AddSocket(IEasySocket socket)
+    {
+        if (!socket.IsConnected()) return;
+
+        socket.Emit = BroadCast;
+        socket.DisposeAtSocketHandler = RemoveSocket;
+
+        var room = _rooms.FirstOrDefault(e => e.Id == socket.RoomId);
+        if (room == null)
+            _rooms.Add(new EasySocketRoom(socket.RoomId, socket));
+        else
+            room.Sockets.Add(socket);
+
+        await socket.OnConnect().ConfigureAwait(false);
+        await socket.ReceiveMessagesAsync().ConfigureAwait(false);
     }
 
     internal async Task AddSocket(IEasySocket socket)
