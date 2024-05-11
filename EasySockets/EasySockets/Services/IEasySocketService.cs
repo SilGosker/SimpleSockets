@@ -19,7 +19,7 @@ public interface IEasySocketService
     ///     Checks if a connected client specified by the <paramref name="roomId" /> and <paramref name="clientId" /> is found.
     /// </summary>
     /// <param name="roomId">The room identifier the client needs to match.</param>
-    /// <param name="clientId">The identifier the client.</param>
+    /// <param name="clientId">The identifier of the client.</param>
     /// <returns><c>true</c> if a client is found matching the prerequisite, otherwise <c>false</c>.</returns>
     public bool Any(string roomId, string clientId);
 
@@ -100,16 +100,16 @@ public interface IEasySocketService
     /// <param name="event">The event identifier or name.</param>
     /// <param name="message">The message to be sent to the client.</param>
     /// <param name="cancellationToken">The <seealso cref="CancellationToken" /> to cancel the operation the message sending.</param>
-    /// <returns>The task representing the sending of the message</returns>
+    /// <returns>The task representing the sending of the message.</returns>
     public Task SendToClientAsync(string roomId, string clientId, string @event, string message,
         CancellationToken cancellationToken);
 
     /// <summary>
-    ///     Lists all rooms and their clients
+    ///     Lists all rooms and their clients.
     /// </summary>
     /// <returns>
-    ///     An enumerator that iterates through all rooms and their clients<br />
-    ///     grouped based on the room's identifier
+    ///     An enumerator that iterates through all rooms and their clients
+    ///     grouped based on the room's identifier.
     /// </returns>
     public IEnumerable<IGrouping<string, IEasySocket>> GetGroupings();
 }

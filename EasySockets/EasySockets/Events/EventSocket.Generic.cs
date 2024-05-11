@@ -14,10 +14,10 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket
     }
 
     /// <summary>
-    ///     Sends a message to the client websocket.
+    ///     Sends a message to the client.
     /// </summary>
     /// <param name="message">The message to be sent.</param>
-    /// <param name="event">The event id/name</param>
+    /// <param name="event">The event identifier or name</param>
     /// <returns>A task representing the asynchronous operation of sending the message to the client.</returns>
     public Task SendToClientAsync(string @event, string message)
     {
@@ -39,13 +39,13 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket
     }
 
     /// <summary>
-    ///     Sends a message with an event id/name to the members matching the all members specified by the
-    ///     <paramref name="filter" />
+    ///     Sends a message with an event to the members matching the all members specified by the
+    ///     <paramref name="filter" />.
     /// </summary>
-    /// <param name="filter">The broadcast level the message will reach</param>
-    /// <param name="event">The event id/name</param>
-    /// <param name="message">The message to be sent</param>
-    /// <returns>The task representing the parallel asynchronous sending</returns>
+    /// <param name="filter">The broadcast level the message will reach.</param>
+    /// <param name="event">The event identifier or name.</param>
+    /// <param name="message">The message to be sent.</param>
+    /// <returns>The task representing the parallel asynchronous sending.</returns>
     public Task Broadcast(BroadCastFilter filter, string @event, string message)
     {
         var bound = BindEvent(@event, message);
@@ -61,7 +61,7 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket
     }
 
     /// <summary>
-    ///     Sends a message to the members matching the <see cref="EasySocket.RoomId" />.
+    ///     Sends a message to all members of the sockets room matching the <see cref="EasySocket.RoomId" />
     /// </summary>
     /// <inheritdoc cref="Broadcast(BroadCastFilter, string, string)" />
     public Task Broadcast(string @event, string message)

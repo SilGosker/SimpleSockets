@@ -1,4 +1,4 @@
-﻿namespace EasySockets;
+namespace EasySockets;
 
 /// <summary>
 ///     The interface for a basic EasySocket class.
@@ -19,20 +19,20 @@ public interface IEasySocket : IDisposable, IInternalEasySocket
     ///     Checks the connection status of the EasySocket.
     /// </summary>
     /// <returns>
-    ///     <c>true</c> if the EasySocket is connected; otherwise, <c>false</c>.
+    ///     <c>true</c> if the EasySocket is connected, otherwise <c>false</c>.
     /// </returns>
     public bool IsConnected();
 
     /// <summary>
-    ///     The event that will be emitted just before the socket receives its messages
+    ///     The event that will be emitted just before the socket receives its messages.
     /// </summary>
-    /// <returns>A task that represent the asynchronous event</returns>
+    /// <returns>A task that represent the asynchronous operation.</returns>
     public Task OnConnect();
 
     /// <summary>
-    ///     The event that will be emitted just before the backing websocket is disposed and removed from the server
+    ///     The event that will be emitted just before the backing websocket is disposed and removed from the server.
     /// </summary>
-    /// <returns>A task that represent the asynchronous event</returns>
+    /// <returns>A task that represent the asynchronous operation.</returns>
     public Task OnDisconnect();
 
     /// <inheritdoc cref="SendToClientAsync(string, CancellationToken)" />
