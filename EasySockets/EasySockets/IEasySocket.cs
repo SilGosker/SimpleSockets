@@ -39,19 +39,20 @@ public interface IEasySocket : IDisposable, IInternalEasySocket
     public Task SendToClientAsync(string message);
 
     /// <summary>
-    ///     Sends a message to the client connected to the server
+    ///     Sends a message to the client.
     /// </summary>
-    /// <param name="message">The content of the message</param>
+    /// <param name="message">The content of the message.</param>
     /// <param name="cancellationToken">The <seealso cref="CancellationToken" /> to cancel the asynchronous operation.</param>
-    /// <returns>A task that represents the asynchronous operation</returns>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public Task SendToClientAsync(string message, CancellationToken cancellationToken);
 
+    /// <inheritdoc cref="CloseAsync(CancellationToken)" />
     public Task CloseAsync();
 
     /// <summary>
-    ///     Closes the websocket connection and disposes the EasySocket instance
+    ///     Closes the websocket connection and disposes the EasySocket instance.
     /// </summary>
     /// <param name="cancellationToken">The <seealso cref="CancellationToken" /> to cancel the asynchronous operation.</param>
-    /// <returns>A task that represents the asynchronous closing operation</returns>
+    /// <returns>A task that represents the asynchronous closing operation.</returns>
     public Task CloseAsync(CancellationToken cancellationToken);
 }

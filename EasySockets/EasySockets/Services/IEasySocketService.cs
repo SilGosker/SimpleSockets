@@ -108,8 +108,7 @@ public interface IEasySocketService
     ///     Lists all rooms and their clients.
     /// </summary>
     /// <returns>
-    ///     An enumerator that iterates through all rooms and their clients
-    ///     grouped based on the room's identifier.
+    ///     An enumerator that iterates through all rooms and their clients grouped based on the room's identifier.
     /// </returns>
     public IEnumerable<IGrouping<string, IEasySocket>> GetGroupings();
 }
