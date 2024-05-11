@@ -1,6 +1,7 @@
 ﻿// ReSharper disable UseObjectOrCollectionInitializer : Unnecessary in this case, as it divides the arrange/act/assert sections of the tests
 
-#pragma warning disable IDE0017
+#pragma warning disable IDE0017 // Prevent this to be explicit for the Act & Assert sections
+#pragma warning disable CS0618 // The BufferSize property is obsolete but should still function as expected
 
 using System.Text;
 
