@@ -5,9 +5,17 @@ namespace EasySockets.Mock;
 
 public class MockEasySocketAuthenticator : IEasySocketAuthenticator
 {
-    internal static bool Authenticated = true;
     internal const string RoomId = "MockEasySocketAuthenticator_TestRoomId";
     internal const string ClientId = "MockEasySocketAuthenticator_TestClientId";
+    internal static bool Authenticated = true;
+
+    public MockEasySocketAuthenticator()
+    {
+        ConstructorCallCount++;
+    }
+
+    internal static int ConstructorCallCount { get; set; }
+
     public EasySocketAuthenticationResult Authenticate(EasySocketAuthenticationResult currentAuthenticationResult,
         HttpContext context)
     {

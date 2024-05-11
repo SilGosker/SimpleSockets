@@ -133,4 +133,39 @@ public class EasySocketAuthenticationServiceTests
         Assert.Equal(MockEasySocketAuthenticatorWithDependency.RoomId, authenticationResult.RoomId);
         Assert.Equal(MockEasySocketAuthenticatorWithDependency.ClientId, authenticationResult.ClientId);
     }
+
+    [Fact]
+    public async Task
+        GetAuthenticationResultAsync_WhenAuthenticatorsAreRegisteredInDependencyContainer_ShouldResolveAuthenticatorsFromDependencyContainer()
+    {
+        // Arrange
+        var serviceCollection = new ServiceCollection();
+        MockEasySocketAuthenticator.ConstructorCallCount = 0;
+        serviceCollection.AddSingleton<MockEasySocketAuthenticator>();
+        var serviceProvider = serviceCollection.BuildServiceProvider();
+
+        var options = new EasySocketOptions();
+        options.AddAuthenticator<MockEasySocketAuthenticator>();
+
+        var optionsMock = new Mock<IOptions<EasySocketGlobalOptions>>();
+        optionsMock.Setup(x => x.Value).Returns(new EasySocketGlobalOptions());
+
+        var easySocketTypeCache = new EasySocketTypeCache(typeof(EasySocket), options);
+
+        var context = new DefaultHttpContext()
+        {
+            RequestServices = serviceProvider
+        };
+        var authenticator = new EasySocketAuthenticationService(context.RequestServices.GetRequiredService<IServiceScopeFactory>(), optionsMock.Object);
+
+        // Act
+        var authenticationResult = await authenticator.GetAuthenticationResultAsync(easySocketTypeCache, context);
+        await authenticator.GetAuthenticationResultAsync(easySocketTypeCache, context);
+
+        // Assert
+        Assert.Equal(1, MockEasySocketAuthenticator.ConstructorCallCount);
+        Assert.Equal(MockEasySocketAuthenticator.Authenticated, authenticationResult.IsAuthenticated);
+        Assert.Equal(MockEasySocketAuthenticator.RoomId, authenticationResult.RoomId);
+        Assert.Equal(MockEasySocketAuthenticator.ClientId, authenticationResult.ClientId);
+    }
 }

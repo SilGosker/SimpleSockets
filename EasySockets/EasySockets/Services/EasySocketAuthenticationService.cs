@@ -32,7 +32,7 @@ internal sealed class EasySocketAuthenticationService
 
         foreach (var authenticatorType in easySocketTypeCache.Options.Authenticators)
         {
-            var authenticator = ActivatorUtilities.CreateInstance(scope, authenticatorType);
+            var authenticator = scope.GetService(authenticatorType) ?? ActivatorUtilities.CreateInstance(scope, authenticatorType);
 
             authenticationResult = authenticator switch
             {

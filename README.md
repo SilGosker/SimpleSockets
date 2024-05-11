@@ -235,10 +235,11 @@ Lets break down exactly how the code above behaves:
 2. The `Authenticate` and `AuthenticateAsync` methods both have the `currentAuthenticationResult` argument. This is the default authentication result or what the last authenticator returned.
    *Note: You can configure what the default authentication result is and you can add as many custom authenticators as you'd like to this pipeline so this is important as your authenticators scale. We'll discuss both of these topics (default authentication and authenticator scaling) later on in this section.*
 3. The return result `true` and `Task.FromResult(new EasySocketAuthenticationResult(true))` both act the same. A implicit converter can be found on the `EasySocketAuthenticationResult` struct so that the value `true` does the same as `new EasySocketAuthenticationResult(true)`.
-   *Note: The boolean value determines whether the websocket is allowed to connect to the server or not. If at any point the return value would be `false`, the pipeline would stop creating new authenticator instances and the request would result in a `401 - Unauthorized` status code.*
+   *Note: The boolean value determines whether the websocket is allowed to connect to the server or not. If at any point the return value would be `false`, the pipeline would stop resolving new authenticator instances and the request would result in a `401 - Unauthorized` status code.*
 4. If needed, you can inject your own services through dependency injection.
-5. The `HttpContext` is added as an parameter so you can get parameters from the current request without having to inject the `IHttpContextAccessor`.
-6. If there aren't any more authenticators in the pipeline and the boolean return value is `true`, the websocket is accepted and a new instance of the `ChatSocket` is created.
+5. If the authenticator is registered in the dependency injection container, it will be resolved from it. Otherwise, a transient instance will be created.
+6. The `HttpContext` is added as an parameter so you can get parameters from the current request without having to inject the `IHttpContextAccessor`.
+7. If there aren't any more authenticators in the pipeline and the boolean return value is `true`, the websocket is accepted and a new instance of the `ChatSocket` is created.
 
 In this example, we will use the `IEasySocketAuthenticator` since we don't need asynchronous operations.
 
