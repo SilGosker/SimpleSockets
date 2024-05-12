@@ -12,10 +12,8 @@ public static class AppBuilderExtensions
 {
     /// <summary>
     ///     Adds the EasySockets middleware to the pipeline. <br /> <br />
-    ///     <b>
-    ///         Make sure the <c>app.UseWebSocket(WebSocketOptions options = null)</c> is called before this method.
-    ///         Otherwise no websocket connection will be able to connect.
-    ///     </b>
+    ///     Make sure the <c>app.UseWebSocket(WebSocketOptions options = null)</c> is called <b>before</b> this method.
+    ///     Otherwise no websocket request will be able to complete its handshake.
     /// </summary>
     /// <param name="app">The application that the EasySockets middleware should be added to.</param>
     /// <returns>A <see cref="EasySocketBuilder" /> To further configure the EasySockets.</returns>
