@@ -20,7 +20,7 @@ public abstract class EasySocket : IEasySocket
     private EasySocketOptions _options = null!;
     private byte[] _sendBuffer = Array.Empty<byte>();
     private WebSocket _webSocket = null!;
-
+    private Encoder _encoder = null!;
     string IInternalEasySocket.RoomId
     {
         set => RoomId = value;
@@ -43,6 +43,7 @@ public abstract class EasySocket : IEasySocket
             _options = value;
             _sendBuffer = new byte[_options.SendBufferSize];
             _bufferCharCount = _options.Encoding.GetMaxCharCount(_options.SendBufferSize);
+            _encoder = _options.Encoding.GetEncoder();
         }
     }
 
@@ -76,14 +77,13 @@ public abstract class EasySocket : IEasySocket
 
         try
         {
-            var encoder = _options.Encoding.GetEncoder();
             var charsProcessed = 0;
             await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
             while (charsProcessed < message.Length)
             {
                 var flush = charsProcessed + _bufferCharCount >= message.Length;
-                encoder.Convert(message.AsSpan()[charsProcessed..], _sendBuffer, flush, out var charsUsed,
+                _encoder.Convert(message.AsSpan()[charsProcessed..], _sendBuffer, flush, out var charsUsed,
                     out var bytesUsed, out _);
 
                 await _webSocket
@@ -100,6 +100,7 @@ public abstract class EasySocket : IEasySocket
         }
         finally
         {
+            _encoder.Reset();
             _semaphore.Release();
         }
     }
