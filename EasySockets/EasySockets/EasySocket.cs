@@ -9,7 +9,7 @@ namespace EasySockets;
 [DebuggerDisplay("{ClientId} = {_webSocket.State}")]
 public abstract class EasySocket : IEasySocket
 {
-    private readonly Queue<EasySocketMessage> _messagePipeline = new();
+    private readonly SemaphoreSlim _semaphore = new(1, 1);
     private int _bufferCharCount;
 
     private Action<IEasySocket>? _disposeAtSocketHandler;
@@ -17,7 +17,6 @@ public abstract class EasySocket : IEasySocket
     private Func<IEasySocket, BroadCastFilter, string, Task>? _emit;
     private bool _isDisposed;
     private bool _isReceiving;
-    private bool _isSending;
     private EasySocketOptions _options = null!;
     private byte[] _sendBuffer = Array.Empty<byte>();
     private WebSocket _webSocket = null!;
@@ -71,15 +70,38 @@ public abstract class EasySocket : IEasySocket
         return SendToClientAsync(message, CancellationToken.None);
     }
 
-    public Task SendToClientAsync(string message, CancellationToken cancellationToken)
+    public async Task SendToClientAsync(string message, CancellationToken cancellationToken)
     {
-        if (!IsConnected()) return Task.CompletedTask;
+        if (!IsConnected()) return;
 
-        _messagePipeline.Enqueue(new EasySocketMessage(message)
+        try
         {
-            CancellationToken = cancellationToken
-        });
-        return StartSendingMessageAsync();
+            var encoder = _options.Encoding.GetEncoder();
+            var charsProcessed = 0;
+            await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+            while (charsProcessed < message.Length)
+            {
+                var flush = charsProcessed + _bufferCharCount >= message.Length;
+                encoder.Convert(message.AsSpan()[charsProcessed..], _sendBuffer, flush, out var charsUsed,
+                    out var bytesUsed, out _);
+
+                await _webSocket
+                    .SendAsync(new ArraySegment<byte>(_sendBuffer, 0, bytesUsed), WebSocketMessageType.Text, flush,
+                        cancellationToken)
+                    .ConfigureAwait(false);
+
+                charsProcessed += charsUsed;
+            }
+        }
+        catch (WebSocketException)
+        {
+            await CloseAsync(cancellationToken).ConfigureAwait(false);
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     public Task CloseAsync()
@@ -174,51 +196,6 @@ public abstract class EasySocket : IEasySocket
         {
             // ignored
         }
-    }
-
-    private async Task StartSendingMessageAsync()
-    {
-        if (_isSending || !IsConnected()) return;
-
-        _isSending = true;
-        var encoder = _options.Encoding.GetEncoder();
-
-        while (_messagePipeline.Count > 0)
-        {
-            var easySocketMessage = _messagePipeline.Dequeue();
-            var message = easySocketMessage.Message;
-            var cancellationToken = easySocketMessage.CancellationToken;
-            var charsProcessed = 0;
-
-            try
-            {
-                while (charsProcessed < message.Length)
-                {
-                    var flush = charsProcessed + _bufferCharCount >= message.Length;
-                    encoder.Convert(message.AsSpan()[charsProcessed..], _sendBuffer, flush, out var charsUsed,
-                        out var bytesUsed, out _);
-
-                    await _webSocket
-                        .SendAsync(new ArraySegment<byte>(_sendBuffer, 0, bytesUsed), WebSocketMessageType.Text, flush,
-                            cancellationToken)
-                        .ConfigureAwait(false);
-
-                    charsProcessed += charsUsed;
-                }
-
-                encoder.Reset();
-            }
-            catch (WebSocketException)
-            {
-                await CloseAsync(cancellationToken).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException)
-            {
-                continue;
-            }
-        }
-
-        _isSending = false;
     }
 
     /// <summary>
