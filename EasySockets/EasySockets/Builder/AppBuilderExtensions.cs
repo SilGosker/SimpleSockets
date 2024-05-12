@@ -23,7 +23,7 @@ public static class AppBuilderExtensions
 		app.UseWebSockets(options.Value.WebSocketOptions);
 		app.UseMiddleware<SocketMiddleware>();
 
-		var easySocketTypeHolder = app.ApplicationServices.GetRequiredService<EasySocketTypeHolder>();
+        var easySocketTypeHolder = app.ApplicationServices.GetRequiredService<EasySocketTypeHolder>();
         return new EasySocketBuilder(easySocketTypeHolder);
-	}
+    }
 }

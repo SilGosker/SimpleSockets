@@ -271,14 +271,13 @@ builder.Services.AddEasySocketServices();
 
 var app = builder.Build();
 
+app.UseHttpsRedirection();
+
 app.UseEasySockets()
     .AddEasySocket<ChatSocket>("/chat", options =>
     {
         options.AddAuthenticator<ChatAuthenticator>();
     });
-
-
-app.UseHttpsRedirection();
 
 app.Run();
 ```
@@ -347,8 +346,6 @@ builder.Services.AddEasySocketServices(options =>
 // Add services to the container.
 
 var app = builder.Build();
-
-// Configure the HTTP request pipeline.
 
 app.UseHttpsRedirection();
 
