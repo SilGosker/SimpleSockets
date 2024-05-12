@@ -18,9 +18,6 @@ public static class AppBuilderExtensions
 	/// <returns>A <see cref="EasySocketBuilder" /> To further configure the EasySockets.</returns>
 	public static EasySocketBuilder UseEasySockets(this IApplicationBuilder app)
 	{
-        var options = app.ApplicationServices.GetRequiredService<IOptions<EasySocketGlobalOptions>>();
-
-		app.UseWebSockets(options.Value.WebSocketOptions);
 		app.UseMiddleware<SocketMiddleware>();
 
 		var easySocketTypeHolder = app.ApplicationServices.GetRequiredService<EasySocketTypeHolder>();

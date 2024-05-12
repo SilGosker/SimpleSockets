@@ -8,7 +8,6 @@ public sealed class EasySocketGlobalOptions
 {
     private Func<HttpContext, string> _getDefaultClientId = _ => Guid.NewGuid().ToString();
     private Func<HttpContext, string> _getDefaultRoomId = _ => "__0";
-    private WebSocketOptions _webSocketOptions = new();
 
     /// <summary>
     ///     <para>
@@ -44,14 +43,5 @@ public sealed class EasySocketGlobalOptions
     {
         get => _getDefaultClientId;
         set => _getDefaultClientId = value ?? throw new ArgumentNullException(nameof(value));
-    }
-
-    /// <summary>
-    ///     The <see cref="Microsoft.AspNetCore.Builder.WebSocketOptions" /> that will be used in the middleware.
-    /// </summary>
-    public WebSocketOptions WebSocketOptions
-    {
-        get => _webSocketOptions;
-        set => _webSocketOptions = value ?? throw new ArgumentNullException(nameof(value));
     }
 }

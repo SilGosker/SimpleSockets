@@ -10,7 +10,6 @@ public class EasySocketGlobalOptionsTests
     {
         var options = new EasySocketGlobalOptions();
 
-        Assert.NotNull(options.WebSocketOptions);
         Assert.NotNull(options.GetDefaultRoomId);
         Assert.NotNull(options.GetDefaultClientId);
     }
@@ -38,14 +37,6 @@ public class EasySocketGlobalOptionsTests
         Assert.NotEqual(clientId1, clientId2);
     }
 
-    [Fact]
-    public void WebSocketOptions_WhenConstructed_ReturnsNewWebSocketOptions()
-    {
-        var options = new EasySocketGlobalOptions();
-
-        Assert.NotNull(options.WebSocketOptions);
-    }
-
     [Theory]
     [InlineData("GetDefaultRoomId")]
     [InlineData("GetDefaultClientId")]
@@ -69,7 +60,6 @@ public class EasySocketGlobalOptionsTests
     [Theory]
     [InlineData("GetDefaultRoomId")]
     [InlineData("GetDefaultClientId")]
-    [InlineData("WebSocketOptions")]
     public void PropertySetters_WhenSetToNull_ShouldThrowArgumentNullException(string propertyName)
     {
         var options = new EasySocketGlobalOptions();
@@ -81,9 +71,6 @@ public class EasySocketGlobalOptionsTests
                 break;
             case "GetDefaultClientId":
                 Assert.Throws<ArgumentNullException>(() => options.GetDefaultClientId = null!);
-                break;
-            case "WebSocketOptions":
-                Assert.Throws<ArgumentNullException>(() => options.WebSocketOptions = null!);
                 break;
         }
     }
