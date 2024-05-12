@@ -39,12 +39,22 @@ public class ServiceCollectionExtensionsTests
     [Fact]
     public void AddEasySocketServices_WhenConfiguring_ConfiguresEasySocketGlobalOptions()
     {
+        var keepAliveInterval = TimeSpan.FromSeconds(1234);
+        var receiveBufferSize = 1234;
+
+        var websocketOptions = new WebSocketOptions
+        {
+            KeepAliveInterval = keepAliveInterval,
+            ReceiveBufferSize = receiveBufferSize,
+        };
+
         var serviceCollection = new ServiceCollection();
         
         serviceCollection.AddEasySocketServices(options =>
         {
             options.GetDefaultClientId = _ => "Test";
             options.GetDefaultRoomId = _ => "Test";
+            options.WebSocketOptions = websocketOptions;
         });
 
         var services = serviceCollection.BuildServiceProvider();
@@ -53,6 +63,8 @@ public class ServiceCollectionExtensionsTests
 
         Assert.Equal("Test", options.Value.GetDefaultClientId(null!));
         Assert.Equal("Test", options.Value.GetDefaultRoomId(null!));
+        Assert.Equal(keepAliveInterval, options.Value.WebSocketOptions.KeepAliveInterval);
+        Assert.Equal(receiveBufferSize, options.Value.WebSocketOptions.ReceiveBufferSize);
     }
 
     [Fact]
