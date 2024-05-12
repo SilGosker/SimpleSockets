@@ -58,6 +58,8 @@ app.UseHttpsRedirection();
 
 // Configure the HTTP request pipeline.
 
+app.UseWebSockets();
+
 app.UseEasySockets();
 
 app.Run();
@@ -65,7 +67,7 @@ app.Run();
 
 The `builder.Services.AddEasySocketServices();` adds the `IEasySocketService` available for DI. This manages all the websocket connections. You can manipulate those connections outside of the websocket instances. For example, you can send messages to the client in a controller or custom services. This is discussed later on in the tutorial.
 
-The `app.UseEasySockets();` adds the middleware that handles authentication and accepts (or declines) a client. If you want authentication based on the `HttpContext.User` property, make sure that you call this method **after** calling the `app.UseAuthentication()`; and `app.UseAuthorization();` methods.
+The `app.UseEasySockets();` adds the middleware that handles authentication and accepts (or declines) a client. **Make sure that `app.UseWebSockets()` is called before `app.UseEasySockets();`. Otherwise no websocket would be accepted**. If you want authentication based on the `HttpContext.User` property, make sure that you call this method **after** calling the `app.UseAuthentication()`; and `app.UseAuthorization();` methods.
 
 This on its own doesn't do a whole lot. Why? Because nothing is configured yet. Every websocket request will fail its handshake protocol.
 
@@ -169,6 +171,8 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 
+app.UseWebSockets();
+
 app.UseEasySockets()
     .AddEasySocket<ChatSocket>("/chat");
 
@@ -271,14 +275,15 @@ builder.Services.AddEasySocketServices();
 
 var app = builder.Build();
 
+app.UseHttpsRedirection();
+
+app.UseWebSockets();
+
 app.UseEasySockets()
     .AddEasySocket<ChatSocket>("/chat", options =>
     {
         options.AddAuthenticator<ChatAuthenticator>();
     });
-
-
-app.UseHttpsRedirection();
 
 app.Run();
 ```
@@ -348,9 +353,9 @@ builder.Services.AddEasySocketServices(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-
 app.UseHttpsRedirection();
+
+app.UseWebSockets();
 
 app.UseEasySockets()
     .AddEasySocket<ChatSocket>("/chat");
@@ -386,6 +391,8 @@ builder.Services.AddEasySocketServices();
 var app = builder.Build();
 
 app.UseHttpsRedirection();
+
+app.UseWebSockets();
 
 app.UseEasySockets()
     .AddEasySocket<ChatSocket>("/chat", options =>
@@ -431,6 +438,8 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 
+app.UseWebSockets();
+
 app.UseEasySockets()
     .AddEasySocket<ChatSocket>("/chat", options =>
     {
@@ -472,6 +481,8 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 
+app.UseWebSockets();
+
 app.UseEasySockets()
     .AddEasySocket<ChatSocket>("/chat", options =>
     {
@@ -512,6 +523,8 @@ builder.Services.AddEasySocketServices();
 var app = builder.Build();
 
 app.UseHttpsRedirection();
+
+app.UseWebSockets();
 
 app.UseEasySockets()
     .AddEasySocket<ChatSocket>("/chat", options =>
@@ -556,6 +569,8 @@ builder.Services.AddEasySocketServices();
 var app = builder.Build();
 
 app.UseHttpsRedirection();
+
+app.UseWebSockets();
 
 app.UseEasySockets()
     .AddEasySocket<ChatSocket>("/chat", options =>
