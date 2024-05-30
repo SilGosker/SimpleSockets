@@ -1,5 +1,7 @@
 using EasySockets.Events;
+using EasySockets.Helpers;
 using EasySockets.Services.Caching;
+using Microsoft.Extensions.Logging;
 
 namespace EasySockets.Builder;
 
@@ -41,9 +43,9 @@ public sealed class EasySocketBuilder
     public EasySocketBuilder AddEasySocket<TEasySocket>(string url, Action<EasySocketOptions>? configure = null)
 		where TEasySocket : class, IEasySocket
 	{
-        if (url == null) throw new ArgumentNullException(nameof(url));
+        ThrowHelper.ThrowIfNull(url);
 
-		var options = new EasySocketOptions();
+        var options = new EasySocketOptions();
 		configure?.Invoke(options);
 
 		if (!url.StartsWith('/')) url = '/' + url;

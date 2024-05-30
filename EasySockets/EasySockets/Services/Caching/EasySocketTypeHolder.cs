@@ -10,7 +10,7 @@ internal class EasySocketTypeHolder
 
     internal void AddType(string url, EasySocketTypeCache easySocketType)
     {
-        if (_easySocketTypes.ContainsKey(url)) throw new InvalidOperationException($"Url '{url}' Cannot be added twice");
+        ThrowHelper.ThrowIfUrlIsAddedTwice(_easySocketTypes, url);
 
         if (TypeHelper.IsSubclassOfRawGeneric(easySocketType.EasySocketType, typeof(EventSocket<>)))
         {

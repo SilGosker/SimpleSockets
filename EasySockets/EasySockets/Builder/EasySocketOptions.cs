@@ -1,5 +1,6 @@
 using System.Text;
 using EasySockets.Authentication;
+using EasySockets.Helpers;
 
 namespace EasySockets.Builder;
 
@@ -24,8 +25,7 @@ public sealed class EasySocketOptions
         get => _bufferSize;
         set
         {
-            if (value < 1)
-                throw new ArgumentOutOfRangeException(nameof(value), $"{nameof(BufferSize)} cannot be less than 1");
+            ThrowHelper.ThrowIfCannotFitEncodingChars(value, _encoding);
             _bufferSize = value;
             _receiveBufferSize = value;
             _sendBufferSize = value;
@@ -42,9 +42,8 @@ public sealed class EasySocketOptions
         get => _receiveBufferSize;
         set
         {
-            if (value < 1)
-                throw new ArgumentOutOfRangeException(nameof(value),
-                    $"{nameof(ReceiveBufferSize)} cannot be less than 1");
+            ThrowHelper.ThrowIfCannotFitEncodingChars(value, _encoding);
+
             _receiveBufferSize = value;
         }
     }
@@ -59,8 +58,8 @@ public sealed class EasySocketOptions
         get => _sendBufferSize;
         set
         {
-            if (value < 1)
-                throw new ArgumentOutOfRangeException(nameof(value), $"{nameof(SendBufferSize)} cannot be less than 1");
+            ThrowHelper.ThrowIfCannotFitEncodingChars(value, _encoding);
+
             _sendBufferSize = value;
         }
     }
@@ -72,7 +71,11 @@ public sealed class EasySocketOptions
     public Encoding Encoding
     {
         get => _encoding;
-        set => _encoding = value ?? throw new ArgumentNullException(nameof(value));
+        set
+        {
+            ThrowHelper.ThrowIfNull(value);
+            _encoding = value;
+        }
     }
 
     /// <summary>
@@ -82,7 +85,11 @@ public sealed class EasySocketOptions
     public string ClosingStatusDescription
     {
         get => _closingStatusDescription;
-        set => _closingStatusDescription = value ?? throw new ArgumentNullException(nameof(value));
+        set
+        {
+            ThrowHelper.ThrowIfNull(value);
+            _closingStatusDescription = value;
+        }
     }
 
     /// <summary>

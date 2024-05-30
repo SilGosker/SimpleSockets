@@ -34,7 +34,6 @@ public class EasySocketOptionsTests
     }
 
     [Theory]
-    [InlineData(1)]
     [InlineData(100)]
     [InlineData(1000)]
     [InlineData(int.MaxValue)]
@@ -75,7 +74,6 @@ public class EasySocketOptionsTests
     }
 
     [Theory]
-    [InlineData(1)]
     [InlineData(100)]
     [InlineData(1000)]
     [InlineData(int.MaxValue)]
@@ -92,7 +90,6 @@ public class EasySocketOptionsTests
     }
 
     [Theory]
-    [InlineData(1)]
     [InlineData(100)]
     [InlineData(1000)]
     [InlineData(int.MaxValue)]
