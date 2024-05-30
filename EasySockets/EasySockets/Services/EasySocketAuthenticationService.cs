@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using EasySockets.Authentication;
 using EasySockets.Builder;
 using EasySockets.Events;
+using EasySockets.Helpers;
 using Microsoft.Extensions.Options;
 using EasySockets.Services.Caching;
 
@@ -44,8 +45,11 @@ internal sealed class EasySocketAuthenticationService
             if (authenticationResult.IsAuthenticated != true) return authenticationResult;
         }
 
-        authenticationResult.RoomId ??= roomId ?? throw new InvalidOperationException("The authenticationResult.RoomId and the default roomId should not be null after successful authentication");
-        authenticationResult.ClientId ??= clientId ?? throw new InvalidOperationException("The authenticationResult.ClientId and the default userId should not be null after successful authentication");
+        ThrowHelper.ThrowIfInvalidRoomId(authenticationResult.RoomId, roomId);
+        ThrowHelper.ThrowIfInvalidClientId(authenticationResult.ClientId, clientId);
+
+        authenticationResult.RoomId ??= roomId;
+        authenticationResult.ClientId ??= clientId;
 
         return authenticationResult;
     }
@@ -56,8 +60,6 @@ internal sealed class EasySocketAuthenticationService
         var ws = websockets.WebSocketRequestedProtocols.Count > 0
             ? await websockets.AcceptWebSocketAsync(websockets.WebSocketRequestedProtocols[0])
             : await websockets.AcceptWebSocketAsync();
-
-        if (ws == null) return null;
 
         if (ActivatorUtilities.CreateInstance(scope.ServiceProvider, cache.EasySocketType) is not IEasySocket easySocket)
             return null;

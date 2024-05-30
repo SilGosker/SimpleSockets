@@ -1,4 +1,5 @@
-﻿using EasySockets.Services;
+﻿using EasySockets.Helpers;
+using EasySockets.Services;
 using EasySockets.Services.Caching;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,11 +18,9 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddEasySocketServices(this IServiceCollection serviceCollection,
         Action<EasySocketGlobalOptions>? configure = null)
     {
-        if (serviceCollection == null) throw new ArgumentNullException(nameof(serviceCollection));
+        ThrowHelper.ThrowIfNull(serviceCollection);
 
-        if (serviceCollection.Any(x => x.ServiceType == typeof(IEasySocketService)))
-            throw new InvalidOperationException(
-                "The EasySocketService has already been added to the service collection.");
+        ThrowHelper.ThrowIfServiceCollectionIsInitialized(serviceCollection);
 
         serviceCollection.AddSingleton<EasySocketService>();
         serviceCollection.AddSingleton<IEasySocketService>(e => e.GetRequiredService<EasySocketService>());

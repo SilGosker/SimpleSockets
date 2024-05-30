@@ -1,4 +1,5 @@
 ﻿using EasySockets.Authentication;
+using EasySockets.Helpers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 
@@ -25,7 +26,11 @@ public sealed class EasySocketGlobalOptions
     public Func<HttpContext, string> GetDefaultRoomId
     {
         get => _getDefaultRoomId;
-        set => _getDefaultRoomId = value ?? throw new ArgumentNullException(nameof(value));
+        set
+        {
+            ThrowHelper.ThrowIfNull(value);
+            _getDefaultRoomId = value;
+        }
     }
 
     /// <summary>
@@ -43,7 +48,11 @@ public sealed class EasySocketGlobalOptions
     public Func<HttpContext, string> GetDefaultClientId
     {
         get => _getDefaultClientId;
-        set => _getDefaultClientId = value ?? throw new ArgumentNullException(nameof(value));
+        set
+        {
+            ThrowHelper.ThrowIfNull(value);
+            _getDefaultClientId = value;
+        }
     }
 
     /// <summary>
@@ -52,6 +61,10 @@ public sealed class EasySocketGlobalOptions
     public WebSocketOptions WebSocketOptions
     {
         get => _webSocketOptions;
-        set => _webSocketOptions = value ?? throw new ArgumentNullException(nameof(value));
+        set
+        {
+            ThrowHelper.ThrowIfNull(value);
+            _webSocketOptions = value;
+        }
     }
 }
