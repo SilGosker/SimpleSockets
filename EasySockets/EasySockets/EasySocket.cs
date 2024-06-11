@@ -20,7 +20,17 @@ public abstract class EasySocket : IEasySocket
     private EasySocketOptions _options = null!;
     private byte[] _sendBuffer = Array.Empty<byte>();
     private WebSocket _webSocket = null!;
-    private Encoder _encoder = null!;
+
+    /// <summary>
+    ///     The options used to configure the socket.
+    /// </summary>
+    protected ReadonlyEasySocketOptions Options => _options.AsReadonly();
+
+    ILogger<EasySocket> IInternalEasySocket.Logger
+    {
+        set => _logger = value;
+    }
+
     string IInternalEasySocket.RoomId
     {
         set => RoomId = value;
