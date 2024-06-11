@@ -6,7 +6,7 @@ namespace EasySockets.Services.Caching;
 
 internal class EasySocketTypeHolder
 {
-    private readonly IDictionary<PathString, EasySocketTypeCache> _easySocketTypes = new Dictionary<PathString, EasySocketTypeCache>();
+    private readonly Dictionary<PathString, EasySocketTypeCache> _easySocketTypes = new();
 
     internal void AddType(string url, EasySocketTypeCache easySocketType)
     {
