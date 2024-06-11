@@ -28,7 +28,6 @@ public abstract class EasySocket : IEasySocket
     /// </summary>
     protected ReadonlyEasySocketOptions Options => _options.AsReadonly();
 
-
     ILogger<EasySocket> IInternalEasySocket.Logger
     {
         set => Logger = value;
