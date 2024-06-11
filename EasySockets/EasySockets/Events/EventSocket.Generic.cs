@@ -25,7 +25,7 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket
         var bound = BindEvent(@event, message);
         if (bound == null)
         {
-            if (Logger.IsEnabled(LogLevel.Warning))
+            if (Options.LoggingEnabled && Logger.IsEnabled(LogLevel.Warning))
             {
                 Logger.LogWarning("Failed to bind event {Event} with message {Message}", @event, message);
             }
@@ -54,7 +54,7 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket
         var bound = BindEvent(@event, message);
         if (bound == null)
         {
-            if (Logger.IsEnabled(LogLevel.Warning))
+            if (Options.LoggingEnabled && Logger.IsEnabled(LogLevel.Warning))
             {
                 Logger.LogWarning("Failed to bind event {Event} with message {Message}", @event, message);
             }
@@ -80,7 +80,7 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket
         var bound = BindEvent(@event, message);
         if (bound == null)
         {
-            if (Logger.IsEnabled(LogLevel.Warning))
+            if (Options.LoggingEnabled && Logger.IsEnabled(LogLevel.Warning))
             {
                 Logger.LogWarning("Failed to bind event {Event} with message {Message}", @event, message);
             }
@@ -96,7 +96,7 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket
         var @event = ExtractEvent(message);
         if (@event is null)
         {
-            if (Logger.IsEnabled(LogLevel.Warning))
+            if (Options.LoggingEnabled && Logger.IsEnabled(LogLevel.Warning))
             {
                 Logger.LogWarning("Failed to extract event from message {Message}", message);
             }
@@ -106,7 +106,7 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket
         var eventInfo = _events.FirstOrDefault(e => e.Contains(@event.Event));
         if (eventInfo is null)
         {
-            if (Logger.IsEnabled(LogLevel.Warning))
+            if (Options.LoggingEnabled && Logger.IsEnabled(LogLevel.Warning))
             {
                 Logger.LogWarning("Failed to find event {Event} in registered events", @event.Event);
             }

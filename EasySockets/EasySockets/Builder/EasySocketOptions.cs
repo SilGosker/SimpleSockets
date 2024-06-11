@@ -93,6 +93,12 @@ public sealed class EasySocketOptions
     }
 
     /// <summary>
+    ///     Whether or not exceptions and warnings should be logged. <br /><br />
+    ///     The default is <c>true</c>.
+    /// </summary>
+    public bool LoggingEnabled { get; set; } = true;
+
+    /// <summary>
     ///     Adds a single authenticator to the sockets authentication pipeline.
     /// </summary>
     /// <typeparam name="TAuthenticator">The type of the authenticator</typeparam>

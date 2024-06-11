@@ -109,7 +109,7 @@ public abstract class EasySocket : IEasySocket
         }
         catch (WebSocketException ex)
         {
-            if (Logger.IsEnabled(LogLevel.Error))
+            if (_options.LoggingEnabled && Logger.IsEnabled(LogLevel.Error))
             {
                 Logger.LogError(ex, "Failed to send message to client.");
             }
@@ -140,7 +140,7 @@ public abstract class EasySocket : IEasySocket
         }
         catch (WebSocketException ex)
         {
-            if (Logger.IsEnabled(LogLevel.Error))
+            if (_options.LoggingEnabled && Logger.IsEnabled(LogLevel.Error))
             {
                 Logger.LogError(ex, "Failed to close the websocket connection.");
             }
@@ -173,7 +173,7 @@ public abstract class EasySocket : IEasySocket
                 }
                 catch (WebSocketException ex)
                 {
-                    if (Logger.IsEnabled(LogLevel.Error))
+                    if (_options.LoggingEnabled && Logger.IsEnabled(LogLevel.Error))
                     {
                         Logger.LogError(ex, "Failed to receive message from client.");
                     }
