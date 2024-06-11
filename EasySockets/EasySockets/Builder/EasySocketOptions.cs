@@ -31,7 +31,7 @@ public sealed class EasySocketOptions : IReadonlyEasySocketOptions
             _sendBufferSize = value;
         }
     }
-    
+
     public int ReceiveBufferSize
     {
         get => _receiveBufferSize;
