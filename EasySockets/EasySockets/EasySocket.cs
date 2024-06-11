@@ -3,6 +3,7 @@ using System.Net.WebSockets;
 using System.Text;
 using EasySockets.Builder;
 using EasySockets.Enums;
+using EasySockets.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace EasySockets;
@@ -21,6 +22,12 @@ public abstract class EasySocket : IEasySocket
     private byte[] _sendBuffer = Array.Empty<byte>();
     private WebSocket _webSocket = null!;
     private Encoder _encoder = null!;
+
+    /// <summary>
+    ///     The options used to configure the socket.
+    /// </summary>
+    protected ReadonlyEasySocketOptions Options => _options.AsReadonly();
+
 
     ILogger<EasySocket> IInternalEasySocket.Logger
     {
