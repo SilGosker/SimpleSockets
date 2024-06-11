@@ -12,15 +12,18 @@ namespace EasySockets.Services;
 
 internal sealed class EasySocketAuthenticationService
 {
-    private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly EasySocketGlobalOptions _options;
-    public EasySocketAuthenticationService(IServiceScopeFactory serviceScopeFactory, IOptions<EasySocketGlobalOptions> options)
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+
+    public EasySocketAuthenticationService(IServiceScopeFactory serviceScopeFactory,
+        IOptions<EasySocketGlobalOptions> options)
     {
         _serviceScopeFactory = serviceScopeFactory;
         _options = options.Value;
     }
 
-    internal async Task<EasySocketAuthenticationResult> GetAuthenticationResultAsync(EasySocketTypeCache easySocketTypeCache, HttpContext context)
+    internal async Task<EasySocketAuthenticationResult> GetAuthenticationResultAsync(
+        EasySocketTypeCache easySocketTypeCache, HttpContext context)
     {
         var roomId = _options.GetDefaultRoomId(context);
         var clientId = _options.GetDefaultClientId(context);
@@ -34,12 +37,16 @@ internal sealed class EasySocketAuthenticationService
 
         foreach (var authenticatorType in easySocketTypeCache.Options.Authenticators)
         {
-            var authenticator = scope.GetService(authenticatorType) ?? ActivatorUtilities.CreateInstance(scope, authenticatorType);
+            var authenticator = scope.GetService(authenticatorType) ??
+                                ActivatorUtilities.CreateInstance(scope, authenticatorType);
 
             authenticationResult = authenticator switch
             {
-                IEasySocketAsyncAuthenticator asyncAuthenticator => await asyncAuthenticator.AuthenticateAsync(authenticationResult, context),
-                IEasySocketAuthenticator syncAuthenticator => syncAuthenticator.Authenticate(authenticationResult, context),
+                IEasySocketAsyncAuthenticator asyncAuthenticator => await asyncAuthenticator
+                    .AuthenticateAsync(authenticationResult, context)
+                    .ConfigureAwait(false),
+                IEasySocketAuthenticator syncAuthenticator => syncAuthenticator.Authenticate(authenticationResult,
+                    context),
                 _ => authenticationResult
             };
 
@@ -55,12 +62,13 @@ internal sealed class EasySocketAuthenticationService
         return authenticationResult;
     }
 
-    internal async Task<IEasySocket?> GetInstanceAsync(EasySocketTypeCache cache, WebSocketManager websockets, string roomId, string clientId)
+    internal async Task<IEasySocket?> GetInstanceAsync(EasySocketTypeCache cache, WebSocketManager websockets,
+        string roomId, string clientId)
     {
         using var scope = _serviceScopeFactory.CreateScope();
         var ws = websockets.WebSocketRequestedProtocols.Count > 0
-            ? await websockets.AcceptWebSocketAsync(websockets.WebSocketRequestedProtocols[0])
-            : await websockets.AcceptWebSocketAsync();
+            ? await websockets.AcceptWebSocketAsync(websockets.WebSocketRequestedProtocols[0]).ConfigureAwait(false)
+            : await websockets.AcceptWebSocketAsync().ConfigureAwait(false);
 
         if (ActivatorUtilities.CreateInstance(scope.ServiceProvider, cache.EasySocketType) is not IEasySocket easySocket)
             return null;
@@ -72,9 +80,7 @@ internal sealed class EasySocketAuthenticationService
         ((IInternalEasySocket)easySocket).ClientId = clientId;
 
         if (easySocket is IInternalEventSocket eventSocket)
-        {
             eventSocket.Events = ((EventSocketTypeCache)cache).EventInfos;
-        }
 
         return easySocket;
     }
