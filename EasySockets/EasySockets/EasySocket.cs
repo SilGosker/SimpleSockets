@@ -3,7 +3,6 @@ using System.Net.WebSockets;
 using System.Text;
 using EasySockets.Builder;
 using EasySockets.Enums;
-using EasySockets.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace EasySockets;
@@ -15,7 +14,6 @@ public abstract class EasySocket : IEasySocket
     private int _bufferCharCount;
     private Action<IEasySocket> _disposeAtSocketHandler = null!;
     private Func<IEasySocket, BroadCastFilter, string, Task> _emit = null!;
-    private Encoder _encoder = null!;
     private bool _isDisposed;
     private bool _isReceiving;
     private ILogger<EasySocket> _logger = null!;
@@ -23,6 +21,12 @@ public abstract class EasySocket : IEasySocket
     private byte[] _sendBuffer = Array.Empty<byte>();
     private WebSocket _webSocket = null!;
     private Encoder _encoder = null!;
+
+    ILogger<EasySocket> IInternalEasySocket.Logger
+    {
+        set => _logger = value;
+    }
+
     string IInternalEasySocket.RoomId
     {
         set => RoomId = value;
