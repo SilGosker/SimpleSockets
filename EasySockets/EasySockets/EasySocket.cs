@@ -3,6 +3,7 @@ using System.Net.WebSockets;
 using System.Text;
 using EasySockets.Builder;
 using EasySockets.Enums;
+using EasySockets.Extensions;
 
 namespace EasySockets;
 
@@ -25,11 +26,6 @@ public abstract class EasySocket : IEasySocket
     ///     The options used to configure the socket.
     /// </summary>
     protected ReadonlyEasySocketOptions Options => _options.AsReadonly();
-
-    ILogger<EasySocket> IInternalEasySocket.Logger
-    {
-        set => _logger = value;
-    }
 
     string IInternalEasySocket.RoomId
     {
