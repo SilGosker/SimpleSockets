@@ -34,5 +34,5 @@ public struct ReadonlyEasySocketOptions
     ///     Whether or not exceptions and warnings should be logged. <br /><br />
     ///     The default is <c>true</c>.
     /// </summary>
-    public bool LoggingEnabled { get; set; } = true;
+    public bool LoggingEnabled { get; init; }
 }
