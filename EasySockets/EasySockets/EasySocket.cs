@@ -3,6 +3,8 @@ using System.Net.WebSockets;
 using System.Text;
 using EasySockets.Builder;
 using EasySockets.Enums;
+using EasySockets.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace EasySockets;
 
@@ -17,6 +19,7 @@ public abstract class EasySocket : IEasySocket
     private Func<IEasySocket, BroadCastFilter, string, Task>? _emit;
     private bool _isDisposed;
     private bool _isReceiving;
+    private ILogger<EasySocket> _logger = null!;
     private EasySocketOptions _options = null!;
     private byte[] _sendBuffer = Array.Empty<byte>();
     private WebSocket _webSocket = null!;
@@ -94,8 +97,10 @@ public abstract class EasySocket : IEasySocket
                 charsProcessed += charsUsed;
             }
         }
-        catch (WebSocketException)
+        catch (WebSocketException ex)
         {
+            _logger.LogError(ex, "Failed to send message to client.");
+
             await CloseAsync(cancellationToken).ConfigureAwait(false);
         }
         finally
@@ -120,9 +125,9 @@ public abstract class EasySocket : IEasySocket
                 .ConfigureAwait(false);
             _webSocket.Abort();
         }
-        catch (WebSocketException)
+        catch (WebSocketException ex)
         {
-            // ignored
+            _logger.LogError(ex, "Failed to close the websocket connection.");
         }
 
         Dispose();
@@ -150,8 +155,9 @@ public abstract class EasySocket : IEasySocket
 
                     sb.Append(_options.Encoding.GetString(buffer.AsSpan()[..result.Count]));
                 }
-                catch (WebSocketException)
+                catch (WebSocketException ex)
                 {
+                    _logger.LogError(ex, "Failed to receive message from client.");
                     break;
                 }
 

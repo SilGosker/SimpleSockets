@@ -1,11 +1,12 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
 using EasySockets.Authentication;
 using EasySockets.Builder;
 using EasySockets.Events;
 using EasySockets.Helpers;
-using Microsoft.Extensions.Options;
 using EasySockets.Services.Caching;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace EasySockets.Services;
 
@@ -65,9 +66,10 @@ internal sealed class EasySocketAuthenticationService
             return null;
 
         easySocket.WebSocket = ws;
+        easySocket.Logger = scope.ServiceProvider.GetRequiredService<ILogger<EasySocket>>();
+        easySocket.Options = cache.Options;
         ((IInternalEasySocket)easySocket).RoomId = roomId;
         ((IInternalEasySocket)easySocket).ClientId = clientId;
-        easySocket.Options = cache.Options;
 
         if (easySocket is IInternalEventSocket eventSocket)
         {
