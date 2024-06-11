@@ -22,6 +22,7 @@ public abstract class EasySocket : IEasySocket
     private byte[] _sendBuffer = Array.Empty<byte>();
     private WebSocket _webSocket = null!;
     private Encoder _encoder = null!;
+
     /// <summary>
     ///     The options used to configure the socket.
     /// </summary>
