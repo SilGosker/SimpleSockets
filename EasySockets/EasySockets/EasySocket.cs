@@ -13,10 +13,9 @@ public abstract class EasySocket : IEasySocket
 {
     private readonly SemaphoreSlim _semaphore = new(1, 1);
     private int _bufferCharCount;
-
-    private Action<IEasySocket>? _disposeAtSocketHandler;
-
-    private Func<IEasySocket, BroadCastFilter, string, Task>? _emit;
+    private Action<IEasySocket> _disposeAtSocketHandler = null!;
+    private Func<IEasySocket, BroadCastFilter, string, Task> _emit = null!;
+    private Encoder _encoder = null!;
     private bool _isDisposed;
     private bool _isReceiving;
     private ILogger<EasySocket> _logger = null!;
@@ -54,12 +53,12 @@ public abstract class EasySocket : IEasySocket
 
     public string ClientId { get; private set; } = null!;
 
-    Func<IEasySocket, BroadCastFilter, string, Task>? IInternalEasySocket.Emit
+    Func<IEasySocket, BroadCastFilter, string, Task> IInternalEasySocket.Emit
     {
         set => _emit = value;
     }
 
-    Action<IEasySocket>? IInternalEasySocket.DisposeAtSocketHandler
+    Action<IEasySocket> IInternalEasySocket.DisposeAtSocketHandler
     {
         set => _disposeAtSocketHandler = value;
     }
@@ -196,7 +195,7 @@ public abstract class EasySocket : IEasySocket
         {
             GC.SuppressFinalize(this);
             _webSocket.Dispose();
-            _disposeAtSocketHandler?.Invoke(this);
+            _disposeAtSocketHandler.Invoke(this);
             _isDisposed = true;
         }
         catch
@@ -211,7 +210,7 @@ public abstract class EasySocket : IEasySocket
     /// <inheritdoc cref="Broadcast(BroadCastFilter, string)" />
     public Task Broadcast(string message)
     {
-        return _emit?.Invoke(this, BroadCastFilter.RoomMembers, message) ?? Task.CompletedTask;
+        return _emit.Invoke(this, BroadCastFilter.RoomMembers, message);
     }
 
     /// <summary>
@@ -222,7 +221,7 @@ public abstract class EasySocket : IEasySocket
     /// <returns>The task representing the parallel asynchronous sending</returns>
     public Task Broadcast(BroadCastFilter filter, string message)
     {
-        return _emit?.Invoke(this, filter, message) ?? Task.CompletedTask;
+        return _emit.Invoke(this, filter, message);
     }
 
     /// <summary>
