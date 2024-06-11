@@ -16,7 +16,7 @@ public abstract class EasySocket : IEasySocket
     private Func<IEasySocket, BroadCastFilter, string, Task> _emit = null!;
     private bool _isDisposed;
     private bool _isReceiving;
-    private ILogger<EasySocket> _logger = null!;
+    internal ILogger<EasySocket> Logger = null!;
     private EasySocketOptions _options = null!;
     private byte[] _sendBuffer = Array.Empty<byte>();
     private WebSocket _webSocket = null!;
@@ -24,7 +24,7 @@ public abstract class EasySocket : IEasySocket
 
     ILogger<EasySocket> IInternalEasySocket.Logger
     {
-        set => _logger = value;
+        set => Logger = value;
     }
 
     string IInternalEasySocket.RoomId
@@ -102,7 +102,10 @@ public abstract class EasySocket : IEasySocket
         }
         catch (WebSocketException ex)
         {
-            _logger.LogError(ex, "Failed to send message to client.");
+            if (Logger.IsEnabled(LogLevel.Error))
+            {
+                Logger.LogError(ex, "Failed to send message to client.");
+            }
 
             await CloseAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -130,7 +133,10 @@ public abstract class EasySocket : IEasySocket
         }
         catch (WebSocketException ex)
         {
-            _logger.LogError(ex, "Failed to close the websocket connection.");
+            if (Logger.IsEnabled(LogLevel.Error))
+            {
+                Logger.LogError(ex, "Failed to close the websocket connection.");
+            }
         }
 
         Dispose();
@@ -160,7 +166,10 @@ public abstract class EasySocket : IEasySocket
                 }
                 catch (WebSocketException ex)
                 {
-                    _logger.LogError(ex, "Failed to receive message from client.");
+                    if (Logger.IsEnabled(LogLevel.Error))
+                    {
+                        Logger.LogError(ex, "Failed to receive message from client.");
+                    }
                     break;
                 }
 
