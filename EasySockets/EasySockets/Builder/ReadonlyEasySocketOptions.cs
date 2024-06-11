@@ -2,15 +2,19 @@
 
 namespace EasySockets.Builder;
 
-public struct ReadonlyEasySocketOptions : IReadonlyEasySocketOptions
+public readonly struct ReadonlyEasySocketOptions : IReadonlyEasySocketOptions
 {
-    public int ReceiveBufferSize { get; init; }
+    public ReadonlyEasySocketOptions()
+    {
+    }
 
-    public int SendBufferSize { get; init; }
+    public int ReceiveBufferSize { get; init; } = 100;
 
-    public Encoding Encoding { get; init; }
+    public int SendBufferSize { get; init; } = 100;
 
-    public string ClosingStatusDescription { get; init; }
+    public Encoding Encoding { get; init; } = Encoding.UTF8;
 
-    public bool LoggingEnabled { get; init; }
+    public string ClosingStatusDescription { get; init; } = "Closing";
+
+    public bool LoggingEnabled { get; init; } = true;
 }

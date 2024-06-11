@@ -14,7 +14,6 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket
         set => _events = value;
     }
 
-
     public Task SendToClientAsync(string @event, string message)
     {
         return SendToClientAsync(@event, message, CancellationToken.None);
@@ -25,10 +24,8 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket
         var bound = BindEvent(@event, message);
         if (bound == null)
         {
-            if (Options.LoggingEnabled && Logger.IsEnabled(LogLevel.Warning))
-            {
-                Logger.LogWarning("Failed to bind event {Event} with message {Message}", @event, message);
-            }
+            if (CanLog(LogLevel.Warning))
+                Logger!.LogWarning("Failed to bind event {Event} with message {Message}", @event, message);
             return Task.CompletedTask;
         }
 
@@ -54,10 +51,8 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket
         var bound = BindEvent(@event, message);
         if (bound == null)
         {
-            if (Options.LoggingEnabled && Logger.IsEnabled(LogLevel.Warning))
-            {
-                Logger.LogWarning("Failed to bind event {Event} with message {Message}", @event, message);
-            }
+            if (CanLog(LogLevel.Warning))
+                Logger!.LogWarning("Failed to bind event {Event} with message {Message}", @event, message);
 
             return Task.CompletedTask;
         }
@@ -80,10 +75,8 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket
         var bound = BindEvent(@event, message);
         if (bound == null)
         {
-            if (Options.LoggingEnabled && Logger.IsEnabled(LogLevel.Warning))
-            {
-                Logger.LogWarning("Failed to bind event {Event} with message {Message}", @event, message);
-            }
+            if (CanLog(LogLevel.Warning))
+                Logger!.LogWarning("Failed to bind event {Event} with message {Message}", @event, message);
 
             return Task.CompletedTask;
         }
@@ -96,20 +89,15 @@ public abstract class EventSocket<TEvent> : EasySocket, IEventSocket
         var @event = ExtractEvent(message);
         if (@event is null)
         {
-            if (Options.LoggingEnabled && Logger.IsEnabled(LogLevel.Warning))
-            {
-                Logger.LogWarning("Failed to extract event from message {Message}", message);
-            }
+            if (CanLog(LogLevel.Warning)) Logger!.LogWarning("Failed to extract event from message {Message}", message);
             return OnFailedEventBinding(message);
         }
 
         var eventInfo = _events.FirstOrDefault(e => e.Contains(@event.Event));
         if (eventInfo is null)
         {
-            if (Options.LoggingEnabled && Logger.IsEnabled(LogLevel.Warning))
-            {
-                Logger.LogWarning("Failed to find event {Event} in registered events", @event.Event);
-            }
+            if (CanLog(LogLevel.Warning))
+                Logger!.LogWarning("Failed to find event {Event} in registered events", @event.Event);
             return Task.CompletedTask;
         }
 

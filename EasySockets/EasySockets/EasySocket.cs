@@ -13,20 +13,20 @@ public abstract class EasySocket : IEasySocket
 {
     private readonly SemaphoreSlim _semaphore = new(1, 1);
     private int _bufferCharCount;
-    private Action<IEasySocket> _disposeAtSocketHandler = null!;
-    private Func<IEasySocket, BroadCastFilter, string, Task> _emit = null!;
+    private Action<IEasySocket>? _disposeAtSocketHandler;
+    private Func<IEasySocket, BroadCastFilter, string, Task>? _emit;
+    private Encoder _encoder = null!;
     private bool _isDisposed;
     private bool _isReceiving;
-    internal ILogger<EasySocket> Logger = null!;
-    private EasySocketOptions _options = null!;
+    private EasySocketOptions? _options;
     private byte[] _sendBuffer = Array.Empty<byte>();
     private WebSocket _webSocket = null!;
-    private Encoder _encoder = null!;
+    internal ILogger<EasySocket>? Logger;
 
     /// <summary>
     ///     The options used to configure the socket.
     /// </summary>
-    protected ReadonlyEasySocketOptions Options => _options.AsReadonly();
+    protected ReadonlyEasySocketOptions Options => _options?.AsReadonly() ?? new ReadonlyEasySocketOptions();
 
     ILogger<EasySocket> IInternalEasySocket.Logger
     {
@@ -108,10 +108,7 @@ public abstract class EasySocket : IEasySocket
         }
         catch (WebSocketException ex)
         {
-            if (_options.LoggingEnabled && Logger.IsEnabled(LogLevel.Error))
-            {
-                Logger.LogError(ex, "Failed to send message to client.");
-            }
+            if (CanLog(LogLevel.Error)) Logger!.LogError(ex, "Failed to send message to client.");
 
             await CloseAsync(cancellationToken).ConfigureAwait(false);
         }
@@ -133,16 +130,13 @@ public abstract class EasySocket : IEasySocket
         try
         {
             await _webSocket
-                .CloseAsync(WebSocketCloseStatus.NormalClosure, _options.ClosingStatusDescription, cancellationToken)
+                .CloseAsync(WebSocketCloseStatus.NormalClosure, Options.ClosingStatusDescription, cancellationToken)
                 .ConfigureAwait(false);
             _webSocket.Abort();
         }
         catch (WebSocketException ex)
         {
-            if (_options.LoggingEnabled && Logger.IsEnabled(LogLevel.Error))
-            {
-                Logger.LogError(ex, "Failed to close the websocket connection.");
-            }
+            if (CanLog(LogLevel.Error)) Logger!.LogError(ex, "Failed to close the websocket connection.");
         }
 
         Dispose();
@@ -154,7 +148,7 @@ public abstract class EasySocket : IEasySocket
         _isReceiving = true;
 
         StringBuilder sb = new();
-        var buffer = new byte[_options.ReceiveBufferSize];
+        var buffer = new byte[Options.ReceiveBufferSize];
 
         while (IsConnected() && !_isDisposed)
         {
@@ -168,14 +162,11 @@ public abstract class EasySocket : IEasySocket
 
                     if (result.MessageType != WebSocketMessageType.Text) continue;
 
-                    sb.Append(_options.Encoding.GetString(buffer.AsSpan()[..result.Count]));
+                    sb.Append(Options.Encoding.GetString(buffer.AsSpan()[..result.Count]));
                 }
                 catch (WebSocketException ex)
                 {
-                    if (_options.LoggingEnabled && Logger.IsEnabled(LogLevel.Error))
-                    {
-                        Logger.LogError(ex, "Failed to receive message from client.");
-                    }
+                    if (CanLog(LogLevel.Error)) Logger!.LogError(ex, "Failed to receive message from client.");
                     break;
                 }
 
@@ -214,7 +205,7 @@ public abstract class EasySocket : IEasySocket
         {
             GC.SuppressFinalize(this);
             _webSocket.Dispose();
-            _disposeAtSocketHandler.Invoke(this);
+            _disposeAtSocketHandler?.Invoke(this);
             _isDisposed = true;
         }
         catch
@@ -223,13 +214,18 @@ public abstract class EasySocket : IEasySocket
         }
     }
 
+    internal bool CanLog(LogLevel logLevel)
+    {
+        return _options != null && Logger != null && Logger.IsEnabled(logLevel);
+    }
+
     /// <summary>
     ///     Sends a message to all members of the sockets room matching the <see cref="RoomId" />
     /// </summary>
     /// <inheritdoc cref="Broadcast(BroadCastFilter, string)" />
     public Task Broadcast(string message)
     {
-        return _emit.Invoke(this, BroadCastFilter.RoomMembers, message);
+        return _emit?.Invoke(this, BroadCastFilter.RoomMembers, message) ?? Task.CompletedTask;
     }
 
     /// <summary>
@@ -240,7 +236,7 @@ public abstract class EasySocket : IEasySocket
     /// <returns>The task representing the parallel asynchronous sending</returns>
     public Task Broadcast(BroadCastFilter filter, string message)
     {
-        return _emit.Invoke(this, filter, message);
+        return _emit?.Invoke(this, filter, message) ?? Task.CompletedTask;
     }
 
     /// <summary>
